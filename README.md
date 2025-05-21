@@ -19,6 +19,7 @@ This project is a demonstration of how to integrate OpenFeature with .NET Aspire
 - Sample feature flags demonstrating different use cases:
   - `use-new-counter-version`: Controls the counter increment behaviour in the web application
   - `return-weather-forecast`: Controls the number of weather forecasts returned by the API
+  - `page-v2`: Controls the display of a new page version with country-based targeting
 
 ## Prerequisites
 
@@ -77,7 +78,7 @@ The Aspire dashboard will open automatically, showing the status of all services
 
 ## Feature Flags
 
-The application uses two feature flags:
+The application uses the following feature flags:
 
 1. **use-new-counter-version**:
 
@@ -85,7 +86,14 @@ The application uses two feature flags:
    - When disabled, the counter will increase by 1
 
 2. **return-weather-forecast**:
+
    - Controls how many weather forecasts the API returns (3 or 5)
+
+3. **page-v2**:
+   - Currently disabled by default
+   - When enabled for users in Portugal (`country` equals "pt"), shows a new page design
+   - Otherwise, displays the original page design
+   - Uses targeting rules to gradually roll out the new design to specific users
 
 ## Modifying Feature Flags
 
