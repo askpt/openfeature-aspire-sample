@@ -16,14 +16,14 @@ var apiService = builder.AddProject<Projects.Todo_ApiService>("apiservice")
     .WithReference(redis)
     .WaitFor(redis)
     .WaitFor(flagd)
-    .WithHttpsHealthCheck("/health");
+    .WithHttpHealthCheck("/health");
 
 builder.AddProject<Projects.Todo_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(redis)
     .WaitFor(redis)
     .WaitFor(flagd)
-    .WithHttpsHealthCheck("/health")
+    .WithHttpHealthCheck("/health")
     .WithReference(apiService)
     .WaitFor(apiService);
 
