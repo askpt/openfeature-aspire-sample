@@ -33,10 +33,14 @@ public static class Extensions
 
         builder.Services.AddOpenFeature(ofBuilder =>
         {
-            ofBuilder.AddHostedFeatureLifecycle().AddProvider(_ => new FlagdProvider());
+            // Hooks must now be added via the ofBuilder.AddHook<>() chain,
+            // replacing the previous Api.Instance.AddHooks approach.
+            ofBuilder
+                .AddHostedFeatureLifecycle()
+                .AddProvider(_ => new FlagdProvider())
+                .AddHook<TracingHook>()
+                .AddHook<MetricsHook>();
         });
-        Api.Instance.AddHooks(new TracingHook());
-        Api.Instance.AddHooks(new MetricsHook());
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
