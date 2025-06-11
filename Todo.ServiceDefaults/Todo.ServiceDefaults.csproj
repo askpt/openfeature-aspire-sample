@@ -10,8 +10,8 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
 
-        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.5.0"/>
-        <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.3.0"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.6.0"/>
+        <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.3.1"/>
         <PackageReference Include="OpenFeature.Contrib.Hooks.Otel" Version="0.2.0" />
         <PackageReference Include="OpenFeature.Contrib.Providers.Flagd" Version="0.3.2" />
         <PackageReference Include="OpenFeature.DependencyInjection" Version="2.6.0" />
