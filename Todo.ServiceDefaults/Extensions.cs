@@ -73,7 +73,7 @@ public static class Extensions
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
-                    .AddMeter("OpenFeature.Contrib.Hooks.Otel")
+                    .AddMeter("OpenFeature")
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })
