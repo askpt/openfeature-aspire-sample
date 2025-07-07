@@ -5,10 +5,8 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenFeature;
-using OpenFeature.Contrib.Providers.Flagd;
-using OpenFeature.DependencyInjection.Providers.Memory;
+using OpenFeature.DependencyInjection.Providers.Flagd;
 using OpenFeature.Hooks;
-using OpenFeature.Providers.Memory;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -37,7 +35,7 @@ public static class Extensions
             // replacing the previous Api.Instance.AddHooks approach.
             ofBuilder
                 .AddHostedFeatureLifecycle()
-                .AddProvider(_ => new FlagdProvider())
+                .AddFlagdProvider()
                 .AddHook<TraceEnricherHook>()
                 .AddHook<MetricsHook>();
         });
