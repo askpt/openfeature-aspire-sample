@@ -12,7 +12,6 @@
 
     <ItemGroup>
         <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.5.1" />
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.4.2" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
     </ItemGroup>
 
