@@ -1,0 +1,9 @@
+# This file defines code owners for various parts of the repository
+
+# These owners will be automatically requested for review on PRs that modify the respective paths
+
+# Learn more at https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+
+* @askpt
