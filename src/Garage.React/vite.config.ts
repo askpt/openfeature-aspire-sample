@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      // Expose the GOFF service URL to the client
+      // Expose the OFREP service URL to the client
       ...defineConfig,
     },
   };

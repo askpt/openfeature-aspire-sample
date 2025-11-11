@@ -156,7 +156,7 @@ public static class Extensions
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentNullException(connectionString);
+                throw new ArgumentNullException(nameof(connectionString));
             }
 
             var serverKey = builder.Configuration["DEVCYCLE:SERVERKEY"];
