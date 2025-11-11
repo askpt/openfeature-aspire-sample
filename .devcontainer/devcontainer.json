@@ -1,5 +1,5 @@
 {
-  "name": "OpenFeature .NET Workshop",
+  "name": "OpenFeature Aspire Sample",
   "image": "mcr.microsoft.com/devcontainers/dotnet:9.0-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:latest": {},
