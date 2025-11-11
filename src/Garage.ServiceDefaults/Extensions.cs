@@ -156,7 +156,7 @@ public static class Extensions
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentNullException(nameof(connectionString));
+                throw new InvalidOperationException("Feature flag provider configuration is missing. Please set either 'services:flagd:ofrep:0' or 'DEVCYCLE:URL' in the application configuration.");
             }
 
             var serverKey = builder.Configuration["DEVCYCLE:SERVERKEY"];

@@ -5,11 +5,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const ofrepServiceUrl = process.env.services__flagd__ofrep__0 || "none";
+  const ofrepServiceUrl = process.env.services__flagd__ofrep__0;
 
-  // Only define OFREP service URL if it's not "none"
+  // Only define OFREP service URL if it is set
   const defineConfig: any = {};
-  if (ofrepServiceUrl !== "none") {
+  if (ofrepServiceUrl) {
     defineConfig["import.meta.env.VITE_OFREP_SERVICE_URL"] =
       JSON.stringify(ofrepServiceUrl);
   }

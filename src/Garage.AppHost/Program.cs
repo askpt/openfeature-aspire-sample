@@ -5,7 +5,7 @@ var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
 
 var serverKey = builder.AddParameter("devcycle-server-key", secret: true);
-var devcycleUrl = builder.Configuration["DevCycle:Url"] ?? "null";
+var devcycleUrl = builder.Configuration["DevCycle:Url"] ?? null;
 
 var cache = builder.AddRedis("cache");
 
