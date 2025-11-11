@@ -1,0 +1,29 @@
+html,
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  margin: 0;
+  padding: 1.1rem;
+}
+
+.loading, .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+}
+
+.error {
+  color: #e51650;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+}

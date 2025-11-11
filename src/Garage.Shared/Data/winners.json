@@ -1,0 +1,1255 @@
+[
+  {
+    "year": 2025,
+    "manufacturer": "Ferrari",
+    "model": "499P",
+    "engine": "3.0L V6 Twin-Turbo Hybrid",
+    "class": "Hypercar",
+    "drivers": [
+      "Robert Kubica",
+      "Yifei Ye",
+      "Phil Hanson"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-499p-2025/800/600"
+  },
+  {
+    "year": 2024,
+    "manufacturer": "Ferrari",
+    "model": "499P",
+    "engine": "3.0L V6 Twin-Turbo Hybrid",
+    "class": "Hypercar",
+    "drivers": [
+      "Antonio Fuoco",
+      "Miguel Molina",
+      "Nicklas Nielsen"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-499p-2024/800/600"
+  },
+  {
+    "year": 2023,
+    "manufacturer": "Ferrari",
+    "model": "499P",
+    "engine": "3.0L V6 Twin-Turbo Hybrid",
+    "class": "Hypercar",
+    "drivers": [
+      "Alessandro Pier Guidi",
+      "James Calado",
+      "António Giovinazzi"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-499p-2023/800/600"
+  },
+  {
+    "year": 2022,
+    "manufacturer": "Toyota",
+    "model": "GR010 Hybrid",
+    "engine": "3.5L V6 Twin-Turbo Hybrid",
+    "class": "Hypercar",
+    "drivers": [
+      "Brendon Hartley",
+      "Sébastien Buemi",
+      "Ryo Hirakawa"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/toyota-gr010-hybrid-2022/800/600"
+  },
+  {
+    "year": 2021,
+    "manufacturer": "Toyota",
+    "model": "GR010 Hybrid",
+    "engine": "3.5L V6 Twin-Turbo Hybrid",
+    "class": "Hypercar",
+    "drivers": [
+      "Mike Conway",
+      "Kamui Kobayashi",
+      "José María López"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/toyota-gr010-hybrid-2021/800/600"
+  },
+  {
+    "year": 2020,
+    "manufacturer": "Toyota",
+    "model": "TS050 Hybrid",
+    "engine": "2.4L V6 Twin-Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Sébastien Buemi",
+      "Kazuki Nakajima",
+      "Brendon Hartley"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/toyota-ts050-hybrid-2020/800/600"
+  },
+  {
+    "year": 2019,
+    "manufacturer": "Toyota",
+    "model": "TS050 Hybrid",
+    "engine": "2.4L V6 Twin-Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Mike Conway",
+      "Kamui Kobayashi",
+      "José María López"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/toyota-ts050-hybrid-2019/800/600"
+  },
+  {
+    "year": 2018,
+    "manufacturer": "Toyota",
+    "model": "TS050 Hybrid",
+    "engine": "2.4L V6 Twin-Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Sébastien Buemi",
+      "Kazuki Nakajima",
+      "Fernando Alonso"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/toyota-ts050-hybrid-2018/800/600"
+  },
+  {
+    "year": 2017,
+    "manufacturer": "Porsche",
+    "model": "919 Hybrid",
+    "engine": "2.0L V4 Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Earl Bamber",
+      "Timo Bernhard",
+      "Brendon Hartley"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-919-hybrid-2017/800/600"
+  },
+  {
+    "year": 2016,
+    "manufacturer": "Porsche",
+    "model": "919 Hybrid",
+    "engine": "2.0L V4 Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Romain Dumas",
+      "Neel Jani",
+      "Marc Lieb"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-919-hybrid-2016/800/600"
+  },
+  {
+    "year": 2015,
+    "manufacturer": "Porsche",
+    "model": "919 Hybrid",
+    "engine": "2.0L V4 Turbo Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Nico Hülkenberg",
+      "Nick Tandy",
+      "Earl Bamber"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-919-hybrid-2015/800/600"
+  },
+  {
+    "year": 2014,
+    "manufacturer": "Audi",
+    "model": "R18 e-tron quattro",
+    "engine": "3.7L V6 TDI Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Marcel Fässler",
+      "André Lotterer",
+      "Benoit Tréluyer"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r18-e-tron-quattro-2014/800/600"
+  },
+  {
+    "year": 2013,
+    "manufacturer": "Audi",
+    "model": "R18 e-tron quattro",
+    "engine": "3.7L V6 TDI Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "Loïc Duval",
+      "Tom Kristensen",
+      "Allan McNish"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r18-e-tron-quattro-2013/800/600"
+  },
+  {
+    "year": 2012,
+    "manufacturer": "Audi",
+    "model": "R18 e-tron quattro",
+    "engine": "3.7L V6 TDI Hybrid",
+    "class": "LMP1",
+    "drivers": [
+      "André Lotterer",
+      "Benoit Tréluyer",
+      "Marcel Fässler"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r18-e-tron-quattro-2012/800/600"
+  },
+  {
+    "year": 2011,
+    "manufacturer": "Audi",
+    "model": "R18 TDI",
+    "engine": "3.7L V6 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "André Lotterer",
+      "Benoit Tréluyer",
+      "Marcel Fässler"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r18-tdi-2011/800/600"
+  },
+  {
+    "year": 2010,
+    "manufacturer": "Audi",
+    "model": "R15 TDI",
+    "engine": "5.5L V10 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "Timo Bernhard",
+      "Romain Dumas",
+      "Mike Rockenfeller"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r15-tdi-2010/800/600"
+  },
+  {
+    "year": 2009,
+    "manufacturer": "Audi",
+    "model": "R15 TDI",
+    "engine": "5.5L V10 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "Rinaldo Capello",
+      "Tom Kristensen",
+      "Allan McNish"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r15-tdi-2009/800/600"
+  },
+  {
+    "year": 2008,
+    "manufacturer": "Audi",
+    "model": "R10 TDI",
+    "engine": "5.5L V12 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "Rinaldo Capello",
+      "Tom Kristensen",
+      "Allan McNish"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r10-tdi-2008/800/600"
+  },
+  {
+    "year": 2007,
+    "manufacturer": "Audi",
+    "model": "R10 TDI",
+    "engine": "5.5L V12 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Emanuele Pirro",
+      "Marco Werner"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r10-tdi-2007/800/600"
+  },
+  {
+    "year": 2006,
+    "manufacturer": "Audi",
+    "model": "R10 TDI",
+    "engine": "5.5L V12 TDI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Emanuele Pirro",
+      "Marco Werner"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r10-tdi-2006/800/600"
+  },
+  {
+    "year": 2005,
+    "manufacturer": "Audi",
+    "model": "R8",
+    "engine": "3.6L V8 FSI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Emanuele Pirro",
+      "Marco Werner"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r8-2005/800/600"
+  },
+  {
+    "year": 2004,
+    "manufacturer": "Audi",
+    "model": "R8",
+    "engine": "3.6L V8 FSI",
+    "class": "LMP1",
+    "drivers": [
+      "Rinaldo Capello",
+      "Tom Kristensen",
+      "Seiji Ara"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r8-2004/800/600"
+  },
+  {
+    "year": 2003,
+    "manufacturer": "Bentley",
+    "model": "Speed 8",
+    "engine": "4.0L V8 Twin-Turbo",
+    "class": "LMP1",
+    "drivers": [
+      "Tom Kristensen",
+      "Rinaldo Capello",
+      "Guy Smith"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-speed-8-2003/800/600"
+  },
+  {
+    "year": 2002,
+    "manufacturer": "Audi",
+    "model": "R8",
+    "engine": "3.6L V8 FSI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Tom Kristensen",
+      "Emanuele Pirro"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r8-2002/800/600"
+  },
+  {
+    "year": 2001,
+    "manufacturer": "Audi",
+    "model": "R8",
+    "engine": "3.6L V8 FSI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Tom Kristensen",
+      "Emanuele Pirro"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r8-2001/800/600"
+  },
+  {
+    "year": 2000,
+    "manufacturer": "Audi",
+    "model": "R8",
+    "engine": "3.6L V8 FSI",
+    "class": "LMP1",
+    "drivers": [
+      "Frank Biela",
+      "Tom Kristensen",
+      "Emanuele Pirro"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/audi-r8-2000/800/600"
+  },
+  {
+    "year": 1999,
+    "manufacturer": "BMW",
+    "model": "V12 LMR",
+    "engine": "6.0L V12",
+    "class": "LMP1",
+    "drivers": [
+      "Joachim Winkelhock",
+      "Pierluigi Martini",
+      "Yannick Dalmas"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bmw-v12-lmr-1999/800/600"
+  },
+  {
+    "year": 1998,
+    "manufacturer": "Porsche",
+    "model": "911 GT1-98",
+    "engine": "3.2L Flat-6 Twin-Turbo",
+    "class": "GT1",
+    "drivers": [
+      "Allan McNish",
+      "Laurent Aïello",
+      "Stéphane Ortelli"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-911-gt1-98-1998/800/600"
+  },
+  {
+    "year": 1997,
+    "manufacturer": "Porsche",
+    "model": "911 GT1",
+    "engine": "3.2L Flat-6 Twin-Turbo",
+    "class": "GT1",
+    "drivers": [
+      "Joerg Müller",
+      "Tom Kristensen",
+      "Michele Alboreto"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-911-gt1-1997/800/600"
+  },
+  {
+    "year": 1996,
+    "manufacturer": "Porsche",
+    "model": "911 GT1",
+    "engine": "3.2L Flat-6 Twin-Turbo",
+    "class": "GT1",
+    "drivers": [
+      "Davy Jones",
+      "Manuel Reuter",
+      "Alexander Wurz"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-911-gt1-1996/800/600"
+  },
+  {
+    "year": 1995,
+    "manufacturer": "McLaren",
+    "model": "F1 GTR",
+    "engine": "6.1L V12",
+    "class": "GT1",
+    "drivers": [
+      "Yannick Dalmas",
+      "Masanori Sekiya",
+      "Volker Weidler"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/mclaren-f1-gtr-1995/800/600"
+  },
+  {
+    "year": 1994,
+    "manufacturer": "Porsche",
+    "model": "962C",
+    "engine": "3.2L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Yannick Dalmas",
+      "Mauro Baldi",
+      "Hurley Haywood"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-962c-1994/800/600"
+  },
+  {
+    "year": 1993,
+    "manufacturer": "Peugeot",
+    "model": "905 Evo 1 Bis",
+    "engine": "3.5L V10",
+    "class": "Group C",
+    "drivers": [
+      "Geoff Brabham",
+      "Christophe Bouchut",
+      "Eric Hélary"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/peugeot-905-evo-1-bis-1993/800/600"
+  },
+  {
+    "year": 1992,
+    "manufacturer": "Peugeot",
+    "model": "905B",
+    "engine": "3.5L V10",
+    "class": "Group C",
+    "drivers": [
+      "Derek Warwick",
+      "Yannick Dalmas",
+      "Mark Blundell"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/peugeot-905b-1992/800/600"
+  },
+  {
+    "year": 1991,
+    "manufacturer": "Mazda",
+    "model": "787B",
+    "engine": "2.6L 4-Rotor",
+    "class": "Group C",
+    "drivers": [
+      "Volker Weidler",
+      "Johnny Herbert",
+      "Bertrand Gachot"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/mazda-787b-1991/800/600"
+  },
+  {
+    "year": 1990,
+    "manufacturer": "Jaguar",
+    "model": "XJR-12",
+    "engine": "7.4L V12",
+    "class": "Group C",
+    "drivers": [
+      "John Nielsen",
+      "Price Cobb",
+      "Martin Brundle"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-xjr-12-1990/800/600"
+  },
+  {
+    "year": 1989,
+    "manufacturer": "Mercedes-Benz",
+    "model": "C9",
+    "engine": "5.0L V8 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Jochen Mass",
+      "Manuel Reuter",
+      "Stanley Dickens"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/mercedes-benz-c9-1989/800/600"
+  },
+  {
+    "year": 1988,
+    "manufacturer": "Jaguar",
+    "model": "XJR-9",
+    "engine": "7.0L V12",
+    "class": "Group C",
+    "drivers": [
+      "Jan Lammers",
+      "Johnny Dumfries",
+      "Andy Wallace"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-xjr-9-1988/800/600"
+  },
+  {
+    "year": 1987,
+    "manufacturer": "Porsche",
+    "model": "962C",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Derek Bell",
+      "Hans-Joachim Stuck",
+      "Al Holbert"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-962c-1987/800/600"
+  },
+  {
+    "year": 1986,
+    "manufacturer": "Porsche",
+    "model": "962C",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Derek Bell",
+      "Hans-Joachim Stuck",
+      "Al Holbert"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-962c-1986/800/600"
+  },
+  {
+    "year": 1985,
+    "manufacturer": "Porsche",
+    "model": "962C",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Klaus Ludwig",
+      "Paolo Barilla",
+      "John Winter"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-962c-1985/800/600"
+  },
+  {
+    "year": 1984,
+    "manufacturer": "Porsche",
+    "model": "956",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Henri Pescarolo",
+      "Klaus Ludwig"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-956-1984/800/600"
+  },
+  {
+    "year": 1983,
+    "manufacturer": "Porsche",
+    "model": "956",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Vern Schuppan",
+      "Hurley Haywood",
+      "Al Holbert"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-956-1983/800/600"
+  },
+  {
+    "year": 1982,
+    "manufacturer": "Porsche",
+    "model": "956",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Derek Bell",
+      "Jacky Ickx"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-956-1982/800/600"
+  },
+  {
+    "year": 1981,
+    "manufacturer": "Porsche",
+    "model": "936/81",
+    "engine": "2.6L Flat-6 Twin-Turbo",
+    "class": "Group C",
+    "drivers": [
+      "Derek Bell",
+      "Jacky Ickx"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-936/81-1981/800/600"
+  },
+  {
+    "year": 1980,
+    "manufacturer": "Rondeau",
+    "model": "M379B",
+    "engine": "2.9L V6",
+    "class": "Group 6",
+    "drivers": [
+      "Jean Rondeau",
+      "Jean-Pierre Jaussaud"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/rondeau-m379b-1980/800/600"
+  },
+  {
+    "year": 1979,
+    "manufacturer": "Porsche",
+    "model": "935 K3",
+    "engine": "3.2L Flat-6 Twin-Turbo",
+    "class": "Group 5",
+    "drivers": [
+      "Klaus Ludwig",
+      "Bill Whittington",
+      "Don Whittington"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-935-k3-1979/800/600"
+  },
+  {
+    "year": 1978,
+    "manufacturer": "Renault",
+    "model": "A442B",
+    "engine": "2.0L V6 Turbo",
+    "class": "Group 6",
+    "drivers": [
+      "Jean-Pierre Jaussaud",
+      "Didier Pironi"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/renault-a442b-1978/800/600"
+  },
+  {
+    "year": 1977,
+    "manufacturer": "Porsche",
+    "model": "936",
+    "engine": "2.1L Flat-6 Turbo",
+    "class": "Group 6",
+    "drivers": [
+      "Jacky Ickx",
+      "Jürgen Barth",
+      "Hurley Haywood"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-936-1977/800/600"
+  },
+  {
+    "year": 1976,
+    "manufacturer": "Porsche",
+    "model": "936",
+    "engine": "2.1L Flat-6 Turbo",
+    "class": "Group 6",
+    "drivers": [
+      "Jacky Ickx",
+      "Gijs van Lennep"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-936-1976/800/600"
+  },
+  {
+    "year": 1975,
+    "manufacturer": "Gulf",
+    "model": "Mirage GR8",
+    "engine": "3.3L V8",
+    "class": "Group 6",
+    "drivers": [
+      "Derek Bell",
+      "Jacky Ickx"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/gulf-mirage-gr8-1975/800/600"
+  },
+  {
+    "year": 1974,
+    "manufacturer": "Matra",
+    "model": "MS670C",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Henri Pescarolo",
+      "Gérard Larrousse"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/matra-ms670c-1974/800/600"
+  },
+  {
+    "year": 1973,
+    "manufacturer": "Matra",
+    "model": "MS670B",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Henri Pescarolo",
+      "Gérard Larrousse"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/matra-ms670b-1973/800/600"
+  },
+  {
+    "year": 1972,
+    "manufacturer": "Matra",
+    "model": "MS670",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Henri Pescarolo",
+      "Graham Hill"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/matra-ms670-1972/800/600"
+  },
+  {
+    "year": 1971,
+    "manufacturer": "Porsche",
+    "model": "917K",
+    "engine": "4.9L Flat-12",
+    "class": "Group 5",
+    "drivers": [
+      "Helmut Marko",
+      "Gijs van Lennep"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-917k-1971/800/600"
+  },
+  {
+    "year": 1970,
+    "manufacturer": "Porsche",
+    "model": "917K",
+    "engine": "4.5L Flat-12",
+    "class": "Group 5",
+    "drivers": [
+      "Hans Herrmann",
+      "Richard Attwood"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/porsche-917k-1970/800/600"
+  },
+  {
+    "year": 1969,
+    "manufacturer": "Ford",
+    "model": "GT40",
+    "engine": "4.9L V8",
+    "class": "Group 4",
+    "drivers": [
+      "Jacky Ickx",
+      "Jackie Oliver"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ford-gt40-1969/800/600"
+  },
+  {
+    "year": 1968,
+    "manufacturer": "Ford",
+    "model": "GT40",
+    "engine": "4.9L V8",
+    "class": "Group 4",
+    "drivers": [
+      "Pedro Rodríguez",
+      "Lucien Bianchi"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ford-gt40-1968/800/600"
+  },
+  {
+    "year": 1967,
+    "manufacturer": "Ford",
+    "model": "GT40 Mk IV",
+    "engine": "7.0L V8",
+    "class": "Group 4",
+    "drivers": [
+      "Dan Gurney",
+      "A. J. Foyt"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ford-gt40-mk-iv-1967/800/600"
+  },
+  {
+    "year": 1966,
+    "manufacturer": "Ford",
+    "model": "GT40 Mk II",
+    "engine": "7.0L V8",
+    "class": "Group 4",
+    "drivers": [
+      "Bruce McLaren",
+      "Chris Amon"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ford-gt40-mk-ii-1966/800/600"
+  },
+  {
+    "year": 1965,
+    "manufacturer": "Ferrari",
+    "model": "250LM",
+    "engine": "3.3L V12",
+    "class": "Group 4",
+    "drivers": [
+      "Jochen Rindt",
+      "Masten Gregory"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-250lm-1965/800/600"
+  },
+  {
+    "year": 1964,
+    "manufacturer": "Ferrari",
+    "model": "275P",
+    "engine": "3.3L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Jean Guichet",
+      "Nino Vaccarella"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-275p-1964/800/600"
+  },
+  {
+    "year": 1963,
+    "manufacturer": "Ferrari",
+    "model": "250P",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Lorenzo Bandini",
+      "Ludovico Scarfiotti"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-250p-1963/800/600"
+  },
+  {
+    "year": 1962,
+    "manufacturer": "Ferrari",
+    "model": "330TRI/LM",
+    "engine": "4.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Oliver Gendebien",
+      "Phil Hill"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-330tri/lm-1962/800/600"
+  },
+  {
+    "year": 1961,
+    "manufacturer": "Ferrari",
+    "model": "250TRI",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Oliver Gendebien",
+      "Phil Hill"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-250tri-1961/800/600"
+  },
+  {
+    "year": 1960,
+    "manufacturer": "Ferrari",
+    "model": "250TR",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Oliver Gendebien",
+      "Paul Frère"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-250tr-1960/800/600"
+  },
+  {
+    "year": 1959,
+    "manufacturer": "Aston Martin",
+    "model": "DBR1",
+    "engine": "3.0L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Roy Salvadori",
+      "Carroll Shelby"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/aston-martin-dbr1-1959/800/600"
+  },
+  {
+    "year": 1958,
+    "manufacturer": "Ferrari",
+    "model": "250TR",
+    "engine": "3.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Oliver Gendebien",
+      "Phil Hill"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-250tr-1958/800/600"
+  },
+  {
+    "year": 1957,
+    "manufacturer": "Jaguar",
+    "model": "D-Type",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Ron Flockhart",
+      "Ivor Bueb"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-d-type-1957/800/600"
+  },
+  {
+    "year": 1956,
+    "manufacturer": "Jaguar",
+    "model": "D-Type",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Ron Flockhart",
+      "Ninian Sanderson"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-d-type-1956/800/600"
+  },
+  {
+    "year": 1955,
+    "manufacturer": "Jaguar",
+    "model": "D-Type",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Mike Hawthorn",
+      "Ivor Bueb"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-d-type-1955/800/600"
+  },
+  {
+    "year": 1954,
+    "manufacturer": "Ferrari",
+    "model": "375 Plus",
+    "engine": "4.9L V12",
+    "class": "Group 6",
+    "drivers": [
+      "José Froilán González",
+      "Maurice Trintignant"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-375-plus-1954/800/600"
+  },
+  {
+    "year": 1953,
+    "manufacturer": "Jaguar",
+    "model": "C-Type",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Tony Rolt",
+      "Duncan Hamilton"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-c-type-1953/800/600"
+  },
+  {
+    "year": 1952,
+    "manufacturer": "Mercedes-Benz",
+    "model": "300SL",
+    "engine": "3.0L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Hermann Lang",
+      "Fritz Riess"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/mercedes-benz-300sl-1952/800/600"
+  },
+  {
+    "year": 1951,
+    "manufacturer": "Jaguar",
+    "model": "C-Type",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Peter Walker",
+      "Peter Whitehead"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/jaguar-c-type-1951/800/600"
+  },
+  {
+    "year": 1950,
+    "manufacturer": "Talbot-Lago",
+    "model": "T26C",
+    "engine": "4.5L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Louis Rosier",
+      "Jean-Louis Rosier"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/talbot-lago-t26c-1950/800/600"
+  },
+  {
+    "year": 1949,
+    "manufacturer": "Ferrari",
+    "model": "166MM",
+    "engine": "2.0L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Luigi Chinetti",
+      "Lord Selsdon"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/ferrari-166mm-1949/800/600"
+  },
+  {
+    "year": 1939,
+    "manufacturer": "Bugatti",
+    "model": "Type 57C Tank",
+    "engine": "3.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Jean-Pierre Wimille",
+      "Pierre Veyron"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bugatti-type-57c-tank-1939/800/600"
+  },
+  {
+    "year": 1938,
+    "manufacturer": "Delahaye",
+    "model": "145",
+    "engine": "4.5L V12",
+    "class": "Group 6",
+    "drivers": [
+      "Eugène Chaboud",
+      "Jean Tremoulet"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/delahaye-145-1938/800/600"
+  },
+  {
+    "year": 1937,
+    "manufacturer": "Bugatti",
+    "model": "Type 57G Tank",
+    "engine": "3.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Jean-Pierre Wimille",
+      "Robert Benoist"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bugatti-type-57g-tank-1937/800/600"
+  },
+  {
+    "year": 1935,
+    "manufacturer": "Lagonda",
+    "model": "M45R",
+    "engine": "4.5L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "John Hindmarsh",
+      "Luis Fontes"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/lagonda-m45r-1935/800/600"
+  },
+  {
+    "year": 1934,
+    "manufacturer": "Alfa Romeo",
+    "model": "8C 2300",
+    "engine": "2.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Luigi Chinetti",
+      "Philippe Étancelin"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/alfa-romeo-8c-2300-1934/800/600"
+  },
+  {
+    "year": 1933,
+    "manufacturer": "Alfa Romeo",
+    "model": "8C 2300",
+    "engine": "2.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Raymond Sommer",
+      "Tazio Nuvolari"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/alfa-romeo-8c-2300-1933/800/600"
+  },
+  {
+    "year": 1932,
+    "manufacturer": "Alfa Romeo",
+    "model": "8C 2300",
+    "engine": "2.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Raymond Sommer",
+      "Luigi Chinetti"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/alfa-romeo-8c-2300-1932/800/600"
+  },
+  {
+    "year": 1931,
+    "manufacturer": "Alfa Romeo",
+    "model": "8C 2300",
+    "engine": "2.3L Inline-8",
+    "class": "Group 6",
+    "drivers": [
+      "Earl Howe",
+      "Henry Birkin"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/alfa-romeo-8c-2300-1931/800/600"
+  },
+  {
+    "year": 1930,
+    "manufacturer": "Bentley",
+    "model": "Speed Six",
+    "engine": "6.6L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Woolf Barnato",
+      "Glen Kidston"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-speed-six-1930/800/600"
+  },
+  {
+    "year": 1929,
+    "manufacturer": "Bentley",
+    "model": "Speed Six",
+    "engine": "6.6L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Woolf Barnato",
+      "Henry Birkin"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-speed-six-1929/800/600"
+  },
+  {
+    "year": 1928,
+    "manufacturer": "Bentley",
+    "model": "4½ Litre",
+    "engine": "4.4L Inline-4",
+    "class": "Group 6",
+    "drivers": [
+      "Woolf Barnato",
+      "Bernard Rubin"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-4½-litre-1928/800/600"
+  },
+  {
+    "year": 1927,
+    "manufacturer": "Bentley",
+    "model": "3 Litre",
+    "engine": "3.0L Inline-4",
+    "class": "Group 6",
+    "drivers": [
+      "J. Dudley Benjafield",
+      "Sammy Davis"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-3-litre-1927/800/600"
+  },
+  {
+    "year": 1926,
+    "manufacturer": "Lorraine-Dietrich",
+    "model": "B3-6",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Robert Bloch",
+      "André Rossignol"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/lorraine-dietrich-b3-6-1926/800/600"
+  },
+  {
+    "year": 1925,
+    "manufacturer": "Lorraine-Dietrich",
+    "model": "B3-6",
+    "engine": "3.4L Inline-6",
+    "class": "Group 6",
+    "drivers": [
+      "Gérard de Courcelles",
+      "André Rossignol"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/lorraine-dietrich-b3-6-1925/800/600"
+  },
+  {
+    "year": 1924,
+    "manufacturer": "Bentley",
+    "model": "3 Litre",
+    "engine": "3.0L Inline-4",
+    "class": "Group 6",
+    "drivers": [
+      "John Duff",
+      "Frank Clement"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/bentley-3-litre-1924/800/600"
+  },
+  {
+    "year": 1923,
+    "manufacturer": "Chenard & Walcker",
+    "model": "Sport",
+    "engine": "3.0L Inline-4",
+    "class": "Group 6",
+    "drivers": [
+      "André Lagache",
+      "René Léonard"
+    ],
+    "isOwned": false,
+    "image": "https://picsum.photos/seed/chenard-&-walcker-sport-1923/800/600"
+  }
+]

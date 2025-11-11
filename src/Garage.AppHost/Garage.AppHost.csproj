@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>1315e618-bdbb-4ef7-9974-5761ed98b9d4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Garage.DatabaseSeeder/Garage.DatabaseSeeder.csproj" />
+    <ProjectReference Include="..\Garage.ApiService\Garage.ApiService.csproj" />
+    <ProjectReference Include="..\Garage.ServiceDefaults\Garage.ServiceDefaults.csproj"
+      IsAspireProjectResource="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.Azure.AppContainers" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.5.2" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="9.8.1-beta.424" />
+  </ItemGroup>
+
+  <Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
+    <ItemGroup>
+      <PackageJsons Include="..\*\package.json" />
+    </ItemGroup>
+
+    <!-- Install npm packages if node_modules is missing -->
+    <Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)"
+      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+    <Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)"
+      Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+  </Target>
+
+</Project>
