@@ -1,0 +1,52 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "enable-database-winners": {
+      "state": "ENABLED",
+      "variants": {
+        "enabled": true,
+        "disabled": false
+      },
+      "defaultVariant": "enabled"
+    },
+    "winners-count": {
+      "state": "ENABLED",
+      "variants": {
+        "zero": 0,
+        "five": 5,
+        "ten": 10,
+        "one-hundred": 100
+      },
+      "defaultVariant": "one-hundred"
+    },
+    "enable-stats-header": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "on"
+    },
+    "enable-tabs": {
+      "state": "ENABLED",
+      "variants": {
+        "enabled": true,
+        "disabled": false
+      },
+      "defaultVariant": "disabled",
+      "targeting": {
+        "if": [
+          {
+            "==": [
+              {
+                "var": "userId"
+              },
+              "1"
+            ]
+          },
+          "enabled"
+        ]
+      }
+    }
+  }
+}

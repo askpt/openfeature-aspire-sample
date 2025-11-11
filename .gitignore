@@ -8,7 +8,6 @@
 *.user
 *.userosscache
 *.sln.docstates
-.devcontainer/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -348,3 +347,6 @@ ASALocalRun/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.azure
+src/Garage.React/ClientApp/dist/
+src/Garage.React/wwwroot/

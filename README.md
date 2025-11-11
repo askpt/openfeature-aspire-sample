@@ -1,106 +1,97 @@
-# OpenFeature Aspire Welcome
+# OpenFeature .NET OFREP Demo: Le Mans Winners Management System
 
-A sample application demonstrating the integration of [OpenFeature](https://openfeature.dev/) with [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) for feature flag management. This application uses the [flagd](https://flagd.dev/) provider to deliver feature flags to the applications in the solution.
+[![.NET 9.0](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Aspire](https://img.shields.io/badge/Aspire-Enabled-purple)](https://learn.microsoft.com/en-us/dotnet/aspire/)
+[![OpenFeature](https://img.shields.io/badge/OpenFeature-Ready-green)](https://openfeature.dev/)
+[![OFREP](https://img.shields.io/badge/OFREP-Enabled-blue)](https://openfeature.dev/specification/ofrep)
 
-## Overview
+A demonstration application showcasing **OpenFeature Remote Evaluation Protocol (OFREP)** capabilities in a .NET environment with React frontend. This application manages a collection of Le Mans winner cars.
 
-This project is a demonstration of how to integrate OpenFeature with .NET Aspire to create a powerful, cloud-native application with feature flag capabilities. The solution consists of:
+## What This Demonstrates
 
-- **Todo.Web**: A Blazor web application that consumes feature flags
-- **Todo.ApiService**: An API service that also uses feature flags
-- **Todo.AppHost**: The Aspire host that coordinates the application components
-- **Todo.ServiceDefaults**: Common services and configurations used across the application
-- **flagd**: A feature flag provider that serves feature flags to the application
+This demo showcases how to implement feature flags using **OpenFeature** and the **OFREP (OpenFeature Remote Evaluation Protocol)** in a full-stack .NET application with React frontend. Key features include:
 
-## Features
+- **OFREP Integration**: Remote feature flag evaluation using the standardized protocol
+- **OpenFeature SDK**: Industry-standard feature flagging for both .NET backend and React frontend
+- **flagd Provider**: Using flagd as the feature flag evaluation engine with OFREP
+- **Dynamic Configuration**: Real-time feature flag updates without redeployment
+- **Full-Stack Implementation**: Feature flags working seamlessly across React UI and .NET API
+- **Kill Switches**: Safely toggle features in production environments
 
-- Integration of OpenFeature with .NET Aspire
-- Feature flag management using flagd
-- Sample feature flags demonstrating different use cases:
-  - `use-new-counter-version`: Controls the counter increment behaviour in the web application
-  - `return-weather-forecast`: Controls the number of weather forecasts returned by the API
-  - `page-v2`: Controls the display of a new page version with country-based targeting
+## Architecture
 
-## Prerequisites
+### Components
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) or later
-- [Docker](https://www.docker.com/products/docker-desktop/) for running the services
+- **Garage.React**: React + Vite frontend for managing car collections
+- **Garage.ApiService**: REST API for car data with Entity Framework Core
+- **Garage.ServiceDefaults**: Shared services including feature flag implementations
+- **Garage.Shared**: Common models and DTOs
+- **Garage.AppHost**: .NET Aspire orchestration and service discovery
 
-## Setup
+### Infrastructure
 
-### 1. Clone the repository
+- **PostgreSQL**: Database for storing car collection data
+- **Redis**: Caching layer for improved performance
+- **flagd**: OpenFeature-compliant feature flag evaluation engine
+
+## Feature Flags Included
+
+The demo demonstrates these feature flags:
+
+| Flag                       | Type   | Purpose                         | Default       |
+| -------------------------- | ------ | ------------------------------- | ------------- |
+| `enable-database-winners`  | `bool` | Toggle data source (DB vs JSON) | `true`        |
+| `winners-count`            | `int`  | Control number of winners shown | `100`         |
+| `enable-stats-header`      | `bool` | Show/hide statistics header     | `true`        |
+| `enable-tabs`              | `bool` | Enable tabbed interface (with targeting) | `false` |
+
+## Requirements
+
+### Prerequisites
+
+- .NET 9.0 SDK or later
+- Visual Studio, Visual Studio Code with C# extension or JetBrains Rider
+- Git for version control
+- Docker Desktop (for containerized dependencies)
+
+## Quick Start
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/askpt/openfeature-aspire-welcome.git
-cd openfeature-aspire-welcome
+git clone https://github.com/open-feature/openfeature-dotnet-workshop.git
+cd openfeature-dotnet-workshop
 ```
 
-### 2. Configure flagd source location
-
-The application needs to know where the flagd configuration file is located. You need to set this using .NET user secrets:
+### 2. Restore Dependencies
 
 ```bash
-cd Todo.AppHost
-dotnet user-secrets init
-dotnet user-secrets set "flagd:Source" "$(pwd)/../flagd"
+dotnet restore
 ```
 
-> **Note for Unix-like systems**: This sets the absolute path to your flagd folder in the user secrets. The AppHost will use this path to mount the flagd configuration file to the container.
->
-> **Note for Windows users**: If you are using PowerShell, replace `$(pwd)` with `$(Get-Location)` in the command above. For example:
->
-> ```powershell
-> dotnet user-secrets set "flagd:Source" "$(Get-Location)/../flagd"
-> ```
-
-### 3. Build and run the application
+### 3. Run with .NET Aspire
 
 ```bash
-dotnet build
-cd Todo.AppHost
+cd src/Garage.AppHost
 dotnet run
 ```
 
-The Aspire dashboard will open automatically, showing the status of all services. From there, you can navigate to the web application.
+### 4. Access the Application
 
-## Project Structure
+- Web Frontend: https://localhost:7070
+- API Service: https://localhost:7071
+- Aspire Dashboard: https://localhost:15888
 
-- **Todo.Web**: Contains the frontend Blazor application
-  - Uses the counter feature flag to demonstrate different behaviours
-- **Todo.ApiService**: Contains the backend API service
-  - Uses a feature flag to control the number of weather forecasts returned
-- **Todo.AppHost**: The Aspire host application
-  - Configures and orchestrates all services
-  - Sets up the flagd container
-- **Todo.ServiceDefaults**: Common configuration for all services
-  - Configures OpenFeature, OpenTelemetry, and other cross-cutting concerns
-- **flagd**: Contains the feature flag configuration
-
-## Feature Flags
-
-The application uses the following feature flags:
-
-1. **use-new-counter-version**:
-
-   - When enabled, the counter will increase by a random value
-   - When disabled, the counter will increase by 1
-
-2. **return-weather-forecast**:
-
-   - Controls how many weather forecasts the API returns (3 or 5)
-
-3. **page-v2**:
-   - Currently disabled by default
-   - When enabled for users in Portugal (`country` equals "pt"), shows a new page design
-   - Otherwise, displays the original page design
-   - Uses targeting rules to gradually roll out the new design to specific users
-
-## Modifying Feature Flags
-
-You can modify the feature flags by editing the `flagd/flagd.json` file. After making changes, restart the application to see the effects.
+The application will start with flagd running as a container, providing OFREP endpoints for both the React frontend and .NET API service to consume feature flags.
 
 ## Additional Resources
 
-- [OpenFeature Documentation](https://openfeature.dev/)
+- [OpenFeature Documentation](https://docs.openfeature.dev/)
+- [OFREP Specification](https://openfeature.dev/specification/ofrep)
 - [flagd Documentation](https://flagd.dev/)
 - [.NET Aspire Documentation](https://learn.microsoft.com/en-us/dotnet/aspire/)
+- [Feature Flag Best Practices](https://martinfowler.com/articles/feature-toggles.html)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
