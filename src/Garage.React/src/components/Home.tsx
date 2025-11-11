@@ -153,7 +153,7 @@ const Home = () => {
 
       <div className="collection-summary">
         <span className="collection-count">
-          {winners.length} of {winners.length} cars
+          {filteredWinners.length} of {winners.length} cars
         </span>
       </div>
 
