@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { OpenFeature } from "@openfeature/web-sdk";
+import { useBooleanFlagValue } from "@openfeature/react-sdk";
 import { Winner, FilterType } from "../types/Winner";
 import CarCard from "./CarCard";
 import "./Home.css";
@@ -9,11 +9,13 @@ const Home = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showHeader, setShowHeader] = useState(true);
-  const [showTabs, setShowTabs] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string>(
     localStorage.getItem("userId") || "1"
   );
+
+  // Use OpenFeature React hooks for feature flags
+  const showHeader = useBooleanFlagValue("enable-stats-header", true);
+  const showTabs = useBooleanFlagValue("enable-tabs", true);
 
   const ownedCount = winners.filter((w) => w.isOwned).length;
 
@@ -49,31 +51,7 @@ const Home = () => {
       }
     };
 
-    const loadFeatureFlags = async () => {
-      try {
-        const client = OpenFeature.getClient();
-
-        // Evaluate feature flags
-        const enableStatsHeader = await client.getBooleanDetails(
-          "enable-stats-header",
-          true
-        );
-        const enableTabs = await client.getBooleanDetails("enable-tabs", true);
-
-        setShowHeader(enableStatsHeader.value);
-        setShowTabs(enableTabs.value);
-
-        console.log("Feature flags loaded:", { enableStatsHeader, enableTabs });
-      } catch (error) {
-        console.warn("Failed to load feature flags:", error);
-        // Use defaults if feature flags fail
-        setShowHeader(true);
-        setShowTabs(true);
-      }
-    };
-
     loadWinners();
-    loadFeatureFlags();
   }, []);
 
   const handleOwnershipChanged = (updatedCar: Winner) => {
