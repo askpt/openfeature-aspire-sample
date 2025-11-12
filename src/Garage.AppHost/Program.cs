@@ -40,7 +40,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     })
     .WithHttpHealthCheck("/health");
 
-var webFrontend = builder.AddNpmApp("webfrontend", "../Garage.React/");
+var webFrontend = builder.AddJavaScriptApp("webfrontend", "../Garage.React/");
 
 // Only reference flagd in development
 if (isLocalDevelopment && flagd != null && ofrepEndpoint != null)
