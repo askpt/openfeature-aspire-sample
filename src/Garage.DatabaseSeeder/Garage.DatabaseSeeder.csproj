@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-Garage.DatabaseSeeder-6c3cea06-cb7e-4629-b5b8-05d28ace476c</UserSecretsId>
   </PropertyGroup>
 
