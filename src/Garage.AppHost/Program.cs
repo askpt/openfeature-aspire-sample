@@ -24,7 +24,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     })
     .WithHttpHealthCheck("/health");
 
-var webFrontend = builder.AddJavaScriptApp("webfrontend", "../Garage.React/");
+var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
 // Only add flagd service for local development (not during publishing/deployment)
 // Use DevCycle if is in publish mode

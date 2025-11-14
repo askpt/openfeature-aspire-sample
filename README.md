@@ -22,7 +22,7 @@ This demo showcases how to implement feature flags using **OpenFeature** and the
 
 ### Components
 
-- **Garage.React**: React + Vite frontend for managing car collections
+- **Garage.Web**: React + Vite frontend for managing car collections
 - **Garage.ApiService**: REST API for car data with Entity Framework Core
 - **Garage.ServiceDefaults**: Shared services including feature flag implementations
 - **Garage.Shared**: Common models and DTOs

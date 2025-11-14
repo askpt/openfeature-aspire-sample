@@ -347,5 +347,5 @@ ASALocalRun/
 !.vscode/launch.json
 !.vscode/extensions.json
 .azure
-src/Garage.React/ClientApp/dist/
-src/Garage.React/wwwroot/
+src/Garage.Web/ClientApp/dist/
+src/Garage.Web/wwwroot/
