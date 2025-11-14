@@ -13,13 +13,13 @@ updates:
     open-pull-requests-limit: 10
 
   - package-ecosystem: "npm"
-    directory: "src/Garage.React/"
+    directory: "src/Garage.Web/"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
 
   - package-ecosystem: "docker"
-    directory: "src/Garage.React/"
+    directory: "src/Garage.Web/"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
