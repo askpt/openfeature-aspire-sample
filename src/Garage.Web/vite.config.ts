@@ -58,13 +58,6 @@ export default defineConfig(({ mode }) => {
         input: "./index.html",
       },
     },
-    resolve: {
-      alias: {
-        // Polyfill Node.js modules for OpenTelemetry in the browser
-        https: "agent-base",
-        http: "agent-base",
-      },
-    },
     define: {
       // Expose the OFREP service URL to the client
       ...defineConfig,
