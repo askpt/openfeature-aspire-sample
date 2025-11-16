@@ -5,32 +5,22 @@ import "./index.css";
 import { initializeTelemetry } from "./telemetry";
 import { initializeFeatureFlags } from "./featureFlags.ts";
 
-// Get runtime config (production) or Vite env vars (development)
-const runtimeConfig = (window as any).__RUNTIME_CONFIG__;
+// Get Vite env vars (works in both dev and production with proxied endpoints)
+// In production, we use relative URLs (empty string) proxied through nginx
+// In development, Vite provides the full URLs
 
 // Initialize OpenTelemetry FIRST (if Aspire provides the endpoint)
-const otelEndpoint =
-  runtimeConfig?.VITE_OTEL_ENDPOINT || import.meta.env.VITE_OTEL_ENDPOINT;
-const otelHeaders =
-  runtimeConfig?.VITE_OTEL_HEADERS || import.meta.env.VITE_OTEL_HEADERS || "";
+const otelEndpoint = import.meta.env.VITE_OTEL_ENDPOINT || "";
+const otelHeaders = import.meta.env.VITE_OTEL_HEADERS || "";
 const otelResourceAttributes =
-  runtimeConfig?.VITE_OTEL_RESOURCE_ATTRIBUTES ||
-  import.meta.env.VITE_OTEL_RESOURCE_ATTRIBUTES ||
-  "";
+  import.meta.env.VITE_OTEL_RESOURCE_ATTRIBUTES || "";
 
-if (otelEndpoint) {
-  initializeTelemetry(otelEndpoint, otelHeaders, otelResourceAttributes);
-}
+initializeTelemetry(otelEndpoint, otelHeaders, otelResourceAttributes);
 
 // Initialize OpenFeature provider before rendering
-const ofrepServiceUrl =
-  runtimeConfig?.VITE_OFREP_SERVICE_URL ||
-  import.meta.env.VITE_OFREP_SERVICE_URL ||
-  "";
+const ofrepServiceUrl = import.meta.env.VITE_OFREP_SERVICE_URL || "";
 
-if (ofrepServiceUrl) {
-  initializeFeatureFlags(ofrepServiceUrl);
-}
+initializeFeatureFlags(ofrepServiceUrl);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

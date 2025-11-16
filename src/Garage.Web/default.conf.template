@@ -11,15 +11,10 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # Serve runtime config with injected environment variables
-    location = /config.js {
-        alias /etc/nginx/conf.d/config.js;
-        add_header Content-Type application/javascript;
-        add_header Cache-Control "no-cache, no-store, must-revalidate";
-    }
 
     location /api/ {
-        proxy_pass ${services__apiservice__https__0};
+        set $api_service ${services__apiservice__https__0};
+        proxy_pass $api_service;
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -27,12 +22,11 @@ server {
     }
 
     location /ofrep/ {
-        proxy_pass ${services__flagd__ofrep__0}/;
+        proxy_pass ${DEVCYCLE__URL}/ofrep/;
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Authorization "${DEVCYCLE__SERVERKEY}";
         proxy_set_header Content-Type "application/json";
-        # Remove /ofrep prefix when forwarding
-        rewrite ^/ofrep(/.*)$ $1 break;
     }
 }

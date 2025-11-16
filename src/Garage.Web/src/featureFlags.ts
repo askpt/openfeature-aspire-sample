@@ -2,13 +2,6 @@ import { OFREPWebProvider } from "@openfeature/ofrep-web-provider";
 import { EvaluationContext, OpenFeature } from "@openfeature/react-sdk";
 
 export function initializeFeatureFlags(ofrepUrl: string) {
-  if (!ofrepUrl) {
-    console.warn(
-      "OFREP URL not configured. Feature flags will not be initialized."
-    );
-    return;
-  }
-
   // Get user id from local storage
   const userId = localStorage.getItem("userId") || "1";
 

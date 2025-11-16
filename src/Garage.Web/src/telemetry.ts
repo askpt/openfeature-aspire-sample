@@ -37,10 +37,7 @@ export function initializeTelemetry(
     console.warn("OTEL endpoint not configured. Telemetry will not be sent.");
     return;
   }
-
   console.log("Initializing OpenTelemetry for browser");
-  console.log("OTLP Endpoint:", otlpUrl);
-
   const attributes = parseDelimitedValues(resourceAttributes);
   attributes[ATTR_SERVICE_NAME] = attributes[ATTR_SERVICE_NAME] || "web";
 
