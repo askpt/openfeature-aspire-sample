@@ -21,6 +21,25 @@ import {
 import { metrics } from "@opentelemetry/api";
 
 /**
+ * Metrics API for recording application metrics
+ */
+export interface MetricsAPI {
+  recordPageView: () => void;
+  recordUserIdChange: () => void;
+}
+
+// Module-level metrics API that will be initialized by setupMetrics
+let metricsAPI: MetricsAPI | null = null;
+
+/**
+ * Get the metrics API for recording application metrics
+ * @returns The metrics API or null if telemetry is not initialized
+ */
+export function getMetricsAPI(): MetricsAPI | null {
+  return metricsAPI;
+}
+
+/**
  * Initialize OpenTelemetry for the web application per Aspire documentation
  * https://aspire.dev/dashboard/enable-browser-telemetry/
  *
@@ -145,8 +164,8 @@ function setupMetrics(
   // Record initial page view
   pageViewCounter.add(1);
 
-  // Export metrics API for use in components
-  (window as any).__OTEL_METRICS__ = {
+  // Initialize the module-level metrics API
+  metricsAPI = {
     recordPageView: () => {
       pageViewCounter.add(1);
     },
