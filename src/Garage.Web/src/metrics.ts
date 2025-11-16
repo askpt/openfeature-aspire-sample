@@ -1,17 +1,10 @@
-/**
- * Helper functions to record metrics from React components
- */
-
-interface OtelMetrics {
-  recordPageView: () => void;
-  recordUserIdChange: () => void;
-}
+import { getMetricsAPI } from "./telemetry";
 
 /**
  * Record a page view metric
  */
 export function recordPageView() {
-  const metrics = (window as any).__OTEL_METRICS__ as OtelMetrics | undefined;
+  const metrics = getMetricsAPI();
   if (metrics) {
     metrics.recordPageView();
   }
@@ -21,7 +14,7 @@ export function recordPageView() {
  * Record a user ID change metric
  */
 export function recordUserIdChange() {
-  const metrics = (window as any).__OTEL_METRICS__ as OtelMetrics | undefined;
+  const metrics = getMetricsAPI();
   if (metrics) {
     metrics.recordUserIdChange();
   }
