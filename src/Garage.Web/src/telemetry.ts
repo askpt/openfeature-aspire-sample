@@ -5,7 +5,7 @@ import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
-import { Resource } from "@opentelemetry/resources";
+import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 import { ZoneContextManager } from "@opentelemetry/context-zone";
@@ -84,7 +84,7 @@ function setupTraces(
   };
 
   const provider = new WebTracerProvider({
-    resource: new Resource(attributes),
+    resource: resourceFromAttributes(attributes),
     spanProcessors: [
       new SimpleSpanProcessor(new OTLPTraceExporter(otlpOptions)),
     ],
@@ -100,9 +100,11 @@ function setupTraces(
     instrumentations: [
       new DocumentLoadInstrumentation(),
       new FetchInstrumentation({
-        // Propagate trace context to all outgoing requests
+        // Propagate trace context to all outgoing requests except OTLP endpoints
         propagateTraceHeaderCorsUrls: [/.+/],
         clearTimingResources: true,
+        // Ignore OTLP telemetry requests to prevent infinite loop
+        ignoreUrls: [/\/v1\/(traces|logs|metrics)/],
       }),
     ],
   });
@@ -119,11 +121,11 @@ function setupMetrics(
 
   const metricReader = new PeriodicExportingMetricReader({
     exporter: metricExporter,
-    exportIntervalMillis: 5000, // Export metrics every 5 seconds (faster for testing)
+    exportIntervalMillis: 10000, // Export metrics every 10 seconds
   });
 
   const meterProvider = new MeterProvider({
-    resource: new Resource(attributes),
+    resource: resourceFromAttributes(attributes),
     readers: [metricReader],
   });
 
@@ -164,12 +166,9 @@ function setupLogs(
   });
 
   const loggerProvider = new LoggerProvider({
-    resource: new Resource(attributes),
+    resource: resourceFromAttributes(attributes),
+    processors: [new BatchLogRecordProcessor(logExporter)],
   });
-
-  loggerProvider.addLogRecordProcessor(
-    new BatchLogRecordProcessor(logExporter)
-  );
 
   logs.setGlobalLoggerProvider(loggerProvider);
 
