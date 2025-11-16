@@ -5,6 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Le Mans Collection Tracker</title>
+    <!-- Runtime configuration for production only (nginx will inject via template) -->
+    <!-- In development, this file won't exist and that's OK -->
+    <script src="/config.js" onerror="window.__RUNTIME_CONFIG__={}"></script>
   </head>
   <body>
     <div id="root"></div>

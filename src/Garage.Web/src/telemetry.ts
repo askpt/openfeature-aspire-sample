@@ -1,7 +1,4 @@
-import {
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { DocumentLoadInstrumentation } from "@opentelemetry/instrumentation-document-load";
 import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
@@ -43,9 +40,6 @@ export function initializeTelemetry(
   const provider = new WebTracerProvider({
     resource: new Resource(attributes),
   });
-
-  // Add console exporter for debugging (optional - remove in production)
-  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
   // Add OTLP exporter to send telemetry to Aspire Dashboard
   provider.addSpanProcessor(

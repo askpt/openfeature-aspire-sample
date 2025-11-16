@@ -1,0 +1,7 @@
+// Runtime configuration injected by nginx at container startup
+window.__RUNTIME_CONFIG__ = {
+    VITE_OTEL_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT}",
+    VITE_OTEL_HEADERS: "${OTEL_EXPORTER_OTLP_HEADERS}",
+    VITE_OTEL_RESOURCE_ATTRIBUTES: "${OTEL_RESOURCE_ATTRIBUTES}",
+    VITE_OFREP_SERVICE_URL: "/ofrep"
+};
