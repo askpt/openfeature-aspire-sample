@@ -88,12 +88,10 @@ function setupTraces(
 
   const provider = new WebTracerProvider({
     resource: new Resource(attributes),
+    spanProcessors: [
+      new SimpleSpanProcessor(new OTLPTraceExporter(otlpOptions)),
+    ],
   });
-
-  // Add OTLP exporter to send telemetry to Aspire Dashboard
-  provider.addSpanProcessor(
-    new SimpleSpanProcessor(new OTLPTraceExporter(otlpOptions))
-  );
 
   provider.register({
     // Prefer ZoneContextManager: supports asynchronous operations
@@ -121,8 +119,6 @@ function setupMetrics(
     url: `${otlpUrl}/v1/metrics`,
     headers: parseDelimitedValues(headers),
   });
-
-  console.log("Metrics exporter URL:", `${otlpUrl}/v1/metrics`);
 
   const metricReader = new PeriodicExportingMetricReader({
     exporter: metricExporter,
