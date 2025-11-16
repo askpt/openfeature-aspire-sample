@@ -349,3 +349,4 @@ ASALocalRun/
 .azure
 src/Garage.Web/ClientApp/dist/
 src/Garage.Web/wwwroot/
+src/Garage.Web/dist/

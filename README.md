@@ -34,6 +34,16 @@ This demo showcases how to implement feature flags using **OpenFeature** and the
 - **Redis**: Caching layer for improved performance
 - **flagd**: OpenFeature-compliant feature flag evaluation engine
 
+## Telemetry Support
+
+This application includes comprehensive telemetry support through .NET Aspire:
+
+- **Distributed Tracing**: Track requests across services
+- **Metrics Collection**: Monitor application performance and feature flag usage
+- **Logging**: Centralized log aggregation
+
+> **Note**: When deployed, telemetry will work for the API service but not for the web frontend.
+
 ## Feature Flags Included
 
 The demo demonstrates these feature flags:
