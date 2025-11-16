@@ -61,6 +61,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // Expose the OFREP service URL to the client
       ...defineConfig,
+      // Define process.env for OpenTelemetry SDK compatibility
+      "process.env": {},
     },
   };
 });

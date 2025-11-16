@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useBooleanFlagValue } from "@openfeature/react-sdk";
 import { Winner, FilterType } from "../types/Winner";
 import CarCard from "./CarCard";
+import { recordPageView, recordUserIdChange } from "../metrics";
 import "./Home.css";
 
 const Home = () => {
@@ -31,6 +32,9 @@ const Home = () => {
   });
 
   useEffect(() => {
+    // Record page view metric
+    recordPageView();
+
     const loadWinners = async () => {
       try {
         setLoading(true);
@@ -72,6 +76,8 @@ const Home = () => {
     if (newUserId && newUserId.trim() !== "") {
       localStorage.setItem("userId", newUserId.trim());
       setCurrentUserId(newUserId.trim());
+      // Record user ID change metric
+      recordUserIdChange();
       // Reload the page to reinitialize OpenFeature with the new user ID
       window.location.reload();
     }

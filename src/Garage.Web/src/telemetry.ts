@@ -3,6 +3,7 @@ import { DocumentLoadInstrumentation } from "@opentelemetry/instrumentation-docu
 import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { Resource } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
@@ -13,6 +14,11 @@ import {
   BatchLogRecordProcessor,
 } from "@opentelemetry/sdk-logs";
 import { logs } from "@opentelemetry/api-logs";
+import {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from "@opentelemetry/sdk-metrics";
+import { metrics } from "@opentelemetry/api";
 
 /**
  * Initialize OpenTelemetry for the web application per Aspire documentation
@@ -35,13 +41,14 @@ export function initializeTelemetry(
   console.log("Initializing OpenTelemetry for browser");
   console.log("OTLP Endpoint:", otlpUrl);
 
+  const attributes = parseDelimitedValues(resourceAttributes);
+  attributes[ATTR_SERVICE_NAME] = attributes[ATTR_SERVICE_NAME] || "web";
+
+  // ===== TRACES SETUP =====
   const otlpOptions = {
     url: `${otlpUrl}/v1/traces`,
     headers: parseDelimitedValues(headers),
   };
-
-  const attributes = parseDelimitedValues(resourceAttributes);
-  attributes[ATTR_SERVICE_NAME] = attributes[ATTR_SERVICE_NAME] || "web";
 
   const provider = new WebTracerProvider({
     resource: new Resource(attributes),
@@ -57,7 +64,51 @@ export function initializeTelemetry(
     contextManager: new ZoneContextManager(),
   });
 
-  // ===== LOGGING SETUP =====
+  // ===== METRICS SETUP =====
+  const metricExporter = new OTLPMetricExporter({
+    url: `${otlpUrl}/v1/metrics`,
+    headers: parseDelimitedValues(headers),
+  });
+
+  console.log("Metrics exporter URL:", `${otlpUrl}/v1/metrics`);
+
+  const metricReader = new PeriodicExportingMetricReader({
+    exporter: metricExporter,
+    exportIntervalMillis: 5000, // Export metrics every 5 seconds (faster for testing)
+  });
+
+  const meterProvider = new MeterProvider({
+    resource: new Resource(attributes),
+    readers: [metricReader],
+  });
+
+  metrics.setGlobalMeterProvider(meterProvider);
+
+  // Create meters and counters for app-specific metrics
+  const meter = metrics.getMeter("web-app-metrics");
+  const pageViewCounter = meter.createCounter("page.views", {
+    description: "Count of page views",
+    unit: "1",
+  });
+  const userIdChangeCounter = meter.createCounter("user.id.changes", {
+    description: "Count of user ID changes",
+    unit: "1",
+  });
+
+  // Record initial page view
+  pageViewCounter.add(1);
+
+  // Export metrics API for use in components
+  (window as any).__OTEL_METRICS__ = {
+    recordPageView: () => {
+      pageViewCounter.add(1);
+    },
+    recordUserIdChange: () => {
+      userIdChangeCounter.add(1);
+    },
+  };
+
+  // ===== LOGS SETUP =====
   const logExporter = new OTLPLogExporter({
     url: `${otlpUrl}/v1/logs`,
     headers: parseDelimitedValues(headers),
