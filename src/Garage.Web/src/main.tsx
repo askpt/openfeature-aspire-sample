@@ -4,6 +4,17 @@ import App from "./App.tsx";
 import "./index.css";
 import { OpenFeature, EvaluationContext } from "@openfeature/react-sdk";
 import { OFREPWebProvider } from "@openfeature/ofrep-web-provider";
+import { initializeTelemetry } from "./telemetry";
+
+// Initialize OpenTelemetry FIRST (if Aspire provides the endpoint)
+const otelEndpoint = import.meta.env.VITE_OTEL_ENDPOINT;
+const otelHeaders = import.meta.env.VITE_OTEL_HEADERS || "";
+const otelResourceAttributes =
+  import.meta.env.VITE_OTEL_RESOURCE_ATTRIBUTES || "";
+
+if (otelEndpoint) {
+  initializeTelemetry(otelEndpoint, otelHeaders, otelResourceAttributes);
+}
 
 // Initialize OpenFeature provider before rendering
 const ofrepServiceUrl = import.meta.env.VITE_OFREP_SERVICE_URL || "";
