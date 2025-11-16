@@ -45,6 +45,42 @@ export function initializeTelemetry(
   attributes[ATTR_SERVICE_NAME] = attributes[ATTR_SERVICE_NAME] || "web";
 
   // ===== TRACES SETUP =====
+  setupTraces(otlpUrl, headers, attributes);
+
+  // ===== METRICS SETUP =====
+  setupMetrics(otlpUrl, headers, attributes);
+
+  // ===== LOGS SETUP =====
+  setupLogs(otlpUrl, headers, attributes);
+
+  console.log("OpenTelemetry initialized successfully");
+}
+
+/**
+ * Parse comma-separated key=value pairs into an object
+ * Example: "key1=value1,key2=value2" => { key1: "value1", key2: "value2" }
+ */
+function parseDelimitedValues(s: string): Record<string, string> {
+  if (!s) return {};
+
+  const pairs = s.split(","); // Split by comma
+  const result: Record<string, string> = {};
+
+  pairs.forEach((pair) => {
+    const [key, value] = pair.split("="); // Split by equal sign
+    if (key && value) {
+      result[key.trim()] = value.trim(); // Add to the object, trimming spaces
+    }
+  });
+
+  return result;
+}
+
+function setupTraces(
+  otlpUrl: string,
+  headers: string,
+  attributes: Record<string, string>
+) {
   const otlpOptions = {
     url: `${otlpUrl}/v1/traces`,
     headers: parseDelimitedValues(headers),
@@ -64,7 +100,23 @@ export function initializeTelemetry(
     contextManager: new ZoneContextManager(),
   });
 
-  // ===== METRICS SETUP =====
+  // Register instrumentations for automatic tracing
+  registerInstrumentations({
+    instrumentations: [
+      new DocumentLoadInstrumentation(),
+      new FetchInstrumentation({
+        // Propagate trace context to all outgoing requests
+        propagateTraceHeaderCorsUrls: [/.+/],
+        clearTimingResources: true,
+      }),
+    ],
+  });
+}
+function setupMetrics(
+  otlpUrl: string,
+  headers: string,
+  attributes: Record<string, string>
+) {
   const metricExporter = new OTLPMetricExporter({
     url: `${otlpUrl}/v1/metrics`,
     headers: parseDelimitedValues(headers),
@@ -107,8 +159,12 @@ export function initializeTelemetry(
       userIdChangeCounter.add(1);
     },
   };
-
-  // ===== LOGS SETUP =====
+}
+function setupLogs(
+  otlpUrl: string,
+  headers: string,
+  attributes: Record<string, string>
+) {
   const logExporter = new OTLPLogExporter({
     url: `${otlpUrl}/v1/logs`,
     headers: parseDelimitedValues(headers),
@@ -203,38 +259,4 @@ export function initializeTelemetry(
       },
     });
   });
-
-  // Register instrumentations for automatic tracing
-  registerInstrumentations({
-    instrumentations: [
-      new DocumentLoadInstrumentation(),
-      new FetchInstrumentation({
-        // Propagate trace context to all outgoing requests
-        propagateTraceHeaderCorsUrls: [/.+/],
-        clearTimingResources: true,
-      }),
-    ],
-  });
-
-  console.log("OpenTelemetry initialized successfully");
-}
-
-/**
- * Parse comma-separated key=value pairs into an object
- * Example: "key1=value1,key2=value2" => { key1: "value1", key2: "value2" }
- */
-function parseDelimitedValues(s: string): Record<string, string> {
-  if (!s) return {};
-
-  const pairs = s.split(","); // Split by comma
-  const result: Record<string, string> = {};
-
-  pairs.forEach((pair) => {
-    const [key, value] = pair.split("="); // Split by equal sign
-    if (key && value) {
-      result[key.trim()] = value.trim(); // Add to the object, trimming spaces
-    }
-  });
-
-  return result;
 }
