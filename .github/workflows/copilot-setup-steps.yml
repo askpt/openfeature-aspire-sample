@@ -1,0 +1,54 @@
+name: Copilot Setup Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-copilot-setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Validate Copilot instructions file exists
+        run: |
+          if [ ! -f .github/copilot-instructions.md ]; then
+            echo "Error: .github/copilot-instructions.md not found"
+            exit 1
+          fi
+          echo "✓ Copilot instructions file exists"
+
+      - name: Validate Copilot instructions content
+        run: |
+          echo "Checking Copilot instructions file..."
+          
+          # Check if file is not empty
+          if [ ! -s .github/copilot-instructions.md ]; then
+            echo "Error: .github/copilot-instructions.md is empty"
+            exit 1
+          fi
+          
+          # Check for required sections
+          required_sections=(
+            "Project Overview"
+            "Technology Stack"
+            "Build and Development Commands"
+            "Coding Standards"
+          )
+          
+          for section in "${required_sections[@]}"; do
+            if ! grep -q "$section" .github/copilot-instructions.md; then
+              echo "Error: Missing required section: $section"
+              exit 1
+            fi
+          done
+          
+          echo "✓ All required sections found"
+          echo "✓ Copilot instructions validation passed"
