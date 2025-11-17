@@ -1,6 +1,6 @@
 # OpenFeature .NET OFREP Demo: Le Mans Winners Management System
 
-[![.NET 9.0](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Aspire](https://img.shields.io/badge/Aspire-Enabled-purple)](https://learn.microsoft.com/en-us/dotnet/aspire/)
 [![OpenFeature](https://img.shields.io/badge/OpenFeature-Ready-green)](https://openfeature.dev/)
 [![OFREP](https://img.shields.io/badge/OFREP-Enabled-blue)](https://openfeature.dev/specification/ofrep)
@@ -59,7 +59,7 @@ The demo demonstrates these feature flags:
 
 ### Prerequisites
 
-- .NET 9.0 SDK or later
+- .NET 10.0 SDK or later
 - Visual Studio, Visual Studio Code with C# extension or JetBrains Rider
 - Git for version control
 - Docker Desktop (for containerized dependencies)
