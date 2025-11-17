@@ -7,7 +7,7 @@ builder.Services.AddHostedService<Worker>();
 builder.AddServiceDefaults();
 
 // Add database
-builder.AddNpgsqlDbContext<GarageDbContext>("garage-db");
+builder.AddAzureNpgsqlDbContext<GarageDbContext>("garage-db");
 
 builder.Services.AddSingleton<DatabaseSeederService>();
 

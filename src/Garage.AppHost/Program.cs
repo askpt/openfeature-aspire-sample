@@ -4,9 +4,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
 
-var cache = builder.AddRedis("cache");
+var cache = builder.AddAzureRedis("cache").RunAsContainer();
 
-var postgres = builder.AddPostgres("postgres");
+var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
 
 var migration = builder.AddProject<Projects.Garage_DatabaseSeeder>("database-seeder")
