@@ -6,7 +6,7 @@
   </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.0.0" />
+        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.0.1" />
         <PackageReference Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.5.2" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11" />
