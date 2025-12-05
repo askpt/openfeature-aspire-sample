@@ -36,33 +36,35 @@ if (!builder.ExecutionContext.IsPublishMode)
     var ofrepEndpoint = flagd.GetEndpoint("ofrep");
 
     apiService = apiService
-        .WithReference(ofrepEndpoint)
-        .WaitFor(flagd);
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     webFrontend = webFrontend
-        .WithReference(ofrepEndpoint)
-        .WaitFor(flagd);
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
-        .WithReference(ofrepEndpoint)
-        .WaitFor(flagd);
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
 else
 {
     var serverKey = builder.AddParameter("devcycle-server-key", secret: true);
     var devcycleUrl = builder.Configuration["DevCycle:Url"] ?? null;
 
+    // For web (nginx), set separate OFREP_AUTHORIZATION for simplicity
     webFrontend = webFrontend
-        .WithEnvironment("DEVCYCLE__URL", devcycleUrl)
-        .WithEnvironment("DEVCYCLE__SERVERKEY", serverKey);
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_AUTHORIZATION", serverKey);
 
+    // For .NET services, use OFREP_HEADERS with Authorization=<value> format
     apiService = apiService
-        .WithEnvironment("DEVCYCLE__URL", devcycleUrl)
-        .WithEnvironment("DEVCYCLE__SERVERKEY", serverKey);
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 
     migration = migration
-        .WithEnvironment("DEVCYCLE__URL", devcycleUrl)
-        .WithEnvironment("DEVCYCLE__SERVERKEY", serverKey);
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 }
 
 webFrontend

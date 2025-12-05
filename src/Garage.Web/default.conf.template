@@ -20,11 +20,11 @@ server {
     }
 
     location /ofrep/ {
-        proxy_pass ${DEVCYCLE__URL}/ofrep/;
+        proxy_pass ${OFREP_ENDPOINT}/ofrep/;
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Authorization "${DEVCYCLE__SERVERKEY}";
+        proxy_set_header Authorization "${OFREP_AUTHORIZATION}";
         proxy_set_header Content-Type "application/json";
     }
 }
