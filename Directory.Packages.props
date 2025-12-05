@@ -1,0 +1,51 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable Central Package Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    
+    <!-- Enable transitive pinning for security updates -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    
+    <!-- Disable version overrides for strict version control -->
+    <CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Aspire Packages">
+    <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.0.1" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.0.1" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Community Packages">
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Microsoft Packages">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="OpenFeature Packages">
+    <PackageVersion Include="OpenFeature.Hosting" Version="2.10.0" />
+    <PackageVersion Include="OpenFeature.Providers.Ofrep" Version="0.1.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="OpenTelemetry Packages">
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Other Packages">
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
+  </ItemGroup>
+</Project>
