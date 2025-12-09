@@ -147,26 +147,41 @@ public static class Extensions
 
         builder.Services.AddOpenFeature(featureBuilder =>
         {
-            // Get connection string from configuration
-            var connectionString = builder.Configuration["services:flagd:ofrep:0"];
-            if (string.IsNullOrWhiteSpace(connectionString))
+            // Get OFREP endpoint from configuration
+            var endpoint = builder.Configuration["OFREP_ENDPOINT"];
+
+            if (string.IsNullOrWhiteSpace(endpoint))
             {
-                connectionString = builder.Configuration["DEVCYCLE:URL"];
+                throw new InvalidOperationException("Feature flag provider configuration is missing. Please set 'OFREP_ENDPOINT' in the application configuration.");
             }
 
-            if (string.IsNullOrWhiteSpace(connectionString))
+            // Parse OFREP_HEADERS for Authorization header (format: "Authorization=<value>,Other=value")
+            var ofrepHeaders = builder.Configuration["OFREP_HEADERS"];
+            Dictionary<string, string> headers = [];
+
+            if (!string.IsNullOrWhiteSpace(ofrepHeaders))
             {
-                throw new InvalidOperationException("Feature flag provider configuration is missing. Please set either 'services:flagd:ofrep:0' or 'DEVCYCLE:URL' in the application configuration.");
+                var splitHeaders = ofrepHeaders.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var header in splitHeaders)
+                {
+                    var parts = header.Split('=', 2, StringSplitOptions.TrimEntries);
+                    if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]) && !string.IsNullOrWhiteSpace(parts[1]))
+                    {
+                        headers[parts[0]] = parts[1];
+                    }
+                }
             }
 
-            var serverKey = builder.Configuration["DEVCYCLE:SERVERKEY"];
             featureBuilder
                 .AddOfrepProvider(ofrepOptions =>
                 {
-                    ofrepOptions.BaseUrl = connectionString;
-                    if (!string.IsNullOrWhiteSpace(serverKey))
+                    ofrepOptions.BaseUrl = endpoint;
+                    if (headers != null && headers.Count > 0)
                     {
-                        ofrepOptions.Headers.Add("Authorization", serverKey);
+                        foreach (var header in headers)
+                        {
+                            ofrepOptions.Headers.Add(header.Key, header.Value);
+                        }
                     }
                 })
                 .AddHook<TraceEnricherHook>()

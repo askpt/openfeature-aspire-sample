@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const ofrepServiceUrl = process.env.services__flagd__ofrep__0;
+  const ofrepServiceUrl = process.env.OFREP_ENDPOINT;
   const otelEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
   const otelHeaders = process.env.OTEL_EXPORTER_OTLP_HEADERS;
   const otelResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES;
