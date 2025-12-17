@@ -9,14 +9,6 @@
       },
       "defaultVariant": "enabled"
     },
-    "enable-preview-mode": {
-      "state": "ENABLED",
-      "variants": {
-        "disabled": "",
-        "enabled": "enable-demo"
-      },
-      "defaultVariant": "enabled"
-    },
     "enable-demo": {
       "state": "ENABLED",
       "variants": {
@@ -40,6 +32,14 @@
         ]
       }
     },
+    "enable-preview-mode": {
+      "state": "ENABLED",
+      "variants": {
+        "disabled": "",
+        "enabled": "enable-tabs"
+      },
+      "defaultVariant": "enabled"
+    },
     "enable-stats-header": {
       "state": "ENABLED",
       "variants": {
@@ -58,11 +58,13 @@
       "targeting": {
         "if": [
           {
-            "==": [
+            "in": [
               {
                 "var": "userId"
               },
-              "1"
+              [
+                "1"
+              ]
             ]
           },
           "enabled"
