@@ -6,6 +6,11 @@ var containerAppEnvironment = builder
 
 var cache = builder.AddAzureRedis("cache").RunAsContainer();
 
+var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+    .WithHttpEndpoint(env: "PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
+
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
 
@@ -70,6 +75,8 @@ else
 webFrontend
     .WithReference(apiService)
     .WaitFor(apiService)
+    .WithReference(flagsApi)
+    .WaitFor(flagsApi)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
