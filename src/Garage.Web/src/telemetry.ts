@@ -203,7 +203,7 @@ function setupLogs(
   };
 
   // Helper to emit log records
-  const emitLog = (level: string, args: any[]) => {
+  const emitLog = (level: string, args: unknown[]) => {
     const message = args
       .map((arg) =>
         typeof arg === "object" ? JSON.stringify(arg) : String(arg)
@@ -218,27 +218,27 @@ function setupLogs(
   };
 
   // Override console methods
-  console.log = (...args: any[]) => {
+  console.log = (...args: unknown[]) => {
     originalConsole.log(...args);
     emitLog("INFO", args);
   };
 
-  console.info = (...args: any[]) => {
+  console.info = (...args: unknown[]) => {
     originalConsole.info(...args);
     emitLog("INFO", args);
   };
 
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     originalConsole.warn(...args);
     emitLog("WARN", args);
   };
 
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     originalConsole.error(...args);
     emitLog("ERROR", args);
   };
 
-  console.debug = (...args: any[]) => {
+  console.debug = (...args: unknown[]) => {
     originalConsole.debug(...args);
     emitLog("DEBUG", args);
   };

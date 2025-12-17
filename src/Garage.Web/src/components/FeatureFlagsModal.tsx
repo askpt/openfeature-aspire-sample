@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./FeatureFlagsModal.css";
 
 interface FeatureFlagsModalProps {
@@ -19,13 +19,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
 
   const userId = localStorage.getItem("userId") || "1";
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchFlags();
-    }
-  }, [isOpen]);
-
-  const fetchFlags = async () => {
+  const fetchFlags = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/flags/?userId=${userId}`);
@@ -46,7 +40,13 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchFlags();
+    }
+  }, [isOpen, fetchFlags]);
 
   const handleToggle = async (flagKey: string, newValue: boolean) => {
     // Reset status before making request

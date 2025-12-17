@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   const otelResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES;
 
   // Only define service URLs and OTEL config if they are set
-  const defineConfig: any = {};
+  const defineConfig: Record<string, string> = {};
 
   // For OFREP, use relative URL (proxied) instead of absolute URL
   defineConfig["import.meta.env.VITE_OFREP_SERVICE_URL"] = JSON.stringify(
