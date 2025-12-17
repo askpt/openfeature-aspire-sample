@@ -350,3 +350,6 @@ ASALocalRun/
 src/Garage.Web/ClientApp/dist/
 src/Garage.Web/wwwroot/
 src/Garage.Web/dist/
+
+# Go build artifacts
+src/Garage.FeatureFlags/flags-api

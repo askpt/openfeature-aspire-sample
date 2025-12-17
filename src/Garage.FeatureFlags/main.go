@@ -193,7 +193,7 @@ func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
 		return err
 	}
 
-	if err := os.WriteFile(flagsFilePath, data, 0644); err != nil {
+	if err := os.WriteFile(flagsFilePath, data, 0600); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return err
@@ -307,11 +307,11 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the list of editable flags from enable-preview-mode
-	flagList := getPreviewModeFlags(ctx)
-
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
+
+	// Get the list of editable flags from enable-preview-mode
+	flagList := getPreviewModeFlags(ctx)
 
 	flagFile, err := readFlagsFile(ctx)
 	if err != nil {
@@ -339,12 +339,18 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(flagStates)
+	if err := json.NewEncoder(w).Encode(flagStates); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		slog.ErrorContext(ctx, "failed to encode flagStates response", "error", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
-// handleEnableDemoTargeting handles POST /flags/
-func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
-	ctx, span := tracer.Start(r.Context(), "handleEnableDemoTargeting")
+// handleUpdateFlagTargeting handles POST /flags/ - updates targeting for allowed flags
+func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracer.Start(r.Context(), "handleUpdateFlagTargeting")
 	defer span.End()
 
 	if r.Method != http.MethodPost {
@@ -432,7 +438,7 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flagFile.Flags["enable-demo"] = flag
+	flagFile.Flags[req.FlagKey] = flag
 
 	if err := writeFlagsFile(ctx, flagFile); err != nil {
 		span.RecordError(err)
@@ -444,12 +450,18 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", req.UserID, "enabled", req.Enabled)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	if err := json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"userId":  req.UserID,
 		"enabled": req.Enabled,
 		"userIds": userIDs,
-	})
+	}); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		slog.ErrorContext(ctx, "failed to encode response", "error", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
@@ -476,7 +488,7 @@ func main() {
 	// Initialize OpenFeature with OFREP provider
 	if err := initOpenFeature(); err != nil {
 		slog.Warn("Failed to initialize OpenFeature", "error", err)
-		slog.Info("Flag updates will be allowed without preview mode check")
+		slog.Info("Flag updates require preview mode to be configured")
 	} else {
 		slog.Info("OpenFeature initialized successfully with OFREP provider")
 	}
@@ -492,7 +504,7 @@ func main() {
 		case http.MethodGet:
 			handleGetFlags(w, r)
 		case http.MethodPost:
-			handleEnableDemoTargeting(w, r)
+			handleUpdateFlagTargeting(w, r)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
@@ -501,5 +513,8 @@ func main() {
 	handler := otelhttp.NewHandler(mux, "flags-api")
 
 	slog.Info("Server listening", "port", port, "flagsFilePath", flagsFilePath)
-	http.ListenAndServe(":"+port, handler)
+	if err := http.ListenAndServe(":"+port, handler); err != nil {
+		slog.Error("HTTP server failed", "error", err)
+		os.Exit(1)
+	}
 }
