@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"slices"
@@ -12,6 +13,17 @@ import (
 
 	"github.com/open-feature/go-sdk-contrib/providers/ofrep"
 	"github.com/open-feature/go-sdk/openfeature"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.opentelemetry.io/contrib/exporters/autoexport"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 )
 
 // Flag represents a feature flag configuration
@@ -40,7 +52,83 @@ var (
 	fileMutex     sync.Mutex
 
 	featureClient *openfeature.Client
+	tracer        = otel.Tracer("flags-api")
+	logger        *slog.Logger
 )
+
+// initOtel initializes OpenTelemetry with autoexport for traces, metrics, and logs
+func initOtel(ctx context.Context) (func(context.Context) error, error) {
+	serviceName := os.Getenv("OTEL_SERVICE_NAME")
+	if serviceName == "" {
+		serviceName = "flags-api"
+	}
+
+	res, err := resource.New(ctx,
+		resource.WithAttributes(semconv.ServiceName(serviceName)),
+		resource.WithFromEnv(),
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create span exporter using autoexport
+	spanExporter, err := autoexport.NewSpanExporter(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithBatcher(spanExporter),
+		trace.WithResource(res),
+	)
+	otel.SetTracerProvider(tracerProvider)
+
+	// Create metric reader using autoexport
+	metricReader, err := autoexport.NewMetricReader(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	meterProvider := metric.NewMeterProvider(
+		metric.WithReader(metricReader),
+		metric.WithResource(res),
+	)
+	otel.SetMeterProvider(meterProvider)
+
+	// Create log exporter using autoexport
+	logExporter, err := autoexport.NewLogExporter(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	loggerProvider := log.NewLoggerProvider(
+		log.WithProcessor(log.NewBatchProcessor(logExporter)),
+		log.WithResource(res),
+	)
+
+	// Initialize slog with OTEL handler
+	logger = slog.New(otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(loggerProvider)))
+	slog.SetDefault(logger)
+
+	// Set global propagator
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	return func(ctx context.Context) error {
+		err := tracerProvider.Shutdown(ctx)
+		if err2 := meterProvider.Shutdown(ctx); err2 != nil && err == nil {
+			err = err2
+		}
+		if err2 := loggerProvider.Shutdown(ctx); err2 != nil && err == nil {
+			err = err2
+		}
+		return err
+	}, nil
+}
 
 func init() {
 	flagsFilePath = os.Getenv("FLAGS_FILE_PATH")
@@ -53,7 +141,7 @@ func init() {
 func initOpenFeature() error {
 	ofrepEndpoint := os.Getenv("OFREP_ENDPOINT")
 	if ofrepEndpoint == "" {
-		return fmt.Errorf("OFREP_ENDPOINT environment variable is not set")
+		return errors.New("OFREP_ENDPOINT environment variable is not set")
 	}
 
 	// Create OFREP provider
@@ -61,7 +149,7 @@ func initOpenFeature() error {
 
 	// Register the provider
 	if err := openfeature.SetProviderAndWait(ofrepProvider); err != nil {
-		return fmt.Errorf("failed to set OpenFeature provider: %w", err)
+		return err
 	}
 
 	// Create a client
@@ -71,29 +159,44 @@ func initOpenFeature() error {
 }
 
 // readFlagsFile reads and parses the flagd.json file
-func readFlagsFile() (*FlagFile, error) {
+func readFlagsFile(ctx context.Context) (*FlagFile, error) {
+	ctx, span := tracer.Start(ctx, "readFlagsFile")
+	defer span.End()
+
 	data, err := os.ReadFile(flagsFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read flags file: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
 	var flagFile FlagFile
 	if err := json.Unmarshal(data, &flagFile); err != nil {
-		return nil, fmt.Errorf("failed to parse flags file: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
 	return &flagFile, nil
 }
 
 // writeFlagsFile writes the flag configuration back to flagd.json
-func writeFlagsFile(flagFile *FlagFile) error {
+func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
+	ctx, span := tracer.Start(ctx, "writeFlagsFile")
+	defer span.End()
+	_ = ctx // ctx available for future use
+
 	data, err := json.MarshalIndent(flagFile, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal flags: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 
 	if err := os.WriteFile(flagsFilePath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write flags file: %w", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 
 	return nil
@@ -103,22 +206,22 @@ func writeFlagsFile(flagFile *FlagFile) error {
 func getUserIDsFromTargeting(targeting map[string]any) ([]string, error) {
 	ifRule, ok := targeting["if"].([]any)
 	if !ok || len(ifRule) < 2 {
-		return nil, fmt.Errorf("invalid targeting structure: missing 'if' rule")
+		return nil, errors.New("invalid targeting structure: missing 'if' rule")
 	}
 
 	inRule, ok := ifRule[0].(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("invalid targeting structure: missing condition")
+		return nil, errors.New("invalid targeting structure: missing condition")
 	}
 
 	inArray, ok := inRule["in"].([]any)
 	if !ok || len(inArray) < 2 {
-		return nil, fmt.Errorf("invalid targeting structure: missing 'in' rule")
+		return nil, errors.New("invalid targeting structure: missing 'in' rule")
 	}
 
 	userIDsRaw, ok := inArray[1].([]any)
 	if !ok {
-		return nil, fmt.Errorf("invalid targeting structure: userIds is not an array")
+		return nil, errors.New("invalid targeting structure: userIds is not an array")
 	}
 
 	userIDs := make([]string, 0, len(userIDsRaw))
@@ -135,17 +238,17 @@ func getUserIDsFromTargeting(targeting map[string]any) ([]string, error) {
 func setUserIDsInTargeting(targeting map[string]any, userIDs []string) error {
 	ifRule, ok := targeting["if"].([]any)
 	if !ok || len(ifRule) < 2 {
-		return fmt.Errorf("invalid targeting structure")
+		return errors.New("invalid targeting structure")
 	}
 
 	inRule, ok := ifRule[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("invalid targeting structure")
+		return errors.New("invalid targeting structure")
 	}
 
 	inArray, ok := inRule["in"].([]any)
 	if !ok || len(inArray) < 2 {
-		return fmt.Errorf("invalid targeting structure")
+		return errors.New("invalid targeting structure")
 	}
 
 	// Convert []string to []any for JSON compatibility
@@ -161,15 +264,19 @@ func setUserIDsInTargeting(targeting map[string]any, userIDs []string) error {
 // isPreviewModeEnabled checks if the enable-preview-mode flag is enabled
 // Returns the list of allowed flag keys (comma-separated) or empty if disabled
 func getPreviewModeFlags(ctx context.Context) []string {
+	ctx, span := tracer.Start(ctx, "getPreviewModeFlags")
+	defer span.End()
+
 	if featureClient == nil {
-		// If OpenFeature is not initialized, return empty (no flags editable)
-		fmt.Println("Warning: OpenFeature client not initialized")
+		slog.WarnContext(ctx, "OpenFeature client not initialized")
 		return []string{}
 	}
 
 	value, err := featureClient.StringValue(ctx, "enable-preview-mode", "", openfeature.EvaluationContext{})
 	if err != nil {
-		fmt.Printf("Warning: Failed to evaluate enable-preview-mode flag: %v\n", err)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		slog.WarnContext(ctx, "Failed to evaluate enable-preview-mode flag", "error", err)
 		return []string{}
 	}
 
@@ -191,6 +298,9 @@ func getPreviewModeFlags(ctx context.Context) []string {
 
 // handleGetFlags handles GET /flags/ - returns current flag states for a user
 func handleGetFlags(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracer.Start(r.Context(), "handleGetFlags")
+	defer span.End()
+
 	userID := r.URL.Query().Get("userId")
 	if userID == "" {
 		http.Error(w, "userId query parameter is required", http.StatusBadRequest)
@@ -198,14 +308,16 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the list of editable flags from enable-preview-mode
-	flagList := getPreviewModeFlags(r.Context())
+	flagList := getPreviewModeFlags(ctx)
 
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
-	flagFile, err := readFlagsFile()
+	flagFile, err := readFlagsFile(ctx)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read flags: %v", err), http.StatusInternalServerError)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Failed to read flags", http.StatusInternalServerError)
 		return
 	}
 
@@ -232,13 +344,16 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 
 // handleEnableDemoTargeting handles POST /flags/
 func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
+	ctx, span := tracer.Start(r.Context(), "handleEnableDemoTargeting")
+	defer span.End()
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	// Get the list of allowed flags from enable-preview-mode
-	allowedFlags := getPreviewModeFlags(r.Context())
+	allowedFlags := getPreviewModeFlags(ctx)
 	if len(allowedFlags) == 0 {
 		http.Error(w, "Flag updates are disabled: enable-preview-mode is empty or off", http.StatusForbidden)
 		return
@@ -246,7 +361,9 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 
 	var req TargetingRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -262,28 +379,32 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the requested flag is in the allowed list
 	if !slices.Contains(allowedFlags, req.FlagKey) {
-		http.Error(w, fmt.Sprintf("Flag '%s' is not allowed for updates", req.FlagKey), http.StatusForbidden)
+		http.Error(w, "Flag is not allowed for updates", http.StatusForbidden)
 		return
 	}
 
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
-	flagFile, err := readFlagsFile()
+	flagFile, err := readFlagsFile(ctx)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read flags: %v", err), http.StatusInternalServerError)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Failed to read flags", http.StatusInternalServerError)
 		return
 	}
 
 	flag, ok := flagFile.Flags[req.FlagKey]
 	if !ok {
-		http.Error(w, fmt.Sprintf("Flag '%s' not found", req.FlagKey), http.StatusNotFound)
+		http.Error(w, "Flag not found", http.StatusNotFound)
 		return
 	}
 
 	userIDs, err := getUserIDsFromTargeting(flag.Targeting)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to parse targeting: %v", err), http.StatusInternalServerError)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Failed to parse targeting", http.StatusInternalServerError)
 		return
 	}
 
@@ -305,16 +426,22 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := setUserIDsInTargeting(flag.Targeting, userIDs); err != nil {
-		http.Error(w, fmt.Sprintf("Failed to update targeting: %v", err), http.StatusInternalServerError)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Failed to update targeting", http.StatusInternalServerError)
 		return
 	}
 
 	flagFile.Flags["enable-demo"] = flag
 
-	if err := writeFlagsFile(flagFile); err != nil {
-		http.Error(w, fmt.Sprintf("Failed to write flags: %v", err), http.StatusInternalServerError)
+	if err := writeFlagsFile(ctx, flagFile); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		http.Error(w, "Failed to write flags", http.StatusInternalServerError)
 		return
 	}
+
+	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", req.UserID, "enabled", req.Enabled)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
@@ -326,6 +453,21 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	ctx := context.Background()
+
+	// Initialize OpenTelemetry
+	shutdown, err := initOtel(ctx)
+	if err != nil {
+		slog.Warn("Failed to initialize OpenTelemetry", "error", err)
+	} else {
+		defer func() {
+			if err := shutdown(ctx); err != nil {
+				slog.Error("Error shutting down telemetry", "error", err)
+			}
+		}()
+		slog.Info("OpenTelemetry initialized successfully")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -333,17 +475,19 @@ func main() {
 
 	// Initialize OpenFeature with OFREP provider
 	if err := initOpenFeature(); err != nil {
-		fmt.Printf("Warning: Failed to initialize OpenFeature: %v\n", err)
-		fmt.Println("Flag updates will be allowed without preview mode check")
+		slog.Warn("Failed to initialize OpenFeature", "error", err)
+		slog.Info("Flag updates will be allowed without preview mode check")
 	} else {
-		fmt.Println("OpenFeature initialized successfully with OFREP provider")
+		slog.Info("OpenFeature initialized successfully with OFREP provider")
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from Go Feature Flags API!")
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello from Go Feature Flags API!"))
 	})
 
-	http.HandleFunc("/flags/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/flags/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			handleGetFlags(w, r)
@@ -354,7 +498,8 @@ func main() {
 		}
 	})
 
-	fmt.Printf("Server listening on port %s\n", port)
-	fmt.Printf("Flags file path: %s\n", flagsFilePath)
-	http.ListenAndServe(":"+port, nil)
+	handler := otelhttp.NewHandler(mux, "flags-api")
+
+	slog.Info("Server listening", "port", port, "flagsFilePath", flagsFilePath)
+	http.ListenAndServe(":"+port, handler)
 }

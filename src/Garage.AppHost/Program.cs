@@ -13,6 +13,7 @@ var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
+    .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
     .PublishAsDockerFile();
 
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
