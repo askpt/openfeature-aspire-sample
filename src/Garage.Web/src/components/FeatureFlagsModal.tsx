@@ -16,6 +16,9 @@ type FlagsMap = Record<string, FlagState>;
 const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const [flags, setFlags] = useState<FlagsMap>({});
   const [loading, setLoading] = useState(true);
+  const timeoutRefs = useState<Map<string, NodeJS.Timeout>>(
+    () => new Map()
+  )[0];
 
   const userId = localStorage.getItem("userId") || "1";
 
@@ -50,24 +53,34 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
 
   // Clean up status indicators after 2 seconds
   useEffect(() => {
-    const timeoutIds: NodeJS.Timeout[] = [];
-
     Object.entries(flags).forEach(([flagKey, flagState]) => {
       if (flagState.status !== "idle") {
+        // Clear existing timeout for this flag if any
+        const existingTimeout = timeoutRefs.get(flagKey);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+
+        // Set new timeout
         const timeoutId = setTimeout(() => {
           setFlags((prev) => ({
             ...prev,
             [flagKey]: { ...prev[flagKey], status: "idle" },
           }));
+          timeoutRefs.delete(flagKey);
         }, 2000);
-        timeoutIds.push(timeoutId);
+        timeoutRefs.set(flagKey, timeoutId);
       }
     });
+  }, [flags, timeoutRefs]);
 
+  // Cleanup all timeouts on unmount
+  useEffect(() => {
     return () => {
-      timeoutIds.forEach((id) => clearTimeout(id));
+      timeoutRefs.forEach((timeout) => clearTimeout(timeout));
+      timeoutRefs.clear();
     };
-  }, [flags]);
+  }, [timeoutRefs]);
 
   const handleToggle = async (flagKey: string, newValue: boolean) => {
     // Reset status before making request

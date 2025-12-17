@@ -199,12 +199,6 @@ func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
 		return err
 	}
 
-	if err := os.Chmod(flagsFilePath, 0600); err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return err
-	}
-
 	return nil
 }
 
