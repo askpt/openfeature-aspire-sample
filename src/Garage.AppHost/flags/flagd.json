@@ -12,8 +12,8 @@
     "enable-preview-mode": {
       "state": "ENABLED",
       "variants": {
-        "disabled": false,
-        "enabled": true
+        "disabled": "",
+        "enabled": "enable-demo"
       },
       "defaultVariant": "enabled"
     },
