@@ -39,8 +39,9 @@ var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 // Use DevCycle if is in publish mode
 if (!builder.ExecutionContext.IsPublishMode)
 {
+    var flagsDir = Path.GetDirectoryName(flagsPath)!;
     var flagd = builder.AddFlagd("flagd")
-        .WithBindFileSync("./flags");
+        .WithBindFileSync(flagsDir);
 
     var ofrepEndpoint = flagd.GetEndpoint("ofrep");
 
