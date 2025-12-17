@@ -6,9 +6,13 @@ var containerAppEnvironment = builder
 
 var cache = builder.AddAzureRedis("cache").RunAsContainer();
 
+// Get the absolute path to the flags directory for the Go app
+var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
+
 var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
+    .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
     .PublishAsDockerFile();
 
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
