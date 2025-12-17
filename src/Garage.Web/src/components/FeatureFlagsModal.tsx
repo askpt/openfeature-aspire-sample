@@ -48,6 +48,27 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
     }
   }, [isOpen, fetchFlags]);
 
+  // Clean up status indicators after 2 seconds
+  useEffect(() => {
+    const timeoutIds: NodeJS.Timeout[] = [];
+
+    Object.entries(flags).forEach(([flagKey, flagState]) => {
+      if (flagState.status !== "idle") {
+        const timeoutId = setTimeout(() => {
+          setFlags((prev) => ({
+            ...prev,
+            [flagKey]: { ...prev[flagKey], status: "idle" },
+          }));
+        }, 2000);
+        timeoutIds.push(timeoutId);
+      }
+    });
+
+    return () => {
+      timeoutIds.forEach((id) => clearTimeout(id));
+    };
+  }, [flags]);
+
   const handleToggle = async (flagKey: string, newValue: boolean) => {
     // Reset status before making request
     setFlags((prev) => ({
@@ -73,25 +94,11 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
           ...prev,
           [flagKey]: { enabled: newValue, status: "success" },
         }));
-        // Hide success indicator after 2 seconds
-        setTimeout(() => {
-          setFlags((prev) => ({
-            ...prev,
-            [flagKey]: { ...prev[flagKey], status: "idle" },
-          }));
-        }, 2000);
       } else {
         setFlags((prev) => ({
           ...prev,
           [flagKey]: { ...prev[flagKey], status: "error" },
         }));
-        // Hide error indicator after 2 seconds
-        setTimeout(() => {
-          setFlags((prev) => ({
-            ...prev,
-            [flagKey]: { ...prev[flagKey], status: "idle" },
-          }));
-        }, 2000);
       }
     } catch (err) {
       console.error("Failed to update flag:", err);
@@ -99,13 +106,6 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
         ...prev,
         [flagKey]: { ...prev[flagKey], status: "error" },
       }));
-      // Hide error indicator after 2 seconds
-      setTimeout(() => {
-        setFlags((prev) => ({
-          ...prev,
-          [flagKey]: { ...prev[flagKey], status: "idle" },
-        }));
-      }, 2000);
     }
   };
 
