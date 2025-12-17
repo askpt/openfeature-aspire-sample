@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useBooleanFlagValue } from "@openfeature/react-sdk";
 import { Winner, FilterType } from "../types/Winner";
 import CarCard from "./CarCard";
+import FeatureFlagsModal from "./FeatureFlagsModal";
 import { recordPageView, recordUserIdChange } from "../metrics";
 import "./Home.css";
 
@@ -13,6 +14,7 @@ const Home = () => {
   const [currentUserId, setCurrentUserId] = useState<string>(
     localStorage.getItem("userId") || "1"
   );
+  const [showFlagsModal, setShowFlagsModal] = useState(false);
 
   // Use OpenFeature React hooks for feature flags
   const showHeader = useBooleanFlagValue("enable-stats-header", true);
@@ -131,6 +133,12 @@ const Home = () => {
             <button className="change-user-btn" onClick={handleChangeUserId}>
               Change User
             </button>
+            <button
+              className="feature-flags-btn"
+              onClick={() => setShowFlagsModal(true)}
+            >
+              Feature Flags
+            </button>
           </div>
         </div>
       )}
@@ -179,6 +187,11 @@ const Home = () => {
           />
         ))}
       </div>
+
+      <FeatureFlagsModal
+        isOpen={showFlagsModal}
+        onClose={() => setShowFlagsModal(false)}
+      />
     </div>
   );
 };

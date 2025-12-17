@@ -50,6 +50,13 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/ofrep/, ""),
           secure: false,
         },
+        "/flags": {
+          target:
+            process.env["services__flags-api__https__0"] ||
+            process.env["services__flags-api__http__0"],
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
     build: {

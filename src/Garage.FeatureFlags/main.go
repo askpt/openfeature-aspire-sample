@@ -174,6 +174,41 @@ func isPreviewModeEnabled(ctx context.Context) bool {
 	return value
 }
 
+// handleGetFlags handles GET /flags/ - returns current flag states for a user
+func handleGetFlags(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("userId")
+	if userID == "" {
+		http.Error(w, "userId query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
+	flagFile, err := readFlagsFile()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to read flags: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Check if enable-demo is enabled for this user
+	enableDemoFlag, ok := flagFile.Flags["enable-demo"]
+	enableDemoEnabled := false
+	if ok && enableDemoFlag.Targeting != nil {
+		userIDs, err := getUserIDsFromTargeting(enableDemoFlag.Targeting)
+		if err == nil {
+			enableDemoEnabled = slices.Contains(userIDs, userID)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"flags": map[string]any{
+			"enable-demo": enableDemoEnabled,
+		},
+	})
+}
+
 // handleEnableDemoTargeting handles POST /flags/
 func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -282,6 +317,8 @@ func main() {
 
 	http.HandleFunc("/flags/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
+		case http.MethodGet:
+			handleGetFlags(w, r)
 		case http.MethodPost:
 			handleEnableDemoTargeting(w, r)
 		default:
