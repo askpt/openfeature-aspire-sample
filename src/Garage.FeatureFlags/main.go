@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"os"
 	"sync"
+
+	"github.com/open-feature/go-sdk-contrib/providers/ofrep"
+	"github.com/open-feature/go-sdk/openfeature"
 )
 
 // Flag represents a feature flag configuration
@@ -31,6 +34,8 @@ type TargetingRequest struct {
 var (
 	flagsFilePath string
 	fileMutex     sync.Mutex
+
+	featureClient *openfeature.Client
 )
 
 func init() {
@@ -38,6 +43,27 @@ func init() {
 	if flagsFilePath == "" {
 		flagsFilePath = "../Garage.AppHost/flags/flagd.json"
 	}
+}
+
+// initOpenFeature initializes the OpenFeature client with OFREP provider
+func initOpenFeature() error {
+	ofrepEndpoint := os.Getenv("OFREP_ENDPOINT")
+	if ofrepEndpoint == "" {
+		return fmt.Errorf("OFREP_ENDPOINT environment variable is not set")
+	}
+
+	// Create OFREP provider
+	ofrepProvider := ofrep.NewProvider(ofrepEndpoint)
+
+	// Register the provider
+	if err := openfeature.SetProviderAndWait(ofrepProvider); err != nil {
+		return fmt.Errorf("failed to set OpenFeature provider: %w", err)
+	}
+
+	// Create a client
+	featureClient = openfeature.NewDefaultClient()
+
+	return nil
 }
 
 // readFlagsFile reads and parses the flagd.json file
@@ -215,6 +241,14 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	// Initialize OpenFeature with OFREP provider
+	if err := initOpenFeature(); err != nil {
+		fmt.Printf("Warning: Failed to initialize OpenFeature: %v\n", err)
+		fmt.Println("Flag updates will be allowed without preview mode check")
+	} else {
+		fmt.Println("OpenFeature initialized successfully with OFREP provider")
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
