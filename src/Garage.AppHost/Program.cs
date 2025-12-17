@@ -6,6 +6,8 @@ var containerAppEnvironment = builder
 
 var cache = builder.AddAzureRedis("cache").RunAsContainer();
 
+
+
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
 
@@ -30,8 +32,19 @@ var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 // Use DevCycle if is in publish mode
 if (!builder.ExecutionContext.IsPublishMode)
 {
+    // Get the absolute path to the flags directory for the Go app
+    var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
+
+    var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+        .WithHttpEndpoint(env: "PORT")
+        .WithExternalHttpEndpoints()
+        .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+        .PublishAsDockerFile();
+
+    var flagsDir = Path.GetDirectoryName(flagsPath)!;
     var flagd = builder.AddFlagd("flagd")
-        .WithBindFileSync("./flags");
+        .WithBindFileSync(flagsDir);
 
     var ofrepEndpoint = flagd.GetEndpoint("ofrep");
 
@@ -41,9 +54,15 @@ if (!builder.ExecutionContext.IsPublishMode)
 
     webFrontend = webFrontend
         .WaitFor(flagd)
+        .WithReference(flagsApi)
+        .WaitFor(flagsApi)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    flagsApi = flagsApi
         .WaitFor(flagd)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }

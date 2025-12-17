@@ -4,49 +4,59 @@
     "enable-database-winners": {
       "state": "ENABLED",
       "variants": {
-        "enabled": true,
-        "disabled": false
+        "disabled": false,
+        "enabled": true
       },
       "defaultVariant": "enabled"
     },
-    "winners-count": {
+    "enable-preview-mode": {
       "state": "ENABLED",
       "variants": {
-        "zero": 0,
-        "five": 5,
-        "ten": 10,
-        "one-hundred": 100
+        "disabled": "",
+        "enabled": "enable-tabs"
       },
-      "defaultVariant": "one-hundred"
+      "defaultVariant": "enabled"
     },
     "enable-stats-header": {
       "state": "ENABLED",
       "variants": {
-        "on": true,
-        "off": false
+        "off": false,
+        "on": true
       },
       "defaultVariant": "on"
     },
     "enable-tabs": {
       "state": "ENABLED",
       "variants": {
-        "enabled": true,
-        "disabled": false
+        "disabled": false,
+        "enabled": true
       },
       "defaultVariant": "disabled",
       "targeting": {
         "if": [
           {
-            "==": [
+            "in": [
               {
                 "var": "userId"
               },
-              "1"
+              [
+                "1"
+              ]
             ]
           },
           "enabled"
         ]
       }
+    },
+    "winners-count": {
+      "state": "ENABLED",
+      "variants": {
+        "five": 5,
+        "one-hundred": 100,
+        "ten": 10,
+        "zero": 0
+      },
+      "defaultVariant": "one-hundred"
     }
   }
 }
