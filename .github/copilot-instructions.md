@@ -7,6 +7,7 @@ This is an OpenFeature .NET OFREP Demo application - a Le Mans Winners Managemen
 ### Technology Stack
 
 - **.NET**: 10.0 (latest version)
+- **Go**: 1.25 (for Feature Flags API)
 - **Frontend**: React 19.2 with TypeScript, Vite 7.2
 - **Backend**: ASP.NET Core 10.0 with Entity Framework Core
 - **Orchestration**: .NET Aspire 13.0
@@ -24,6 +25,7 @@ This is an OpenFeature .NET OFREP Demo application - a Le Mans Winners Managemen
 │   ├── Garage.ApiService/      # REST API service
 │   ├── Garage.AppHost/         # .NET Aspire orchestration
 │   ├── Garage.DatabaseSeeder/  # Database initialization
+│   ├── Garage.FeatureFlags/    # Go API for feature flag management
 │   ├── Garage.ServiceDefaults/ # Shared services & feature flags
 │   ├── Garage.Shared/          # Common models and DTOs
 │   └── Garage.Web/             # React + Vite frontend
@@ -78,6 +80,27 @@ npm run lint
 npm run preview
 ```
 
+### Go Feature Flags API
+
+```bash
+cd src/Garage.FeatureFlags
+
+# Download dependencies
+go mod download
+
+# Build the application
+go build -o flags-api .
+
+# Run the application
+go run .
+
+# Format code
+go fmt ./...
+
+# Run linter (requires golangci-lint)
+golangci-lint run
+```
+
 ## Coding Standards and Conventions
 
 ### .NET Code
@@ -96,6 +119,15 @@ npm run preview
 - **Style**: Follow ESLint rules in the configuration
 - **Module System**: ES modules
 
+### Go Code
+
+- **Go Version**: 1.25 or later
+- **Formatting**: Use `go fmt` for code formatting
+- **Error Handling**: Follow Go idioms for error handling
+- **Telemetry**: OpenTelemetry integration for tracing, metrics, and logging
+- **HTTP Framework**: Standard library `net/http` with `otelhttp` instrumentation
+- **Feature Flags**: OpenFeature Go SDK with OFREP provider
+
 ## Important Patterns and Practices
 
 ### Feature Flags
@@ -112,6 +144,7 @@ Example feature flags in use:
 - `winners-count`: Control number of items displayed
 - `enable-stats-header`: Show/hide statistics header
 - `enable-tabs`: Enable tabbed interface
+- `enable-preview-mode`: Comma-separated list of flags that can be dynamically updated
 
 ### Service Configuration
 
@@ -190,3 +223,8 @@ Currently, there are no test projects in the solution. When adding tests:
 - Feature flags are central to this project - understand OFREP concepts
 - The application uses .NET Aspire for cloud-ready development
 - Both backend and frontend use OpenFeature for consistent feature flag experience
+- The Go Feature Flags API (`Garage.FeatureFlags`) provides dynamic flag targeting management
+  - Exposes REST endpoints for getting and updating flag targeting rules
+  - Uses OpenFeature Go SDK with OFREP provider for flag evaluation
+  - Includes full OpenTelemetry instrumentation (traces, metrics, logs)
+  - Reads/writes to the flagd.json configuration file

@@ -1,6 +1,7 @@
 # OpenFeature .NET OFREP Demo: Le Mans Winners Management System
 
 [![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Go 1.25](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go)](https://go.dev/)
 [![Aspire](https://img.shields.io/badge/Aspire-Enabled-purple)](https://learn.microsoft.com/en-us/dotnet/aspire/)
 [![OpenFeature](https://img.shields.io/badge/OpenFeature-Ready-green)](https://openfeature.dev/)
 [![OFREP](https://img.shields.io/badge/OFREP-Enabled-blue)](https://openfeature.dev/specification/ofrep)
@@ -24,6 +25,7 @@ This demo showcases how to implement feature flags using **OpenFeature** and the
 
 - **Garage.Web**: React + Vite frontend for managing car collections
 - **Garage.ApiService**: REST API for car data with Entity Framework Core
+- **Garage.FeatureFlags**: Go API for managing feature flag targeting rules
 - **Garage.ServiceDefaults**: Shared services including feature flag implementations
 - **Garage.Shared**: Common models and DTOs
 - **Garage.AppHost**: .NET Aspire orchestration and service discovery
@@ -48,18 +50,20 @@ This application includes comprehensive telemetry support through .NET Aspire:
 
 The demo demonstrates these feature flags:
 
-| Flag                       | Type   | Purpose                         | Default       |
-| -------------------------- | ------ | ------------------------------- | ------------- |
-| `enable-database-winners`  | `bool` | Toggle data source (DB vs JSON) | `true`        |
-| `winners-count`            | `int`  | Control number of winners shown | `100`         |
-| `enable-stats-header`      | `bool` | Show/hide statistics header     | `true`        |
-| `enable-tabs`              | `bool` | Enable tabbed interface (with targeting) | `false` |
+| Flag                       | Type     | Purpose                                   | Default       |
+| -------------------------- | -------- | ----------------------------------------- | ------------- |
+| `enable-database-winners`  | `bool`   | Toggle data source (DB vs JSON)           | `true`        |
+| `winners-count`            | `int`    | Control number of winners shown           | `100`         |
+| `enable-stats-header`      | `bool`   | Show/hide statistics header               | `true`        |
+| `enable-tabs`              | `bool`   | Enable tabbed interface (with targeting)  | `false`       |
+| `enable-preview-mode`      | `string` | Comma-separated list of editable flags    | `""`          |
 
 ## Requirements
 
 ### Prerequisites
 
 - .NET 10.0 SDK or later
+- Go 1.25 or later (for Feature Flags API)
 - Visual Studio, Visual Studio Code with C# extension or JetBrains Rider
 - Git for version control
 - Docker Desktop (for containerized dependencies)
