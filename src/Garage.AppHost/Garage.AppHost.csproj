@@ -19,6 +19,7 @@
     <PackageReference Include="Aspire.Hosting.Azure.AppContainers" />
     <PackageReference Include="Aspire.Hosting.JavaScript" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Flagd" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Golang" />
   </ItemGroup>
 
 </Project>
