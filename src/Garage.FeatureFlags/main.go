@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 	"sync"
 
 	"github.com/open-feature/go-sdk-contrib/providers/ofrep"
@@ -29,6 +31,7 @@ type FlagFile struct {
 type TargetingRequest struct {
 	UserID  string `json:"userId"`
 	Enabled bool   `json:"enabled"`
+	FlagKey string `json:"flagKey"`
 }
 
 var (
@@ -154,10 +157,33 @@ func setUserIDsInTargeting(targeting map[string]any, userIDs []string) error {
 	return nil
 }
 
-// handleEnableDemoTargeting handles POST /flags/enable-demo/targeting
+// isPreviewModeEnabled checks if the enable-preview-mode flag is enabled
+func isPreviewModeEnabled(ctx context.Context) bool {
+	if featureClient == nil {
+		// If OpenFeature is not initialized, allow updates (fallback)
+		fmt.Println("Warning: OpenFeature client not initialized, allowing update")
+		return true
+	}
+
+	value, err := featureClient.BooleanValue(ctx, "enable-preview-mode", false, openfeature.EvaluationContext{})
+	if err != nil {
+		fmt.Printf("Warning: Failed to evaluate enable-preview-mode flag: %v\n", err)
+		return false
+	}
+
+	return value
+}
+
+// handleEnableDemoTargeting handles POST /flags/
 func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check if preview mode is enabled before allowing updates
+	if !isPreviewModeEnabled(r.Context()) {
+		http.Error(w, "Flag updates are disabled: enable-preview-mode is off", http.StatusForbidden)
 		return
 	}
 
@@ -172,6 +198,11 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.FlagKey == "" {
+		http.Error(w, "flagKey is required", http.StatusBadRequest)
+		return
+	}
+
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
@@ -181,9 +212,9 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flag, ok := flagFile.Flags["enable-demo"]
+	flag, ok := flagFile.Flags[req.FlagKey]
 	if !ok {
-		http.Error(w, "Flag 'enable-demo' not found", http.StatusNotFound)
+		http.Error(w, fmt.Sprintf("Flag '%s' not found", req.FlagKey), http.StatusNotFound)
 		return
 	}
 
@@ -195,13 +226,7 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 
 	if req.Enabled {
 		// Add userId if not already present
-		found := false
-		for _, id := range userIDs {
-			if id == req.UserID {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(userIDs, req.UserID)
 		if !found {
 			userIDs = append(userIDs, req.UserID)
 		}
@@ -255,7 +280,7 @@ func main() {
 		fmt.Fprintf(w, "Hello from Go Feature Flags API!")
 	})
 
-	http.HandleFunc("/flags/enable-demo/targeting", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/flags/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			handleEnableDemoTargeting(w, r)
