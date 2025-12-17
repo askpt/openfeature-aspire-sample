@@ -9,29 +9,6 @@
       },
       "defaultVariant": "enabled"
     },
-    "enable-demo": {
-      "state": "ENABLED",
-      "variants": {
-        "disabled": false,
-        "enabled": true
-      },
-      "defaultVariant": "disabled",
-      "targeting": {
-        "if": [
-          {
-            "in": [
-              {
-                "var": "userId"
-              },
-              [
-                "1"
-              ]
-            ]
-          },
-          "enabled"
-        ]
-      }
-    },
     "enable-preview-mode": {
       "state": "ENABLED",
       "variants": {

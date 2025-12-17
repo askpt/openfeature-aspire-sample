@@ -28,7 +28,6 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
       const response = await fetch(`/flags/?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        // data is { "enable-demo": true, "enable-demo2": false, ... }
         const flagsData: FlagsMap = {};
         for (const [key, value] of Object.entries(data)) {
           flagsData[key] = {
