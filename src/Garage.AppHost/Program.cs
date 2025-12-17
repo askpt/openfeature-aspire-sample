@@ -6,15 +6,7 @@ var containerAppEnvironment = builder
 
 var cache = builder.AddAzureRedis("cache").RunAsContainer();
 
-// Get the absolute path to the flags directory for the Go app
-var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
 
-var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
-    .WithHttpEndpoint(env: "PORT")
-    .WithExternalHttpEndpoints()
-    .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
-    .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-    .PublishAsDockerFile();
 
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
@@ -40,6 +32,16 @@ var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 // Use DevCycle if is in publish mode
 if (!builder.ExecutionContext.IsPublishMode)
 {
+    // Get the absolute path to the flags directory for the Go app
+    var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
+
+    var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+        .WithHttpEndpoint(env: "PORT")
+        .WithExternalHttpEndpoints()
+        .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+        .PublishAsDockerFile();
+
     var flagsDir = Path.GetDirectoryName(flagsPath)!;
     var flagd = builder.AddFlagd("flagd")
         .WithBindFileSync(flagsDir);
@@ -52,6 +54,8 @@ if (!builder.ExecutionContext.IsPublishMode)
 
     webFrontend = webFrontend
         .WaitFor(flagd)
+        .WithReference(flagsApi)
+        .WaitFor(flagsApi)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
@@ -80,17 +84,11 @@ else
     migration = migration
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
-
-    flagsApi = flagsApi
-        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
-        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 }
 
 webFrontend
     .WithReference(apiService)
     .WaitFor(apiService)
-    .WithReference(flagsApi)
-    .WaitFor(flagsApi)
     .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
