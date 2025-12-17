@@ -56,6 +56,10 @@ if (!builder.ExecutionContext.IsPublishMode)
     migration = migration
         .WaitFor(flagd)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    flagsApi = flagsApi
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
 else
 {
@@ -73,6 +77,10 @@ else
         .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 
     migration = migration
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
+
+    flagsApi = flagsApi
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 }

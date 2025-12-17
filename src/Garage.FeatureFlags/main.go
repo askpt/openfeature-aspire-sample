@@ -211,41 +211,6 @@ func handleEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// handleGetEnableDemoTargeting handles GET /flags/enable-demo/targeting
-func handleGetEnableDemoTargeting(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	fileMutex.Lock()
-	defer fileMutex.Unlock()
-
-	flagFile, err := readFlagsFile()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read flags: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	flag, ok := flagFile.Flags["enable-demo"]
-	if !ok {
-		http.Error(w, "Flag 'enable-demo' not found", http.StatusNotFound)
-		return
-	}
-
-	userIDs, err := getUserIDsFromTargeting(flag.Targeting)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to parse targeting: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
-		"flagName": "enable-demo",
-		"userIds":  userIDs,
-	})
-}
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -258,8 +223,6 @@ func main() {
 
 	http.HandleFunc("/flags/enable-demo/targeting", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
-		case http.MethodGet:
-			handleGetEnableDemoTargeting(w, r)
 		case http.MethodPost:
 			handleEnableDemoTargeting(w, r)
 		default:

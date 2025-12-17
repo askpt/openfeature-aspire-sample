@@ -9,6 +9,14 @@
       },
       "defaultVariant": "enabled"
     },
+    "enable-preview-mode": {
+      "state": "ENABLED",
+      "variants": {
+        "disabled": false,
+        "enabled": true
+      },
+      "defaultVariant": "enabled"
+    },
     "enable-demo": {
       "state": "ENABLED",
       "variants": {
