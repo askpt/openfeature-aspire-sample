@@ -11,11 +11,10 @@ interface FlagState {
   status: "idle" | "success" | "error";
 }
 
+type FlagsMap = Record<string, FlagState>;
+
 const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
-  const [enableDemo, setEnableDemo] = useState<FlagState>({
-    enabled: false,
-    status: "idle",
-  });
+  const [flags, setFlags] = useState<FlagsMap>({});
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem("userId") || "1";
@@ -32,10 +31,15 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
       const response = await fetch(`/flags/?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setEnableDemo({
-          enabled: data.flags["enable-demo"] || false,
-          status: "idle",
-        });
+        // data is { "enable-demo": true, "enable-demo2": false, ... }
+        const flagsData: FlagsMap = {};
+        for (const [key, value] of Object.entries(data)) {
+          flagsData[key] = {
+            enabled: value as boolean,
+            status: "idle",
+          };
+        }
+        setFlags(flagsData);
       }
     } catch (err) {
       console.error("Failed to fetch flags:", err);
@@ -46,7 +50,10 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
 
   const handleToggle = async (flagKey: string, newValue: boolean) => {
     // Reset status before making request
-    setEnableDemo((prev) => ({ ...prev, status: "idle" }));
+    setFlags((prev) => ({
+      ...prev,
+      [flagKey]: { ...prev[flagKey], status: "idle" },
+    }));
 
     try {
       const response = await fetch("/flags/", {
@@ -62,29 +69,49 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
       });
 
       if (response.ok) {
-        setEnableDemo({ enabled: newValue, status: "success" });
+        setFlags((prev) => ({
+          ...prev,
+          [flagKey]: { enabled: newValue, status: "success" },
+        }));
         // Hide success indicator after 2 seconds
         setTimeout(() => {
-          setEnableDemo((prev) => ({ ...prev, status: "idle" }));
+          setFlags((prev) => ({
+            ...prev,
+            [flagKey]: { ...prev[flagKey], status: "idle" },
+          }));
         }, 2000);
       } else {
-        setEnableDemo((prev) => ({ ...prev, status: "error" }));
+        setFlags((prev) => ({
+          ...prev,
+          [flagKey]: { ...prev[flagKey], status: "error" },
+        }));
         // Hide error indicator after 2 seconds
         setTimeout(() => {
-          setEnableDemo((prev) => ({ ...prev, status: "idle" }));
+          setFlags((prev) => ({
+            ...prev,
+            [flagKey]: { ...prev[flagKey], status: "idle" },
+          }));
         }, 2000);
       }
     } catch (err) {
       console.error("Failed to update flag:", err);
-      setEnableDemo((prev) => ({ ...prev, status: "error" }));
+      setFlags((prev) => ({
+        ...prev,
+        [flagKey]: { ...prev[flagKey], status: "error" },
+      }));
       // Hide error indicator after 2 seconds
       setTimeout(() => {
-        setEnableDemo((prev) => ({ ...prev, status: "idle" }));
+        setFlags((prev) => ({
+          ...prev,
+          [flagKey]: { ...prev[flagKey], status: "idle" },
+        }));
       }, 2000);
     }
   };
 
   if (!isOpen) return null;
+
+  const flagKeys = Object.keys(flags).sort();
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -98,34 +125,33 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
         <div className="modal-body">
           {loading ? (
             <div className="loading">Loading flags...</div>
+          ) : flagKeys.length === 0 ? (
+            <div className="no-flags">No flags available</div>
           ) : (
             <div className="flag-list">
-              <div className="flag-item">
-                <div className="flag-info">
-                  <span className="flag-name">enable-demo</span>
-                  <span className="flag-description">
-                    Enable demo features for this user
-                  </span>
+              {flagKeys.map((flagKey) => (
+                <div key={flagKey} className="flag-item">
+                  <div className="flag-info">
+                    <span className="flag-name">{flagKey}</span>
+                  </div>
+                  <div className="flag-toggle-container">
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={flags[flagKey].enabled}
+                        onChange={(e) => handleToggle(flagKey, e.target.checked)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    {flags[flagKey].status === "success" && (
+                      <span className="status-icon success">✓</span>
+                    )}
+                    {flags[flagKey].status === "error" && (
+                      <span className="status-icon error">✗</span>
+                    )}
+                  </div>
                 </div>
-                <div className="flag-toggle-container">
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={enableDemo.enabled}
-                      onChange={(e) =>
-                        handleToggle("enable-demo", e.target.checked)
-                      }
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                  {enableDemo.status === "success" && (
-                    <span className="status-icon success">✓</span>
-                  )}
-                  {enableDemo.status === "error" && (
-                    <span className="status-icon error">✗</span>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>

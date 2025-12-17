@@ -182,6 +182,9 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// list of flags for the user
+	flagList := []string{"enable-demo"}
+
 	fileMutex.Lock()
 	defer fileMutex.Unlock()
 
@@ -191,22 +194,25 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if enable-demo is enabled for this user
-	enableDemoFlag, ok := flagFile.Flags["enable-demo"]
-	enableDemoEnabled := false
-	if ok && enableDemoFlag.Targeting != nil {
-		userIDs, err := getUserIDsFromTargeting(enableDemoFlag.Targeting)
-		if err == nil {
-			enableDemoEnabled = slices.Contains(userIDs, userID)
+	flagStates := make(map[string]bool)
+
+	// Check if flags are enabled for this user
+	for _, flagKey := range flagList {
+		flag, ok := flagFile.Flags[flagKey]
+
+		if ok && flag.Targeting != nil {
+			userIDs, err := getUserIDsFromTargeting(flag.Targeting)
+			if err == nil {
+				enabled := slices.Contains(userIDs, userID)
+
+				// collect flag states
+				flagStates[flagKey] = enabled
+			}
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
-		"flags": map[string]any{
-			"enable-demo": enableDemoEnabled,
-		},
-	})
+	json.NewEncoder(w).Encode(flagStates)
 }
 
 // handleEnableDemoTargeting handles POST /flags/
