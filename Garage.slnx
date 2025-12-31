@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Garage.ApiModel/Garage.ApiModel.csproj" />
     <Project Path="src/Garage.ApiService/Garage.ApiService.csproj" />
     <Project Path="src/Garage.AppHost/Garage.AppHost.csproj" />
     <Project Path="src/Garage.DatabaseSeeder/Garage.DatabaseSeeder.csproj" />
