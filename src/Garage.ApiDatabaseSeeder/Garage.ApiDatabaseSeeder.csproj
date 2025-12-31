@@ -3,11 +3,13 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Garage.ApiService/Garage.ApiService.csproj" />
+    <ProjectReference Include="..\Garage.ApiModel\Garage.ApiModel.csproj" />
+    <ProjectReference Include="..\Garage.ServiceDefaults\Garage.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Garage.Shared\Garage.Shared.csproj" />
   </ItemGroup>
 </Project>

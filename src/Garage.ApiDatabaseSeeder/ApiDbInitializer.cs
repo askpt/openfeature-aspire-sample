@@ -71,7 +71,7 @@ public class ApiDbInitializer(
             }
 
             var jsonData = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
-            var winners = System.Text.Json.JsonSerializer.Deserialize<Garage.ApiModel.Data.Models.Winner[]>(jsonData, new System.Text.Json.JsonSerializerOptions
+            var winners = System.Text.Json.JsonSerializer.Deserialize<ApiModel.Data.Models.Winner[]>(jsonData, new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
