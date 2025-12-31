@@ -1,6 +1,6 @@
-using Garage.ApiService.Data;
 using Garage.ApiDatabaseSeeder;
 using Garage.ServiceDefaults;
+using Garage.ApiModel.Data;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();

@@ -1,4 +1,4 @@
-namespace Garage.ApiService.Data.Models;
+namespace Garage.ApiModel.Data.Models;
 
 public record Winner(
     int Year,

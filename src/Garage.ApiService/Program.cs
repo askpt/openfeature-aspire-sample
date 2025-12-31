@@ -1,4 +1,4 @@
-using Garage.ApiService.Data;
+using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
 

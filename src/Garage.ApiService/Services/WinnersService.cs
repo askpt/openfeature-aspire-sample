@@ -1,5 +1,6 @@
 using System.Text.Json;
-using Garage.ApiService.Data;
+using Garage.ApiModel.Data;
+using Garage.ApiService.Mappers;
 using Garage.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using OpenFeature;

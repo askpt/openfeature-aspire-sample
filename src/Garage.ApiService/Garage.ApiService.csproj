@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="../Garage.ApiModel/Garage.ApiModel.csproj" />
     <ProjectReference Include="..\Garage.ServiceDefaults\Garage.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Garage.Shared\Garage.Shared.csproj" />
   </ItemGroup>
@@ -9,7 +10,6 @@
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" />
     <PackageReference Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Riok.Mapperly" />
   </ItemGroup>
 

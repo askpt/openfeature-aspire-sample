@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Garage.ApiService.Data;
-using Garage.ApiService.Data.Models;
+using Garage.ApiModel.Data;
+using Garage.ApiModel.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Garage.ApiDatabaseSeeder;
