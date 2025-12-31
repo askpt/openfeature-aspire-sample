@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Garage.ApiModel.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,7 +72,7 @@ public class ApiDbInitializer(
             }
 
             var jsonData = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
-            var winners = System.Text.Json.JsonSerializer.Deserialize<ApiModel.Data.Models.Winner[]>(jsonData, new System.Text.Json.JsonSerializerOptions
+            var winners = JsonSerializer.Deserialize<ApiModel.Data.Models.Winner[]>(jsonData, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
