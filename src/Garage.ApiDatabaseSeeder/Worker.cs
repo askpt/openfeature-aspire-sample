@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Garage.DatabaseSeeder;
+namespace Garage.ApiDatabaseSeeder;
 
 public class Worker : BackgroundService
 {

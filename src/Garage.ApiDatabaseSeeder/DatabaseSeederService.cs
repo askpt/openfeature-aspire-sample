@@ -3,7 +3,7 @@ using Garage.ApiService.Data;
 using Garage.ApiService.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Garage.DatabaseSeeder;
+namespace Garage.ApiDatabaseSeeder;
 
 public class DatabaseSeederService
 {

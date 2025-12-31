@@ -22,9 +22,9 @@ This is an OpenFeature .NET OFREP Demo application - a Le Mans Winners Managemen
 ```
 /
 ├── src/
+│   ├── Garage.ApiDatabaseSeeder/  # Database initialization
 │   ├── Garage.ApiService/      # REST API service
 │   ├── Garage.AppHost/         # .NET Aspire orchestration
-│   ├── Garage.DatabaseSeeder/  # Database initialization
 │   ├── Garage.FeatureFlags/    # Go API for feature flag management
 │   ├── Garage.ServiceDefaults/ # Shared services & feature flags
 │   ├── Garage.Shared/          # Common models and DTOs

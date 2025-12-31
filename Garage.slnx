@@ -3,7 +3,7 @@
     <Project Path="src/Garage.ApiModel/Garage.ApiModel.csproj" />
     <Project Path="src/Garage.ApiService/Garage.ApiService.csproj" />
     <Project Path="src/Garage.AppHost/Garage.AppHost.csproj" />
-    <Project Path="src/Garage.DatabaseSeeder/Garage.DatabaseSeeder.csproj" />
+    <Project Path="src/Garage.ApiDatabaseSeeder/Garage.ApiDatabaseSeeder.csproj" />
     <Project Path="src/Garage.ServiceDefaults/Garage.ServiceDefaults.csproj" />
     <Project Path="src/Garage.Shared/Garage.Shared.csproj" />
   </Folder>
