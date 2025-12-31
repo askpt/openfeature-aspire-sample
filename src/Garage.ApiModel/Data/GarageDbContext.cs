@@ -1,8 +1,8 @@
 using System.Text.Json;
-using Garage.ApiService.Data.Models;
+using Garage.ApiModel.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Garage.ApiService.Data;
+namespace Garage.ApiModel.Data;
 
 public class GarageDbContext : DbContext
 {

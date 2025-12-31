@@ -9,7 +9,7 @@ var cache = builder.AddAzureManagedRedis("cache").RunAsContainer();
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
 
-var migration = builder.AddProject<Projects.Garage_DatabaseSeeder>("database-seeder")
+var migration = builder.AddProject<Projects.Garage_ApiDatabaseSeeder>("database-seeder")
     .WithReference(database)
     .WaitFor(database);
 
