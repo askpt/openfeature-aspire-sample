@@ -23,7 +23,6 @@ public class ApiDbInitializer(
             var dbContext = scope.ServiceProvider.GetRequiredService<GarageDbContext>();
 
             await RunMigrationAsync(dbContext, cancellationToken);
-            await SeedDatabaseAsync(dbContext, cancellationToken);
 
             logger.LogInformation("Database initialization completed successfully");
         }
@@ -37,20 +36,13 @@ public class ApiDbInitializer(
         hostApplicationLifetime.StopApplication();
     }
 
-    private static async Task RunMigrationAsync(GarageDbContext dbContext, CancellationToken cancellationToken)
+    private async Task RunMigrationAsync(GarageDbContext dbContext, CancellationToken cancellationToken)
     {
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
             await dbContext.Database.MigrateAsync(cancellationToken);
-        });
-    }
 
-    private async Task SeedDatabaseAsync(GarageDbContext dbContext, CancellationToken cancellationToken)
-    {
-        var strategy = dbContext.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(async () =>
-        {
             // Check if data already exists
             if (await dbContext.Winners.AnyAsync(cancellationToken))
             {
