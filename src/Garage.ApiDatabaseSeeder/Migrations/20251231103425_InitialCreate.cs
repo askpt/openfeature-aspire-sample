@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Garage.ApiService.Migrations
+namespace Garage.ApiDatabaseSeeder.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -14,13 +14,13 @@ namespace Garage.ApiService.Migrations
                 name: "Winners",
                 columns: table => new
                 {
-                    Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    Manufacturer = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Model = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Engine = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Class = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Manufacturer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Model = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Engine = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Class = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Drivers = table.Column<string>(type: "TEXT", nullable: false),
-                    IsOwned = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false)
+                    IsOwned = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {

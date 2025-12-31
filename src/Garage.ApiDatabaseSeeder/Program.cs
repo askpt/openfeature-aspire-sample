@@ -1,16 +1,20 @@
 using Garage.ApiDatabaseSeeder;
-using Garage.ServiceDefaults;
 using Garage.ApiModel.Data;
+using Garage.ServiceDefaults;
+using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+
+builder.Services.AddHostedService<ApiDbInitializer>();
+
 builder.AddServiceDefaults();
 
-// Add database
-builder.AddAzureNpgsqlDbContext<GarageDbContext>("garage-db");
+builder.Services.AddDbContextPool<GarageDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("garage-db"), sqlOptions =>
+        sqlOptions.MigrationsAssembly("Garage.ApiDatabaseSeeder")
+    ));
+builder.EnrichAzureNpgsqlDbContext<GarageDbContext>();
 
-builder.Services.AddSingleton<DatabaseSeederService>();
+var app = builder.Build();
 
-var host = builder.Build();
-
-host.Run();
+app.Run();
