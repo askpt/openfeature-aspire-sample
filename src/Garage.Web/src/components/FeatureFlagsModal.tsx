@@ -25,7 +25,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const fetchFlags = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/flags/?userId=${userId}`);
+      const response = await fetch(`/flags/${userId}`);
       if (response.ok) {
         const data = await response.json();
         const flagsData: FlagsMap = {};
@@ -89,13 +89,12 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
     }));
 
     try {
-      const response = await fetch("/flags/", {
+      const response = await fetch(`/flags/${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId,
           flagKey,
           enabled: newValue,
         }),
