@@ -147,42 +147,9 @@ public static class Extensions
 
         builder.Services.AddOpenFeature(featureBuilder =>
         {
-            // Get OFREP endpoint from configuration
-            var endpoint = builder.Configuration["OFREP_ENDPOINT"];
-
-            if (string.IsNullOrWhiteSpace(endpoint))
-            {
-                throw new InvalidOperationException("Feature flag provider configuration is missing. Please set 'OFREP_ENDPOINT' in the application configuration.");
-            }
-
-            // Parse OFREP_HEADERS for Authorization header (format: "Authorization=<value>,Other=value")
-            var ofrepHeaders = builder.Configuration["OFREP_HEADERS"];
-            Dictionary<string, string> headers = [];
-
-            if (!string.IsNullOrWhiteSpace(ofrepHeaders))
-            {
-                var splitHeaders = ofrepHeaders.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                foreach (var header in splitHeaders)
-                {
-                    var parts = header.Split('=', 2, StringSplitOptions.TrimEntries);
-                    if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]) && !string.IsNullOrWhiteSpace(parts[1]))
-                    {
-                        headers[parts[0]] = parts[1];
-                    }
-                }
-            }
-
             featureBuilder
                 .AddOfrepProvider(ofrepOptions =>
                 {
-                    ofrepOptions.BaseUrl = endpoint;
-                    if (headers != null && headers.Count > 0)
-                    {
-                        foreach (var header in headers)
-                        {
-                            ofrepOptions.Headers.Add(header.Key, header.Value);
-                        }
-                    }
                 })
                 .AddHook<TraceEnricherHook>()
                 .AddHook<MetricsHook>();
