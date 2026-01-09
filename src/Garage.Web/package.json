@@ -17,7 +17,7 @@
     "@opentelemetry/api-logs": "^0.208.0",
     "@opentelemetry/context-zone": "^2.2.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.208.0",
-    "@opentelemetry/exporter-metrics-otlp-proto": "^0.208.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.209.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.208.0",
     "@opentelemetry/instrumentation": "^0.208.0",
     "@opentelemetry/instrumentation-document-load": "^0.54.0",
