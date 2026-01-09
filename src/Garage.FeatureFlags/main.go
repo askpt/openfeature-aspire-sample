@@ -58,7 +58,6 @@ var (
 
 	featureClient *openfeature.Client
 	tracer        = otel.Tracer("flags-api")
-	logger        *slog.Logger
 )
 
 // initOtel initializes OpenTelemetry with autoexport for traces, metrics, and logs
@@ -111,7 +110,7 @@ func initOtel(ctx context.Context) (func(context.Context) error, error) {
 	)
 
 	// Initialize slog with OTEL handler
-	logger = slog.New(otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(loggerProvider)))
+	logger := slog.New(otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(loggerProvider)))
 	slog.SetDefault(logger)
 
 	// Set global propagator
@@ -140,7 +139,7 @@ func init() {
 }
 
 // initOpenFeature initializes the OpenFeature client with OFREP provider
-func initOpenFeature() error {
+func initOpenFeature(ctx context.Context) error {
 	ofrepEndpoint := os.Getenv("OFREP_ENDPOINT")
 	if ofrepEndpoint == "" {
 		return errors.New("OFREP_ENDPOINT environment variable is not set")
@@ -150,7 +149,7 @@ func initOpenFeature() error {
 	ofrepProvider := ofrep.NewProvider(ofrepEndpoint)
 
 	// Register the provider
-	if err := openfeature.SetProviderAndWait(ofrepProvider); err != nil {
+	if err := openfeature.SetProviderWithContextAndWait(ctx, ofrepProvider); err != nil {
 		return err
 	}
 
@@ -297,7 +296,7 @@ func getPreviewModeFlags(ctx context.Context) []string {
 	return result
 }
 
-// handleGetFlags handles GET /flags/ - returns current flag states for a user
+// handleGetFlags handles GET /flags/{userId} - returns current flag states for a user
 func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "handleGetFlags")
 	defer span.End()
@@ -349,7 +348,7 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleUpdateFlagTargeting handles POST /flags/ - updates targeting for allowed flags
+// handleUpdateFlagTargeting handles POST /flags/{userId} - updates targeting for allowed flags
 func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "handleUpdateFlagTargeting")
 	defer span.End()
@@ -458,14 +457,14 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	if err := run(); err != nil {
+	if err := run(context.Background()); err != nil {
 		slog.Error("Failed to run", slog.Any("error", err))
 		os.Exit(1)
 	}
 }
 
-func run() error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+func run(ctx context.Context) error {
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
 	defer stop()
 
 	port := cmp.Or(os.Getenv("PORT"), "8080")
@@ -473,12 +472,12 @@ func run() error {
 	var lc net.ListenConfig
 	ln, err := lc.Listen(ctx, "tcp", ":"+port)
 	if err != nil {
-		return fmt.Errorf("failed to start metrics listener: %w", err)
+		return fmt.Errorf("failed to start listener: %w", err)
 	}
 
 	defer func() {
 		if err := ln.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
-			slog.Error("Failed to stop metrics listener", "error", err)
+			slog.Error("Failed to stop listener", "error", err)
 		}
 	}()
 
@@ -491,7 +490,7 @@ func run() error {
 	}
 
 	// Initialize OpenFeature with OFREP provider
-	if err := initOpenFeature(); err != nil {
+	if err := initOpenFeature(ctx); err != nil {
 		slog.Warn("Failed to initialize OpenFeature", "error", err)
 		slog.Info("Flag updates require preview mode to be configured")
 	} else {
@@ -518,16 +517,20 @@ func run() error {
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		slog.Error("server forced to shutdown", "error", err)
+		slog.Error("Server forced to shutdown", "error", err)
 	}
 
 	// wait for server shutdown
 	err = eg.Wait()
 	if err != nil {
-		slog.Error("HTTP server failed", "error", err)
+		slog.Error("Server failed", "error", err)
 	}
 
 	slog.Info("Server is exited")
+
+	if err := openfeature.ShutdownWithContext(shutdownCtx); err != nil {
+		slog.Error("Error shutting down openfeature", "error", err)
+	}
 
 	if shutdown != nil {
 		if err := shutdown(shutdownCtx); err != nil {
