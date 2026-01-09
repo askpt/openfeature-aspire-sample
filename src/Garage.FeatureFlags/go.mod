@@ -1,4 +1,4 @@
-module main
+module garageflags
 
 go 1.25.5
 
