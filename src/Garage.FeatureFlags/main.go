@@ -1,15 +1,20 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/open-feature/go-sdk-contrib/providers/ofrep"
 	"github.com/open-feature/go-sdk/openfeature"
@@ -24,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
+	"golang.org/x/sync/errgroup"
 )
 
 // Flag represents a feature flag configuration
@@ -42,14 +48,13 @@ type FlagFile struct {
 
 // TargetingRequest represents the request body for targeting updates
 type TargetingRequest struct {
-	UserID  string `json:"userId"`
 	Enabled bool   `json:"enabled"`
 	FlagKey string `json:"flagKey"`
 }
 
 var (
 	flagsFilePath string
-	fileMutex     sync.Mutex
+	fileMutex     sync.RWMutex
 
 	featureClient *openfeature.Client
 	tracer        = otel.Tracer("flags-api")
@@ -58,10 +63,7 @@ var (
 
 // initOtel initializes OpenTelemetry with autoexport for traces, metrics, and logs
 func initOtel(ctx context.Context) (func(context.Context) error, error) {
-	serviceName := os.Getenv("OTEL_SERVICE_NAME")
-	if serviceName == "" {
-		serviceName = "flags-api"
-	}
+	serviceName := cmp.Or(os.Getenv("OTEL_SERVICE_NAME"), "flags-api")
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(semconv.ServiceName(serviceName)),
@@ -160,7 +162,7 @@ func initOpenFeature() error {
 
 // readFlagsFile reads and parses the flagd.json file
 func readFlagsFile(ctx context.Context) (*FlagFile, error) {
-	ctx, span := tracer.Start(ctx, "readFlagsFile")
+	_, span := tracer.Start(ctx, "readFlagsFile")
 	defer span.End()
 
 	data, err := os.ReadFile(flagsFilePath)
@@ -182,9 +184,8 @@ func readFlagsFile(ctx context.Context) (*FlagFile, error) {
 
 // writeFlagsFile writes the flag configuration back to flagd.json
 func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
-	ctx, span := tracer.Start(ctx, "writeFlagsFile")
+	_, span := tracer.Start(ctx, "writeFlagsFile")
 	defer span.End()
-	_ = ctx // ctx available for future use
 
 	data, err := json.MarshalIndent(flagFile, "", "  ")
 	if err != nil {
@@ -193,7 +194,7 @@ func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
 		return err
 	}
 
-	if err := os.WriteFile(flagsFilePath, data, 0600); err != nil {
+	if err := os.WriteFile(flagsFilePath, data, 0o600); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return err
@@ -301,14 +302,14 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "handleGetFlags")
 	defer span.End()
 
-	userID := r.URL.Query().Get("userId")
+	userID := r.PathValue("userId")
 	if userID == "" {
-		http.Error(w, "userId query parameter is required", http.StatusBadRequest)
+		http.Error(w, "userId path parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	fileMutex.Lock()
-	defer fileMutex.Unlock()
+	fileMutex.RLock()
+	defer fileMutex.RUnlock()
 
 	// Get the list of editable flags from enable-preview-mode
 	flagList := getPreviewModeFlags(ctx)
@@ -353,15 +354,16 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 	ctx, span := tracer.Start(r.Context(), "handleUpdateFlagTargeting")
 	defer span.End()
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	// Get the list of allowed flags from enable-preview-mode
 	allowedFlags := getPreviewModeFlags(ctx)
 	if len(allowedFlags) == 0 {
 		http.Error(w, "Flag updates are disabled: enable-preview-mode is empty or off", http.StatusForbidden)
+		return
+	}
+
+	userID := r.PathValue("userId")
+	if userID == "" {
+		http.Error(w, "userId is required", http.StatusBadRequest)
 		return
 	}
 
@@ -370,11 +372,6 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	if req.UserID == "" {
-		http.Error(w, "userId is required", http.StatusBadRequest)
 		return
 	}
 
@@ -416,19 +413,15 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 
 	if req.Enabled {
 		// Add userId if not already present
-		found := slices.Contains(userIDs, req.UserID)
+		found := slices.Contains(userIDs, userID)
 		if !found {
-			userIDs = append(userIDs, req.UserID)
+			userIDs = append(userIDs, userID)
 		}
 	} else {
 		// Remove userId if present
-		newUserIDs := make([]string, 0, len(userIDs))
-		for _, id := range userIDs {
-			if id != req.UserID {
-				newUserIDs = append(newUserIDs, id)
-			}
-		}
-		userIDs = newUserIDs
+		userIDs = slices.DeleteFunc(userIDs, func(id string) bool {
+			return id == userID
+		})
 	}
 
 	if err := setUserIDsInTargeting(flag.Targeting, userIDs); err != nil {
@@ -447,12 +440,12 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", req.UserID, "enabled", req.Enabled)
+	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", userID, "enabled", req.Enabled)
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
-		"userId":  req.UserID,
+		"userId":  userID,
 		"enabled": req.Enabled,
 		"userIds": userIDs,
 	}); err != nil {
@@ -465,24 +458,36 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	ctx := context.Background()
+	if err := run(); err != nil {
+		slog.Error("Failed to run", slog.Any("error", err))
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	port := cmp.Or(os.Getenv("PORT"), "8080")
+	// Listen addrs
+	var lc net.ListenConfig
+	ln, err := lc.Listen(ctx, "tcp", ":"+port)
+	if err != nil {
+		return fmt.Errorf("failed to start metrics listener: %w", err)
+	}
+
+	defer func() {
+		if err := ln.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			slog.Error("Failed to stop metrics listener", "error", err)
+		}
+	}()
 
 	// Initialize OpenTelemetry
 	shutdown, err := initOtel(ctx)
 	if err != nil {
 		slog.Warn("Failed to initialize OpenTelemetry", "error", err)
 	} else {
-		defer func() {
-			if err := shutdown(ctx); err != nil {
-				slog.Error("Error shutting down telemetry", "error", err)
-			}
-		}()
 		slog.Info("OpenTelemetry initialized successfully")
-	}
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
 	}
 
 	// Initialize OpenFeature with OFREP provider
@@ -493,28 +498,54 @@ func main() {
 		slog.Info("OpenFeature initialized successfully with OFREP provider")
 	}
 
+	// Start the server
+	server := newServer()
+	eg, ctx := errgroup.WithContext(ctx)
+
+	eg.Go(func() error {
+		slog.Info("Server listening", "port", port, "flagsFilePath", flagsFilePath)
+		if err := server.Serve(ln); !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+		return nil
+	})
+
+	// wait for interrupt signal
+	<-ctx.Done()
+
+	slog.Info("Server is starting to exit...")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("server forced to shutdown", "error", err)
+	}
+
+	// wait for server shutdown
+	err = eg.Wait()
+	if err != nil {
+		slog.Error("HTTP server failed", "error", err)
+	}
+
+	slog.Info("Server is exited")
+
+	if shutdown != nil {
+		if err := shutdown(shutdownCtx); err != nil {
+			slog.Error("Error shutting down telemetry", "error", err)
+		}
+	}
+
+	return nil
+}
+
+func newServer() *http.Server {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /flags/{userId}", handleGetFlags)
+	mux.HandleFunc("POST /flags/{userId}", handleUpdateFlagTargeting)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello from Go Feature Flags API!"))
+		_, _ = w.Write([]byte("Hello from Go Feature Flags API!"))
 	})
 
-	mux.HandleFunc("/flags/", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			handleGetFlags(w, r)
-		case http.MethodPost:
-			handleUpdateFlagTargeting(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
-
-	handler := otelhttp.NewHandler(mux, "flags-api")
-
-	slog.Info("Server listening", "port", port, "flagsFilePath", flagsFilePath)
-	if err := http.ListenAndServe(":"+port, handler); err != nil {
-		slog.Error("HTTP server failed", "error", err)
-		os.Exit(1)
-	}
+	return &http.Server{Handler: otelhttp.NewHandler(mux, "flags-api")}
 }
