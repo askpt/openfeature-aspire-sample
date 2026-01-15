@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup Label="Community Packages">
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.0.0" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Golang" Version="13.0.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.1.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Golang" Version="13.1.0" />
   </ItemGroup>
 
   <ItemGroup Label="Microsoft Packages">
