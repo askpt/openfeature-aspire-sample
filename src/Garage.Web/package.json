@@ -20,7 +20,7 @@
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.210.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.210.0",
     "@opentelemetry/instrumentation": "^0.210.0",
-    "@opentelemetry/instrumentation-document-load": "^0.54.0",
+    "@opentelemetry/instrumentation-document-load": "^0.55.0",
     "@opentelemetry/instrumentation-fetch": "^0.210.0",
     "@opentelemetry/resources": "^2.4.0",
     "@opentelemetry/sdk-logs": "^0.210.0",
