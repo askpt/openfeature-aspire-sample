@@ -8,7 +8,7 @@ This repository is set up to use Aspire. Aspire is an orchestrator for the entir
 ### Technology Stack
 
 - **.NET**: 10.0 (latest version)
-- **Python**: 3.14 (for Chat Service with GitHub Models)
+- **Python**: 3.12+ (for Chat Service with GitHub Models)
 - **Go**: 1.25 (for Feature Flags API)
 - **Frontend**: React 19.2 with TypeScript, Vite 7.2
 - **Backend**: ASP.NET Core 10.0 with Entity Framework Core

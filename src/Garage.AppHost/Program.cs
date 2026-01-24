@@ -40,7 +40,8 @@ var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/"
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
     .WithOtlpExporter()
-    .WithHttpHealthCheck("/health");
+    .WithHttpHealthCheck("/health")
+    .PublishAsDockerFile();
 
 // Only add flagd service for local development (not during publishing/deployment)
 // Use DevCycle if is in publish mode
@@ -93,11 +94,18 @@ else
 
     // For web (nginx), set separate OFREP_AUTHORIZATION for simplicity
     webFrontend = webFrontend
+        .WithReference(chatService)
+        .WaitFor(chatService)
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_AUTHORIZATION", serverKey);
 
     // For .NET services, use OFREP_HEADERS with Authorization=<value> format
     apiService = apiService
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
+
+    // For Python chat service, use OFREP_HEADERS with Authorization=<value> format
+    chatService = chatService
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 

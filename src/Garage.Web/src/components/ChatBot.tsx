@@ -135,13 +135,15 @@ const ChatBot = () => {
               placeholder="Ask about Le Mans..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               disabled={isLoading}
+              aria-label="Chat message input"
             />
             <button
               className="chatbot-send-btn"
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
+              aria-label="Send message"
             >
               ➤
             </button>
