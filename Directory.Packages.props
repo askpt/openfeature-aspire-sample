@@ -38,7 +38,7 @@
 
   <ItemGroup Label="OpenFeature Packages">
     <PackageVersion Include="OpenFeature.Hosting" Version="2.11.1" />
-    <PackageVersion Include="OpenFeature.Providers.Ofrep" Version="0.1.4" />
+    <PackageVersion Include="OpenFeature.Providers.Ofrep" Version="0.1.5" />
   </ItemGroup>
 
   <ItemGroup Label="OpenTelemetry Packages">
