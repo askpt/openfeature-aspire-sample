@@ -6,6 +6,9 @@
     "ghcr.io/devcontainers/features/docker-in-docker": {},
     "ghcr.io/devcontainers/features/node": {},
     "ghcr.io/devcontainers/features/go": {},
+    "ghcr.io/devcontainers/features/python": {
+      "version": "3.14"
+    },
     "ghcr.io/dotnet/aspire-devcontainer-feature/dotnetaspire:latest": {}
   },
   "customizations": {
@@ -24,7 +27,9 @@
         "esbenp.prettier-vscode",
         "redhat.vscode-yaml",
         "microsoft-aspire.aspire-vscode",
-        "golang.go"
+        "golang.go",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
       ]
     }
   },
