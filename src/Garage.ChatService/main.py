@@ -13,18 +13,18 @@ from openfeature import api
 from openfeature.contrib.provider.ofrep import OFREPProvider
 from openfeature.evaluation_context import EvaluationContext
 from opentelemetry import trace, metrics
+from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME as RESOURCE_SERVICE_NAME
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 from prompt_loader import load_prompt, render_messages, get_model_parameters
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Get configuration from environment
 OFREP_ENDPOINT = os.environ.get("OFREP_ENDPOINT", "http://localhost:8016")
@@ -41,9 +41,13 @@ PROMPTS_DIR = Path(__file__).parent / "prompts"
 chat_request_counter = None
 chat_request_duration = None
 
+# Configure basic logging first (will be enhanced by OTLP later)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 def setup_telemetry():
-    """Configure OpenTelemetry tracing and metrics using gRPC exporter."""
+    """Configure OpenTelemetry tracing, metrics, and logging using gRPC exporter."""
     global chat_request_counter, chat_request_duration
     
     # Create resource with service name
@@ -52,7 +56,7 @@ def setup_telemetry():
     })
     
     if not OTLP_ENDPOINT:
-        logger.warning("OTEL_EXPORTER_OTLP_ENDPOINT not set, using no-op metrics")
+        logger.warning("OTEL_EXPORTER_OTLP_ENDPOINT not set, using no-op telemetry")
         # Create metrics even without export endpoint for local tracking
         meter = metrics.get_meter(__name__)
         chat_request_counter = meter.create_counter(
@@ -88,6 +92,7 @@ def setup_telemetry():
     try:
         from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
         from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+        from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
         
         # Determine credentials for TLS
         credentials = None
@@ -119,6 +124,23 @@ def setup_telemetry():
         metric_reader = PeriodicExportingMetricReader(metric_exporter, export_interval_millis=10000)
         meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
         metrics.set_meter_provider(meter_provider)
+        
+        # Setup logging export to OTLP
+        if use_tls and credentials:
+            log_exporter = OTLPLogExporter(endpoint=grpc_endpoint, credentials=credentials)
+        else:
+            log_exporter = OTLPLogExporter(endpoint=grpc_endpoint, insecure=True)
+        
+        logger_provider = LoggerProvider(resource=resource)
+        logger_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
+        set_logger_provider(logger_provider)
+        
+        # Add OTLP handler to root logger to export logs
+        otlp_handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+        logging.getLogger().addHandler(otlp_handler)
+        
+        # Instrument logging to add trace context to logs
+        LoggingInstrumentor().instrument(set_logging_format=True)
         
         # Create metrics
         meter = metrics.get_meter(__name__)
