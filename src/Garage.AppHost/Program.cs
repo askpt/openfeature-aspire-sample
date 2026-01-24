@@ -31,12 +31,12 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
 
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
-// Add Python chat service
-var chatService = builder.AddPythonApp("chat-service", "../Garage.ChatService/", "main.py")
-    .WithVirtualEnvironment(".venv")
-    .WithHttpEndpoint(env: "PORT")
+// Add Python chat service using Uvicorn (FastAPI/ASGI)
+var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/", "main:app")
+    .WithPip()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
+    .WithOtlpExporter()
     .WithHttpHealthCheck("/health");
 
 // Only add flagd service for local development (not during publishing/deployment)

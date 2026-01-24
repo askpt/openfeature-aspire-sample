@@ -12,12 +12,13 @@ from openai import OpenAI
 from openfeature import api
 from openfeature.contrib.provider.ofrep import OFREPProvider
 from openfeature.evaluation_context import EvaluationContext
-from opentelemetry import trace
+from opentelemetry import trace, metrics
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource, SERVICE_NAME as RESOURCE_SERVICE_NAME
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.sdk.resources import Resource
 
 from prompt_loader import load_prompt, render_messages, get_model_parameters
 
@@ -31,23 +32,123 @@ OFREP_ENDPOINT = os.environ.get("OFREP_ENDPOINT", "http://localhost:8016")
 GITHUB_MODELS_ENDPOINT = os.environ.get("CHAT_MODEL_URI", "https://models.github.ai/inference")
 GITHUB_TOKEN = os.environ.get("CHAT_MODEL_KEY", "")
 GITHUB_MODEL_NAME = os.environ.get("CHAT_MODEL_MODELNAME", "openai/gpt-4o")
+# OpenTelemetry configuration from Aspire
 OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "chat-service")
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+# Metrics - initialized after setup_telemetry
+chat_request_counter = None
+chat_request_duration = None
+
 
 def setup_telemetry():
-    """Configure OpenTelemetry tracing."""
+    """Configure OpenTelemetry tracing and metrics using gRPC exporter."""
+    global chat_request_counter, chat_request_duration
+    
+    # Create resource with service name
+    resource = Resource.create({
+        RESOURCE_SERVICE_NAME: SERVICE_NAME
+    })
+    
     if not OTLP_ENDPOINT:
-        logger.warning("OTLP_ENDPOINT not set, telemetry disabled")
+        logger.warning("OTEL_EXPORTER_OTLP_ENDPOINT not set, using no-op metrics")
+        # Create metrics even without export endpoint for local tracking
+        meter = metrics.get_meter(__name__)
+        chat_request_counter = meter.create_counter(
+            name="chat_requests_total",
+            description="Total number of chat requests",
+            unit="1"
+        )
+        chat_request_duration = meter.create_histogram(
+            name="chat_request_duration_seconds",
+            description="Duration of chat requests in seconds",
+            unit="s"
+        )
         return
     
-    resource = Resource.create({"service.name": SERVICE_NAME})
-    provider = TracerProvider(resource=resource)
-    exporter = OTLPSpanExporter(endpoint=f"{OTLP_ENDPOINT}/v1/traces")
-    provider.add_span_processor(BatchSpanProcessor(exporter))
-    trace.set_tracer_provider(provider)
-    logger.info(f"OpenTelemetry configured with endpoint: {OTLP_ENDPOINT}")
+    logger.info(f"Configuring OpenTelemetry with endpoint: {OTLP_ENDPOINT}")
+    
+    # Parse endpoint - Aspire provides HTTPS endpoint, we need to handle it
+    endpoint = OTLP_ENDPOINT
+    
+    # For gRPC, we need just host:port without the scheme
+    if endpoint.startswith("https://"):
+        grpc_endpoint = endpoint.replace("https://", "")
+        use_tls = True
+    elif endpoint.startswith("http://"):
+        grpc_endpoint = endpoint.replace("http://", "")
+        use_tls = False
+    else:
+        grpc_endpoint = endpoint
+        use_tls = False
+    
+    logger.info(f"OTLP gRPC endpoint: {grpc_endpoint}, TLS: {use_tls}")
+    
+    try:
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+        
+        # Determine credentials for TLS
+        credentials = None
+        if use_tls:
+            ca_cert_path = os.environ.get("SSL_CERT_FILE", "")
+            if ca_cert_path and os.path.exists(ca_cert_path):
+                logger.info(f"Using CA cert from SSL_CERT_FILE: {ca_cert_path}")
+                with open(ca_cert_path, "rb") as f:
+                    ca_cert = f.read()
+                import grpc
+                credentials = grpc.ssl_channel_credentials(root_certificates=ca_cert)
+        
+        # Setup tracing
+        if use_tls and credentials:
+            trace_exporter = OTLPSpanExporter(endpoint=grpc_endpoint, credentials=credentials)
+        else:
+            trace_exporter = OTLPSpanExporter(endpoint=grpc_endpoint, insecure=True)
+        
+        trace_provider = TracerProvider(resource=resource)
+        trace_provider.add_span_processor(BatchSpanProcessor(trace_exporter))
+        trace.set_tracer_provider(trace_provider)
+        
+        # Setup metrics
+        if use_tls and credentials:
+            metric_exporter = OTLPMetricExporter(endpoint=grpc_endpoint, credentials=credentials)
+        else:
+            metric_exporter = OTLPMetricExporter(endpoint=grpc_endpoint, insecure=True)
+        
+        metric_reader = PeriodicExportingMetricReader(metric_exporter, export_interval_millis=10000)
+        meter_provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
+        metrics.set_meter_provider(meter_provider)
+        
+        # Create metrics
+        meter = metrics.get_meter(__name__)
+        chat_request_counter = meter.create_counter(
+            name="chat_requests_total",
+            description="Total number of chat requests",
+            unit="1"
+        )
+        chat_request_duration = meter.create_histogram(
+            name="chat_request_duration_seconds",
+            description="Duration of chat requests in seconds",
+            unit="s"
+        )
+        
+        logger.info(f"OpenTelemetry configured successfully for service: {SERVICE_NAME}")
+        
+    except Exception as e:
+        logger.error(f"Failed to configure OpenTelemetry: {e}")
+        # Create fallback metrics
+        meter = metrics.get_meter(__name__)
+        chat_request_counter = meter.create_counter(
+            name="chat_requests_total",
+            description="Total number of chat requests",
+            unit="1"
+        )
+        chat_request_duration = meter.create_histogram(
+            name="chat_request_duration_seconds",
+            description="Duration of chat requests in seconds",
+            unit="s"
+        )
 
 
 def setup_openfeature():
@@ -120,6 +221,9 @@ async def health_check():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Chat endpoint that uses GitHub Models with dynamic prompt selection."""
+    import time
+    start_time = time.time()
+    
     tracer = trace.get_tracer(__name__)
     
     with tracer.start_as_current_span("chat_request") as span:
@@ -137,6 +241,9 @@ async def chat(request: ChatRequest):
         span.set_attribute("feature.enable_chatbot", chatbot_enabled)
         
         if not chatbot_enabled:
+            # Record metric for disabled requests
+            if chat_request_counter:
+                chat_request_counter.add(1, {"status": "disabled", "prompt_style": "none"})
             raise HTTPException(
                 status_code=503,
                 detail="Chatbot is currently disabled"
@@ -168,16 +275,27 @@ async def chat(request: ChatRequest):
                 answer = response.choices[0].message.content
                 model_span.set_attribute("response_length", len(answer))
             
+            # Record successful request metrics
+            duration = time.time() - start_time
+            if chat_request_counter:
+                chat_request_counter.add(1, {"status": "success", "prompt_style": prompt_file})
+            if chat_request_duration:
+                chat_request_duration.record(duration, {"prompt_style": prompt_file})
+            
             return ChatResponse(response=answer, prompt_style=prompt_file)
             
         except FileNotFoundError:
             logger.error(f"Prompt file not found: {prompt_file}")
+            if chat_request_counter:
+                chat_request_counter.add(1, {"status": "error", "prompt_style": prompt_file})
             raise HTTPException(
                 status_code=500,
                 detail=f"Prompt file '{prompt_file}' not found"
             )
         except Exception as e:
             logger.error(f"Error calling GitHub Models: {e}")
+            if chat_request_counter:
+                chat_request_counter.add(1, {"status": "error", "prompt_style": prompt_file})
             raise HTTPException(
                 status_code=500,
                 detail=f"Error processing chat request: {str(e)}"
