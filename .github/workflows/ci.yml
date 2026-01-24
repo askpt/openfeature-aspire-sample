@@ -20,6 +20,8 @@ jobs:
           global-json-file: global.json
       - name: Build with dotnet
         run: dotnet build --configuration Release
+      - name: dotnet format
+        run: dotnet format --verify-no-changes
     #   - name: Test with dotnet
     #     run: dotnet test
 
