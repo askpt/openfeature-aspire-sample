@@ -1,6 +1,14 @@
 {
   "$schema": "https://flagd.dev/schema/v0/flags.json",
   "flags": {
+    "enable-chatbot": {
+      "state": "ENABLED",
+      "variants": {
+        "off": false,
+        "on": true
+      },
+      "defaultVariant": "on"
+    },
     "enable-database-winners": {
       "state": "ENABLED",
       "variants": {
@@ -47,6 +55,15 @@
           "enabled"
         ]
       }
+    },
+    "prompt-file": {
+      "state": "ENABLED",
+      "variants": {
+        "brief": "brief",
+        "casual": "casual",
+        "expert": "expert"
+      },
+      "defaultVariant": "expert"
     },
     "winners-count": {
       "state": "ENABLED",
