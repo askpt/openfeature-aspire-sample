@@ -76,7 +76,8 @@
       "variants": {
         "brief": "brief",
         "casual": "casual",
-        "expert": "expert"
+        "expert": "expert",
+        "unreliable": "unreliable"
       },
       "defaultVariant": "expert"
     },
