@@ -33,6 +33,7 @@ var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
 // Add Python chat service
 var chatService = builder.AddPythonApp("chat-service", "../Garage.ChatService/", "main.py")
+    .WithVirtualEnvironment(".venv")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)

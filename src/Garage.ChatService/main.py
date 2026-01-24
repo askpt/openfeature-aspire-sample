@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 from openfeature import api
 from openfeature.contrib.provider.ofrep import OFREPProvider
+from openfeature.evaluation_context import EvaluationContext
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -96,6 +97,7 @@ openai_client = OpenAI(
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
     message: str
+    userId: str = "anonymous"
 
 
 class ChatResponse(BaseModel):
@@ -123,8 +125,15 @@ async def chat(request: ChatRequest):
     with tracer.start_as_current_span("chat_request") as span:
         client = api.get_client()
         
+        # Create evaluation context with user ID
+        eval_context = EvaluationContext(
+            targeting_key=request.userId,
+            attributes={"userId": request.userId}
+        )
+        span.set_attribute("user.id", request.userId)
+        
         # Check if chatbot is enabled
-        chatbot_enabled = client.get_boolean_value("enable-chatbot", True)
+        chatbot_enabled = client.get_boolean_value("enable-chatbot", True, eval_context)
         span.set_attribute("feature.enable_chatbot", chatbot_enabled)
         
         if not chatbot_enabled:
@@ -134,9 +143,9 @@ async def chat(request: ChatRequest):
             )
         
         # Get the prompt file to use
-        prompt_file = client.get_string_value("prompt-file", "expert")
+        prompt_file = client.get_string_value("prompt-file", "expert", eval_context)
         span.set_attribute("feature.prompt_file", prompt_file)
-        logger.info(f"Using prompt file: {prompt_file}")
+        logger.info(f"Using prompt file: {prompt_file} for user: {request.userId}")
         
         try:
             # Load and render the prompt

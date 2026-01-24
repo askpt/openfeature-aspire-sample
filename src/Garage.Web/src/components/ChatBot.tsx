@@ -37,6 +37,7 @@ const ChatBot = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
+    const userId = localStorage.getItem("userId") || "1";
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
@@ -47,7 +48,7 @@ const ChatBot = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage, userId }),
       });
 
       if (!response.ok) {

@@ -7,7 +7,22 @@
         "off": false,
         "on": true
       },
-      "defaultVariant": "on"
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "in": [
+              {
+                "var": "userId"
+              },
+              [
+                "1"
+              ]
+            ]
+          },
+          "on"
+        ]
+      }
     },
     "enable-database-winners": {
       "state": "ENABLED",
@@ -21,7 +36,7 @@
       "state": "ENABLED",
       "variants": {
         "disabled": "",
-        "enabled": "enable-tabs"
+        "enabled": "enable-tabs,enable-chatbot"
       },
       "defaultVariant": "enabled"
     },
