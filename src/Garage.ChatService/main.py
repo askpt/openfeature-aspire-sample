@@ -35,6 +35,8 @@ GITHUB_MODEL_NAME = os.environ.get("CHAT_MODEL_MODELNAME", "openai/gpt-4o")
 # OpenTelemetry configuration from Aspire
 OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "chat-service")
+# CORS configuration - allow specific origins from environment, default to localhost dev servers
+CORS_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
 # Metrics - initialized after setup_telemetry
@@ -198,11 +200,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware - use configurable origins for security
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -320,7 +322,7 @@ async def chat(request: ChatRequest):
                 chat_request_counter.add(1, {"status": "error", "prompt_style": prompt_file})
             raise HTTPException(
                 status_code=500,
-                detail=f"Error processing chat request: {str(e)}"
+                detail="Error processing chat request"
             )
 
 
