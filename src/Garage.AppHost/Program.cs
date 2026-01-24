@@ -1,3 +1,5 @@
+using Aspire.Hosting.GitHub;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure Container App Environment for publishing
@@ -6,8 +8,9 @@ var containerAppEnvironment = builder
 
 // Add GitHub Models (requires GitHub PAT)
 var githubToken = builder.AddParameter("github-token", secret: true);
-var chatModel = builder.AddGitHubModel("chat-model", "openai/gpt-4o")
-    .WithApiKey(githubToken);
+var chatModel = builder.AddGitHubModel("chat-model", GitHubModel.OpenAI.OpenAIGpt4o)
+    .WithApiKey(githubToken)
+    .WithHealthCheck();
 
 var cache = builder.AddAzureManagedRedis("cache").RunAsContainer();
 
