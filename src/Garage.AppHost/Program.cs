@@ -4,6 +4,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
 
+// Add GitHub Models (requires GitHub PAT)
+var githubToken = builder.AddParameter("github-token", secret: true);
+var chatModel = builder.AddGitHubModel("chat-model", "openai/gpt-4o")
+    .WithApiKey(githubToken);
+
 var cache = builder.AddAzureManagedRedis("cache").RunAsContainer();
 
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
@@ -25,6 +30,13 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     .WithHttpHealthCheck("/health");
 
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
+
+// Add Python chat service
+var chatService = builder.AddPythonApp("chat-service", "../Garage.ChatService/", "main.py")
+    .WithHttpEndpoint(env: "PORT")
+    .WithExternalHttpEndpoints()
+    .WithReference(chatModel)
+    .WithHttpHealthCheck("/health");
 
 // Only add flagd service for local development (not during publishing/deployment)
 // Use DevCycle if is in publish mode
@@ -54,6 +66,8 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WaitFor(flagd)
         .WithReference(flagsApi)
         .WaitFor(flagsApi)
+        .WithReference(chatService)
+        .WaitFor(chatService)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
@@ -61,6 +75,10 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     flagsApi = flagsApi
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    chatService = chatService
         .WaitFor(flagd)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
