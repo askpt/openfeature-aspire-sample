@@ -1,6 +1,29 @@
 {
   "$schema": "https://flagd.dev/schema/v0/flags.json",
   "flags": {
+    "enable-chatbot": {
+      "state": "ENABLED",
+      "variants": {
+        "off": false,
+        "on": true
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          {
+            "in": [
+              {
+                "var": "userId"
+              },
+              [
+                "1"
+              ]
+            ]
+          },
+          "on"
+        ]
+      }
+    },
     "enable-database-winners": {
       "state": "ENABLED",
       "variants": {
@@ -13,7 +36,7 @@
       "state": "ENABLED",
       "variants": {
         "disabled": "",
-        "enabled": "enable-tabs"
+        "enabled": "enable-tabs,enable-chatbot"
       },
       "defaultVariant": "enabled"
     },
@@ -47,6 +70,16 @@
           "enabled"
         ]
       }
+    },
+    "prompt-file": {
+      "state": "ENABLED",
+      "variants": {
+        "brief": "brief",
+        "casual": "casual",
+        "expert": "expert",
+        "unreliable": "unreliable"
+      },
+      "defaultVariant": "expert"
     },
     "winners-count": {
       "state": "ENABLED",

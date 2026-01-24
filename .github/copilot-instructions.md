@@ -2,20 +2,22 @@
 
 ## Project Overview
 
-This is an OpenFeature .NET OFREP Demo application - a Le Mans Winners Management System that demonstrates feature flag capabilities using OpenFeature and the Remote Evaluation Protocol (OFREP) in a .NET environment with a React frontend.
+This is an OpenFeature .NET OFREP Demo application - a Le Mans Winners Management System that demonstrates feature flag capabilities using OpenFeature and the Remote Evaluation Protocol (OFREP) in a polyglot environment with .NET, Python, Go, and React frontend.
 This repository is set up to use Aspire. Aspire is an orchestrator for the entire application and will take care of configuring dependencies, building, and running the application. The resources that make up the application are defined in `apphost` including application code and external dependencies.
 
 ### Technology Stack
 
 - **.NET**: 10.0 (latest version)
+- **Python**: 3.12+ (for Chat Service with GitHub Models)
 - **Go**: 1.25 (for Feature Flags API)
 - **Frontend**: React 19.2 with TypeScript, Vite 7.2
 - **Backend**: ASP.NET Core 10.0 with Entity Framework Core
 - **Orchestration**: .NET Aspire 13.0
 - **Feature Flags**: OpenFeature with OFREP and flagd provider
+- **AI/Chat**: GitHub Models (GPT-4o) with GitHub Repository Prompts
 - **Database**: PostgreSQL with Entity Framework Core
 - **Caching**: Redis via StackExchange.Redis
-- **Telemetry**: OpenTelemetry integration
+- **Telemetry**: OpenTelemetry integration (traces, metrics, logs)
 - **Mapping**: Riok.Mapperly for object mapping
 
 ### Project Structure
@@ -26,6 +28,11 @@ This repository is set up to use Aspire. Aspire is an orchestrator for the entir
 │   ├── Garage.ApiDatabaseSeeder/  # Database initialization
 │   ├── Garage.ApiService/      # REST API service
 │   ├── Garage.AppHost/         # .NET Aspire orchestration
+│   ├── Garage.ChatService/     # Python FastAPI chatbot service
+│   │   ├── main.py             # FastAPI application
+│   │   ├── prompt_loader.py    # GitHub Repository Prompts loader
+│   │   ├── requirements.txt    # Python dependencies
+│   │   └── prompts/            # .prompt.yml files
 │   ├── Garage.FeatureFlags/    # Go API for feature flag management
 │   ├── Garage.ServiceDefaults/ # Shared services & feature flags
 │   ├── Garage.Shared/          # Common models and DTOs
@@ -102,6 +109,31 @@ go fmt ./...
 golangci-lint run
 ```
 
+### Python Chat Service
+
+```bash
+cd src/Garage.ChatService
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # Linux/Mac
+.venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application (development)
+uvicorn main:app --reload --port 8080
+
+# Format code
+black .
+
+# Type checking
+mypy .
+```
+
 ## Coding Standards and Conventions
 
 ### .NET Code
@@ -129,15 +161,26 @@ golangci-lint run
 - **HTTP Framework**: Standard library `net/http` with `otelhttp` instrumentation
 - **Feature Flags**: OpenFeature Go SDK with OFREP provider
 
+### Python Code
+
+- **Python Version**: 3.14 or later
+- **Framework**: FastAPI with Uvicorn (ASGI)
+- **Formatting**: Use `black` for code formatting
+- **Type Hints**: Use type hints throughout
+- **Telemetry**: OpenTelemetry integration (traces, metrics, logs via OTLP gRPC)
+- **Feature Flags**: OpenFeature Python SDK with OFREP provider
+- **Prompts**: GitHub Repository Prompts format (`.prompt.yml` files)
+
 ## Important Patterns and Practices
 
 ### Feature Flags
 
 When working with feature flags:
-- Use OpenFeature SDK for both .NET and React
+- Use OpenFeature SDK for .NET, Python, Go, and React
 - Feature flag keys use kebab-case (e.g., `enable-database-winners`)
 - Boolean flags for toggle features
 - Integer flags for numeric values
+- String flags for selecting variants (e.g., prompt files)
 - Targeting rules supported via flagd
 
 Example feature flags in use:
@@ -146,12 +189,40 @@ Example feature flags in use:
 - `enable-stats-header`: Show/hide statistics header
 - `enable-tabs`: Enable tabbed interface
 - `enable-preview-mode`: Comma-separated list of flags that can be dynamically updated
+- `enable-chatbot`: Show/hide AI chatbot (with user targeting)
+- `prompt-file`: Select chatbot prompt style (expert, casual, brief, unreliable)
+
+### GitHub Repository Prompts
+
+The chatbot uses GitHub Repository Prompts format for dynamic prompt selection:
+
+```yaml
+# prompts/expert.prompt.yml
+name: Le Mans Expert
+description: A knowledgeable Le Mans racing historian
+model: openai/gpt-4o
+modelParameters:
+  temperature: 0.7
+messages:
+  - role: system
+    content: |
+      You are a Le Mans 24 Hours racing expert...
+  - role: user
+    content: "{{message}}"
+```
+
+Available prompt styles:
+- `expert`: Detailed Le Mans historian with comprehensive knowledge
+- `casual`: Friendly enthusiast for casual conversation
+- `brief`: Quick facts with concise responses
+- `unreliable`: Confidently incorrect (for A/B testing demos)
 
 ### Service Configuration
 
 - Service defaults are in `Garage.ServiceDefaults` for shared configuration
 - Use .NET Aspire for service orchestration and discovery
 - All services include OpenTelemetry instrumentation
+- Python services use `AddUvicornApp` with `.WithPip()` for package management
 
 ### Database Access
 
@@ -166,6 +237,7 @@ Currently, there are no test projects in the solution. When adding tests:
 - Create test projects with `*.Tests.csproj` naming
 - Include both unit tests and integration tests where appropriate
 - For React components, consider adding Vitest or Jest
+- For Python, use pytest
 
 ## CI/CD
 
@@ -183,9 +255,11 @@ Currently, there are no test projects in the solution. When adding tests:
 ## Dependencies and Security
 
 - Use Dependabot for dependency updates (configured in `.github/dependabot.yml`)
+- Dependabot monitors: NuGet, npm, pip, Go modules, GitHub Actions, Docker
 - Keep .NET SDK at version 10.0.100 or later (see `global.json`)
-- Review and update NuGet and npm packages regularly
+- Review and update NuGet, npm, and pip packages regularly
 - Follow security best practices for feature flag configuration
+- Store GitHub PAT as user secret for GitHub Models access
 
 ## Documentation
 
@@ -198,10 +272,19 @@ Currently, there are no test projects in the solution. When adding tests:
 
 ### Adding a New Feature Flag
 
-1. Define the flag in flagd configuration
-2. Add flag evaluation in service defaults
+1. Define the flag in flagd configuration (`src/Garage.AppHost/flags/flagd.json`)
+2. Add flag evaluation in service defaults or directly in service code
 3. Use in .NET: `await _featureClient.GetBooleanValueAsync("flag-name", false)`
-4. Use in React: `const flagValue = useFlag('flag-name')`
+4. Use in React: `const flagValue = useBooleanFlagValue('flag-name', false)`
+5. Use in Python: `client.get_boolean_value("flag-name", False, eval_context)`
+6. Use in Go: `client.BooleanValue(ctx, "flag-name", false, evalCtx)`
+
+### Adding a New Chatbot Prompt
+
+1. Create a new `.prompt.yml` file in `src/Garage.ChatService/prompts/`
+2. Follow the GitHub Repository Prompts format
+3. Add the variant to `prompt-file` flag in `flagd.json`
+4. Configure targeting rules if needed for A/B testing
 
 ### Adding a New API Endpoint
 
@@ -223,12 +306,19 @@ Currently, there are no test projects in the solution. When adding tests:
 - Code quality is important - maintain clean, maintainable code
 - Feature flags are central to this project - understand OFREP concepts
 - The application uses .NET Aspire for cloud-ready development
-- Both backend and frontend use OpenFeature for consistent feature flag experience
+- All services (backend, frontend, Python, Go) use OpenFeature for consistent feature flag experience
 - The Go Feature Flags API (`Garage.FeatureFlags`) provides dynamic flag targeting management
   - Exposes REST endpoints for getting and updating flag targeting rules
   - Uses OpenFeature Go SDK with OFREP provider for flag evaluation
   - Includes full OpenTelemetry instrumentation (traces, metrics, logs)
   - Reads/writes to the flagd.json configuration file
+- The Python Chat Service (`Garage.ChatService`) provides AI-powered chatbot
+  - Uses FastAPI with Uvicorn (ASGI)
+  - Integrates with GitHub Models (GPT-4o) for AI responses
+  - Uses OpenFeature OFREP provider for feature flags
+  - Supports GitHub Repository Prompts (`.prompt.yml`) for dynamic prompt selection
+  - Includes full OpenTelemetry instrumentation (traces, metrics, logs via OTLP gRPC)
+  - Custom metrics: `chat_requests_total` counter, `chat_request_duration_seconds` histogram
 
 ## General recommendations for working with Aspire
 1. Before making any changes always run the apphost using `aspire run` and inspect the state of resources to make sure you are building from a known state.

@@ -36,6 +36,14 @@ export default defineConfig(({ mode }) => {
     server: {
       port: parseInt(env.VITE_PORT),
       proxy: {
+        "/api/chat": {
+          target:
+            process.env["services__chat-service__https__0"] ||
+            process.env["services__chat-service__http__0"],
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/chat/, "/chat"),
+          secure: false,
+        },
         "/api": {
           target:
             process.env.services__apiservice__https__0 ||

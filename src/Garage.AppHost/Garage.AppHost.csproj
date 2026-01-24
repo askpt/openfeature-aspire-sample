@@ -17,7 +17,9 @@
     <PackageReference Include="Aspire.Hosting.Azure.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.Azure.Redis" />
     <PackageReference Include="Aspire.Hosting.Azure.AppContainers" />
+    <PackageReference Include="Aspire.Hosting.GitHub.Models" />
     <PackageReference Include="Aspire.Hosting.JavaScript" />
+    <PackageReference Include="Aspire.Hosting.Python" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Flagd" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Golang" />
   </ItemGroup>

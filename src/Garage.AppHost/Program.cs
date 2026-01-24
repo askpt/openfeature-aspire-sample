@@ -1,8 +1,16 @@
+using Aspire.Hosting.GitHub;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure Container App Environment for publishing
 var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
+
+// Add GitHub Models (requires GitHub PAT)
+var githubToken = builder.AddParameter("github-token", secret: true);
+var chatModel = builder.AddGitHubModel("chat-model", GitHubModel.OpenAI.OpenAIGpt4o)
+    .WithApiKey(githubToken)
+    .WithHealthCheck();
 
 var cache = builder.AddAzureManagedRedis("cache").RunAsContainer();
 
@@ -25,6 +33,15 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     .WithHttpHealthCheck("/health");
 
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
+
+// Add Python chat service using Uvicorn (FastAPI/ASGI)
+var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/", "main:app")
+    .WithPip()
+    .WithExternalHttpEndpoints()
+    .WithReference(chatModel)
+    .WithOtlpExporter()
+    .WithHttpHealthCheck("/health")
+    .PublishAsDockerFile();
 
 // Only add flagd service for local development (not during publishing/deployment)
 // Use DevCycle if is in publish mode
@@ -54,6 +71,8 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WaitFor(flagd)
         .WithReference(flagsApi)
         .WaitFor(flagsApi)
+        .WithReference(chatService)
+        .WaitFor(chatService)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
@@ -61,6 +80,10 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     flagsApi = flagsApi
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    chatService = chatService
         .WaitFor(flagd)
         .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
@@ -71,11 +94,18 @@ else
 
     // For web (nginx), set separate OFREP_AUTHORIZATION for simplicity
     webFrontend = webFrontend
+        .WithReference(chatService)
+        .WaitFor(chatService)
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_AUTHORIZATION", serverKey);
 
     // For .NET services, use OFREP_HEADERS with Authorization=<value> format
     apiService = apiService
+        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
+        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
+
+    // For Python chat service, use OFREP_HEADERS with Authorization=<value> format
+    chatService = chatService
         .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
         .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
 
