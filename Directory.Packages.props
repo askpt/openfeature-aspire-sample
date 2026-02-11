@@ -29,8 +29,8 @@
 
   <ItemGroup Label="Microsoft Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.3.0" />
