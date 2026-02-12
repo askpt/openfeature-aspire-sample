@@ -18,7 +18,7 @@
     <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.1.0" />
     <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.1.0" />
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
-    <PackageVersion Include="Aspire.Hosting.Python" Version="13.1.0" />
+    <PackageVersion Include="Aspire.Hosting.Python" Version="13.1.1" />
     <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.1" />
   </ItemGroup>
 
