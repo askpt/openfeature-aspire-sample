@@ -11,15 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup Label="Aspire Packages">
-    <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.1.1" />
-    <PackageVersion Include="Aspire.Hosting.Python" Version="13.1.1" />
-    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.1" />
+    <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.1.2" />
+    <PackageVersion Include="Aspire.Hosting.Python" Version="13.1.2" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.2" />
   </ItemGroup>
 
   <ItemGroup Label="Community Packages">
