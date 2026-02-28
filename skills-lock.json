@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "aspire": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "computedHash": "aa502e4ff4c9cb28baa2c9ebd14b48fe7ed572fd291a9e24cda5226654413903"
+    }
+  }
+}
