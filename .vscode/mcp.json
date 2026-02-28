@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "aspire": {
+      "type": "stdio",
+      "command": "aspire",
+      "args": ["mcp", "start"]
+    },
+    "github-agentic-workflows": {
+      "command": "gh",
+      "args": ["aw", "mcp-server"],
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  "inputs": []
+}
