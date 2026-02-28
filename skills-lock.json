@@ -15,6 +15,11 @@
       "source": "jeffallan/claude-skills",
       "sourceType": "github",
       "computedHash": "709f35fe79694533e7e8f1059eecb627cced758a1e31ae2d0c0c6f4bffa91277"
+    },
+    "python-sdk": {
+      "source": "inference-sh-9/skills",
+      "sourceType": "github",
+      "computedHash": "e266a809ae6f808115082c5b8155cf99c17d03708e9f4ac28cf36b3cebc8f39a"
     }
   }
 }
