@@ -1,0 +1,22 @@
+{
+  "last_run": "2026-02-28T18:06:01Z",
+  "last_run_id": "22526055690",
+  "monthly_summary_issue": {
+    "month": "2026-02",
+    "status": "created"
+  },
+  "comments_made": {
+    "407": {
+      "comment_date": "2026-02-28T18:06:01Z",
+      "summary": "Noted that PR #409 already addresses NuGet caching"
+    }
+  },
+  "issues_cursor": "Y3Vyc29yOnYyOpK0MjAyNi0wMi0yOFQxNzo0OTowM1rO7rh-9A==",
+  "tasks_run": {
+    "task1_triage": "2026-02-28T18:06:01Z",
+    "task11_monthly_summary": "2026-02-28T18:06:01Z"
+  },
+  "fix_attempts": {},
+  "improvement_ideas": [],
+  "notes": "First run. Open issue #407 commented on (has PR #409). Open PRs: #409 (Repo Assist, draft, fixing #407), #339 (Dependabot, @eslint/js bump)."
+}
