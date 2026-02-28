@@ -20,6 +20,11 @@
       "source": "inference-sh-9/skills",
       "sourceType": "github",
       "computedHash": "e266a809ae6f808115082c5b8155cf99c17d03708e9f4ac28cf36b3cebc8f39a"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "4365be772fd3b41994a72ad478472c6d680678e7f3859860ab010e9c46e48ee0"
     }
   }
 }
