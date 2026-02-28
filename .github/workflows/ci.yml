@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
         with:
           global-json-file: global.json
+          cache: true
       - name: Build with dotnet
         run: dotnet build --configuration Release
       - name: dotnet format
