@@ -340,12 +340,6 @@ ASALocalRun/
 
 /src/LastMajorVersionBinaries
 
-# vscode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 .azure
 src/Garage.Web/ClientApp/dist/
 src/Garage.Web/wwwroot/
