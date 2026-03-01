@@ -4,14 +4,29 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - "src/**"
+      - "**/*.props"
+      - "*.slnx"
+      - "global.json"
+      - ".github/workflows/ci.yml"
   pull_request:
+    paths:
+      - "src/**"
+      - "**/*.props"
+      - "*.slnx"
+      - "global.json"
+      - ".github/workflows/ci.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build-dotnet:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Cache NuGet packages
@@ -45,6 +60,7 @@ jobs:
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
           go-version-file: src/Garage.FeatureFlags/go.mod
+          cache-dependency-path: src/Garage.FeatureFlags/go.sum
       - name: Download dependencies
         run: go mod download
       - name: Build
