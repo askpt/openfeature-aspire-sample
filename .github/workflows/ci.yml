@@ -23,7 +23,45 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      dotnet: ${{ steps.filter.outputs.dotnet }}
+      go: ${{ steps.filter.outputs.go }}
+      python: ${{ steps.filter.outputs.python }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            dotnet:
+              - 'src/Garage.ApiService/**'
+              - 'src/Garage.ApiDatabaseSeeder/**'
+              - 'src/Garage.ApiModel/**'
+              - 'src/Garage.AppHost/**'
+              - 'src/Garage.ServiceDefaults/**'
+              - 'src/Garage.Shared/**'
+              - '**/*.props'
+              - '*.slnx'
+              - 'global.json'
+              - '.github/workflows/ci.yml'
+            go:
+              - 'src/Garage.FeatureFlags/**'
+              - '.github/workflows/ci.yml'
+            python:
+              - 'src/Garage.ChatService/**'
+              - '.github/workflows/ci.yml'
+            web:
+              - 'src/Garage.Web/**'
+              - '.github/workflows/ci.yml'
+
   build-dotnet:
+    needs: changes
+    if: needs.changes.outputs.dotnet == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,6 +86,8 @@ jobs:
     #     run: dotnet test
 
   build-go:
+    needs: changes
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -74,6 +114,8 @@ jobs:
           fi
 
   build-python:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,6 +138,8 @@ jobs:
         run: python -m py_compile main.py prompt_loader.py
 
   build-web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
