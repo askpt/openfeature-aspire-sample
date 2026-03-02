@@ -31,8 +31,7 @@ safe-outputs:
     title-prefix: "[ci-coach] "
     github-token-for-extra-empty-commit: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 timeout-minutes: 30
-source: githubnext/agentics/workflows/ci-coach.md@442992eda2ccb11ee75a39c019ec6d38ae5a84a2
-engine: copilot
+source: githubnext/agentics/workflows/ci-coach.md@da02dddebe71d9a937665abdcd1f5214dab852a7
 ---
 
 # CI Optimization Coach
@@ -140,7 +139,7 @@ If no significant improvements are found:
      needs: [build]
    lint:
      needs: [build]
-   
+
    # After: Parallel
    test:
      needs: [build]
