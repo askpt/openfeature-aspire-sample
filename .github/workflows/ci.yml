@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       dotnet: ${{ steps.filter.outputs.dotnet }}
       go: ${{ steps.filter.outputs.go }}
