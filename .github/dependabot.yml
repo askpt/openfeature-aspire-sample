@@ -11,6 +11,8 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+    exclude-paths:
+      - .github/workflows/*.lock.yml
 
   - package-ecosystem: "npm"
     directory: "src/Garage.Web/"
