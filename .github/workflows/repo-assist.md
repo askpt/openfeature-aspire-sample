@@ -58,11 +58,11 @@ safe-outputs:
   add-labels:
     allowed: [bug, enhancement, "help wanted", "good first issue", "spam", "off topic", documentation, question, duplicate, wontfix, "needs triage", "needs investigation", "breaking change", performance, security, refactor]
     max: 30
-    target: "*"
+    target: "*" 
   remove-labels:
     allowed: [bug, enhancement, "help wanted", "good first issue", "spam", "off topic", documentation, question, duplicate, wontfix, "needs triage", "needs investigation", "breaking change", performance, security, refactor]
     max: 5
-    target: "*"
+    target: "*" 
 
 tools:
   web-fetch:
@@ -71,7 +71,7 @@ tools:
   bash: true
   repo-memory: true
 
-source: githubnext/agentics/workflows/repo-assist.md@da02dddebe71d9a937665abdcd1f5214dab852a7
+source: githubnext/agentics/workflows/repo-assist.md@b466f28f0f65b68d6f2b10b15b44f51d787b93be
 ---
 
 # Repo Assist
@@ -80,7 +80,7 @@ source: githubnext/agentics/workflows/repo-assist.md@da02dddebe71d9a937665abdcd1
 
 Take heed of **instructions**: "${{ steps.sanitized.outputs.text }}"
 
-If these are non-empty (not ""), then you have been triggered via `/repo-assist <instructions>`. Follow the user's instructions instead of the normal scheduled workflow. Focus exclusively on those instructions. Apply all the same guidelines (read AGENTS.md, run formatters/linters/tests, be polite, use AI disclosure). Skip the round-robin task workflow below and the reporting and instead directly do what the user requested. If no specific instructions were provided (empty or blank), proceed with the normal scheduled workflow below.
+If these are non-empty (not ""), then you have been triggered via `/repo-assist <instructions>`. Follow the user's instructions instead of the normal scheduled workflow. Focus exclusively on those instructions. Apply all the same guidelines (read AGENTS.md, run formatters/linters/tests, be polite, use AI disclosure). Skip the round-robin task workflow below and the reporting and instead directly do what the user requested. If no specific instructions were provided (empty or blank), proceed with the normal scheduled workflow below. 
 
 Then exit  -  do not run the normal workflow after completing the instructions.
 
@@ -224,7 +224,7 @@ Maintain a single open issue titled `[Repo Assist] Monthly Activity {YYYY}-{MM}`
 
    ## Suggested Actions for Maintainer
 
-   **Comprehensive list** of all pending actions requiring maintainer attention (excludes items already actioned and checked off).
+   **Comprehensive list** of all pending actions requiring maintainer attention (excludes items already actioned and checked off). 
    - Reread the issue you're updating before you update it  -  there may be new checkbox adjustments since your last update that require you to adjust the suggested actions.
    - List **all** the comments, PRs, and issues that need attention
    - Exclude **all** items that have either
