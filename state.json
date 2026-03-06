@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-05T12:01:35Z",
-  "last_run_id": "22716871790",
+  "last_run": "2026-03-06T11:58:29Z",
+  "last_run_id": "22762438865",
   "monthly_summary_issue": {
     "number": 413,
     "month": "2026-03",
@@ -19,13 +19,13 @@
   "issues_cursor": null,
   "tasks_run": {
     "task1_triage": "2026-03-03T11:59:51Z",
-    "task2_fix_issues": "2026-03-03T11:59:51Z",
+    "task2_fix_issues": "2026-03-06T11:58:29Z",
     "task3_improvements": "2026-03-05T12:01:35Z",
     "task4_dependencies": "2026-03-04T11:59:47Z",
     "task6_stale_nudges": "2026-03-01T11:04:00Z",
-    "task7_labels": "2026-03-03T11:59:51Z",
+    "task7_labels": "2026-03-06T11:58:29Z",
     "task10_forward": "2026-03-05T12:01:35Z",
-    "task11_monthly_summary": "2026-03-05T12:01:35Z"
+    "task11_monthly_summary": "2026-03-06T11:58:29Z"
   },
   "fix_attempts": {
     "ci_go_tests": {
@@ -36,11 +36,11 @@
     },
     "api_service_tests": {
       "branch": "repo-assist/add-api-service-tests",
-      "date": "2026-03-05T12:01:35Z",
+      "date": "2026-03-06T11:58:29Z",
       "status": "pr_created",
-      "description": "Added Garage.ApiService.Tests xUnit project with WinnerMapper tests (3 tests); enabled dotnet test in CI"
+      "description": "Added Garage.ApiService.Tests xUnit project with WinnerMapper tests (3 tests); enabled dotnet test in CI. Real PR created (supersedes patch-only issue #455)"
     }
   },
   "improvement_ideas": ["add tests for WinnersService with mocked GarageDbContext and IFeatureClient"],
-  "notes": "PR #453 (CI Go tests) merged 2026-03-05. PR #454 (workflows+deps v0.53.3) merged 2026-03-05. Open PRs: #384 and #339 (ESLint Dependabot). Repo Assist PR created this run: add-api-service-tests (first .NET test project). March 2026 monthly summary is issue #413."
+  "notes": "PR #453 (CI Go tests) merged 2026-03-05. PR #454 (workflows+deps v0.53.3) merged 2026-03-05. Open PRs: #384 and #339 (ESLint Dependabot). Repo Assist PR created this run: add-api-service-tests (real PR, supersedes patch-only issue #455). Issue #459 is ci-coach suggestion (labeled enhancement). March 2026 monthly summary is issue #413."
 }
