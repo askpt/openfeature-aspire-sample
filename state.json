@@ -1,56 +1,47 @@
 {
-  "last_run": "2026-03-08T11:56:15Z",
-  "last_run_id": "22820573997",
+  "last_run": "2026-03-09T12:02:21Z",
+  "last_run_id": "22852400040",
   "monthly_summary_issue": {
     "number": 413,
-    "month": "2026-03",
-    "status": "active"
+    "month": "2026-03"
   },
   "comments_made": {
-    "384": {
-      "comment_date": "2026-03-01T11:04:00Z",
-      "summary": "ESLint v10 upgrade assessment: security fix, flat config compatible, should merge with #339"
-    },
-    "339": {
-      "comment_date": "2026-03-01T11:04:00Z",
-      "summary": "Noted should be merged alongside #384 for ESLint v10 upgrade"
-    },
-    "463": {
-      "comment_date": "2026-03-08T11:56:00Z",
-      "summary": "Endorsed ci-coach fail-fast gofmt + copilot-setup-steps timeout suggestions; noted PR created"
-    }
+    "339": "Noted merge with eslint PR (now #467)",
+    "463": "Endorsed ci-coach suggestions; PR #478 merged 2026-03-09; issue closed"
   },
   "issues_cursor": null,
   "tasks_run": {
-    "task1_triage": "2026-03-08T11:56:15Z",
-    "task2_fix_issues": "2026-03-08T11:56:15Z",
-    "task3_improvements": "2026-03-08T11:56:15Z",
-    "task4_dependencies": "2026-03-04T11:59:47Z",
-    "task6_stale_nudges": "2026-03-01T11:04:00Z",
-    "task7_labels": "2026-03-08T11:56:15Z",
-    "task10_forward": "2026-03-07T11:55:57Z",
-    "task11_monthly_summary": "2026-03-08T11:56:15Z"
+    "task1_triage": "2026-03-08",
+    "task2_fix": "2026-03-08",
+    "task3_improve": "2026-03-09",
+    "task4_deps": "2026-03-04",
+    "task6_stale": "2026-03-01",
+    "task7_labels": "2026-03-08",
+    "task10_forward": "2026-03-09",
+    "task11_summary": "2026-03-09"
   },
   "fix_attempts": {
     "ci_go_tests": {
-      "branch": "repo-assist/improve-ci-go-tests",
-      "date": "2026-03-04T11:59:47Z",
       "status": "pr_merged",
-      "description": "Added 'go test -v ./...' step to build-go CI job; merged as PR #453 on 2026-03-05"
+      "pr": 453,
+      "merged": "2026-03-05"
     },
     "api_service_tests": {
-      "branch": "repo-assist/add-api-service-tests",
-      "date": "2026-03-08T11:56:15Z",
       "status": "pr_created",
-      "description": "Added Garage.ApiService.Tests xUnit project with WinnerMapper tests (3 tests); enabled dotnet test in CI. 3/3 tests pass. PR created 2026-03-08."
+      "date": "2026-03-09",
+      "desc": "3 xUnit WinnerMapper tests; CI dotnet test enabled"
     },
     "ci_go_format_timeout": {
-      "branch": "repo-assist/ci-go-format-timeout",
-      "date": "2026-03-08T11:56:15Z",
-      "status": "pr_created",
-      "description": "Moved gofmt check before go mod download in build-go; added timeout-minutes: 10 to copilot-setup-steps. Implements #463. PR created 2026-03-08."
+      "status": "pr_merged",
+      "pr": 478,
+      "merged": "2026-03-09"
     }
   },
-  "improvement_ideas": ["add tests for WinnersService with mocked GarageDbContext and IFeatureClient"],
-  "notes": "PR #453 (CI Go tests) merged 2026-03-05. PR #454 (workflows+deps v0.53.3) merged 2026-03-05. PR #461 (CI optimize dotnet format) merged 2026-03-06. Open Dependabot PRs: #384 and #339 (ESLint v10). Issue #455 closed by askpt 2026-03-06. Issue #463 (ci-coach: fail-fast gofmt + timeout) created 2026-03-08 - commented and labelled. Two new Repo Assist PRs created this run: add-api-service-tests (tests PR) and ci-go-format-timeout (CI optimization). March 2026 monthly summary is issue #413."
+  "improvement_ideas": [
+    "WinnersService tests (mocked GarageDbContext+IFeatureClient)"
+  ],
+  "open_prs": [
+    "repo-assist/add-api-service-tests"
+  ],
+  "notes": "Open PRs: #339 (@eslint/js 10.0.1) and #467 (eslint 10.0.3). Repo Assist PR add-api-service-tests created 2026-03-09. Monthly summary #413."
 }
