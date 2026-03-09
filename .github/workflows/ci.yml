@@ -105,12 +105,6 @@ jobs:
         with:
           go-version-file: src/Garage.FeatureFlags/go.mod
           cache-dependency-path: src/Garage.FeatureFlags/go.sum
-      - name: Download dependencies
-        run: go mod download
-      - name: Build
-        run: go build -v ./...
-      - name: Test
-        run: go test -v ./...
       - name: Format check
         run: |
           if [ -n "$(gofmt -l .)" ]; then
@@ -118,6 +112,12 @@ jobs:
             gofmt -d .
             exit 1
           fi
+      - name: Download dependencies
+        run: go mod download
+      - name: Build
+        run: go build -v ./...
+      - name: Test
+        run: go test -v ./...
 
   build-python:
     needs: changes
