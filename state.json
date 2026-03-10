@@ -1,47 +1,18 @@
 {
-  "last_run": "2026-03-09T12:02:21Z",
-  "last_run_id": "22852400040",
-  "monthly_summary_issue": {
-    "number": 413,
-    "month": "2026-03"
-  },
-  "comments_made": {
-    "339": "Noted merge with eslint PR (now #467)",
-    "463": "Endorsed ci-coach suggestions; PR #478 merged 2026-03-09; issue closed"
-  },
-  "issues_cursor": null,
+  "last_run": "2026-03-10T12:00:11Z",
+  "last_run_id": "22901376338",
+  "monthly_summary_issue": 413,
+  "comments_made": {"339": "2026-03-01", "467": "2026-03-10", "481": "2026-03-10"},
   "tasks_run": {
-    "task1_triage": "2026-03-08",
-    "task2_fix": "2026-03-08",
-    "task3_improve": "2026-03-09",
-    "task4_deps": "2026-03-04",
-    "task6_stale": "2026-03-01",
-    "task7_labels": "2026-03-08",
-    "task10_forward": "2026-03-09",
-    "task11_summary": "2026-03-09"
+    "task1": "2026-03-08", "task2": "2026-03-08", "task3": "2026-03-09",
+    "task4": "2026-03-10", "task6": "2026-03-10", "task7": "2026-03-08",
+    "task10": "2026-03-09", "task11": "2026-03-10"
   },
   "fix_attempts": {
-    "ci_go_tests": {
-      "status": "pr_merged",
-      "pr": 453,
-      "merged": "2026-03-05"
-    },
-    "api_service_tests": {
-      "status": "pr_created",
-      "date": "2026-03-09",
-      "desc": "3 xUnit WinnerMapper tests; CI dotnet test enabled"
-    },
-    "ci_go_format_timeout": {
-      "status": "pr_merged",
-      "pr": 478,
-      "merged": "2026-03-09"
-    }
+    "api_service_tests": "blocked_protected_files",
+    "ci_go_format_timeout": "merged_pr478",
+    "ci_go_tests": "merged_pr453"
   },
-  "improvement_ideas": [
-    "WinnersService tests (mocked GarageDbContext+IFeatureClient)"
-  ],
-  "open_prs": [
-    "repo-assist/add-api-service-tests"
-  ],
-  "notes": "Open PRs: #339 (@eslint/js 10.0.1) and #467 (eslint 10.0.3). Repo Assist PR add-api-service-tests created 2026-03-09. Monthly summary #413."
+  "open_prs": [],
+  "notes": "Dependabot PRs open: #481 gh-aw 0.57, #467 eslint 10.0.3, #339 @eslint/js 10.0.1. No RA PRs open."
 }
