@@ -27,10 +27,11 @@ tools:
 safe-outputs:
   create-pull-request:
     expires: 2d
+    protected-files: fallback-to-issue
     title-prefix: "[ci-coach] "
     github-token-for-extra-empty-commit: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 timeout-minutes: 30
-source: githubnext/agentics/workflows/ci-coach.md@b466f28f0f65b68d6f2b10b15b44f51d787b93be
+source: githubnext/agentics/workflows/ci-coach.md@346204513ecfa08b81566450d7d599556807389f
 ---
 
 # CI Optimization Coach
