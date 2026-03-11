@@ -1,12 +1,17 @@
 """Utility module for loading and rendering GitHub Repository Prompts (.prompt.yml files)."""
 
 import yaml
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 
+@lru_cache(maxsize=10)
 def load_prompt(prompt_name: str, prompts_dir: str = "prompts") -> dict[str, Any]:
     """Load a .prompt.yml file and return parsed content.
+
+    Results are cached in-memory so repeated calls with the same arguments
+    avoid redundant disk I/O and YAML parsing.
     
     Args:
         prompt_name: Name of the prompt (without extension)
