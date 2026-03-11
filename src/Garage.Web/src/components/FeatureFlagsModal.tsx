@@ -16,6 +16,7 @@ type FlagsMap = Record<string, FlagState>;
 const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const [flags, setFlags] = useState<FlagsMap>({});
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const timeoutRefs = useState<Map<string, NodeJS.Timeout>>(
     () => new Map()
   )[0];
@@ -25,6 +26,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const fetchFlags = useCallback(async () => {
     try {
       setLoading(true);
+      setFetchError(null);
       const response = await fetch(`/flags/${userId}`);
       if (response.ok) {
         const data = await response.json();
@@ -36,8 +38,12 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
           };
         }
         setFlags(flagsData);
+      } else {
+        setFetchError("Failed to load flags. Please try again.");
+        console.error("Failed to fetch flags:", response.statusText);
       }
     } catch (err) {
+      setFetchError("Failed to load flags. Please try again.");
       console.error("Failed to fetch flags:", err);
     } finally {
       setLoading(false);
@@ -136,6 +142,8 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
         <div className="modal-body">
           {loading ? (
             <div className="loading">Loading flags...</div>
+          ) : fetchError ? (
+            <div className="error">{fetchError}</div>
           ) : flagKeys.length === 0 ? (
             <div className="no-flags">No flags available</div>
           ) : (
