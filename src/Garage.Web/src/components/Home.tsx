@@ -53,7 +53,6 @@ const Home = () => {
         }
         const winnersData: Winner[] = await response.json();
         setWinners(winnersData);
-        console.log(`Loaded ${winnersData.length} winners`);
       } catch (err) {
         console.error("Failed to load winners:", err);
         setError("Failed to load winners");
@@ -72,7 +71,6 @@ const Home = () => {
         winner.year === updatedCar.year ? updatedCar : winner
       )
     );
-    console.log(`Updated ownership for ${updatedCar.year} ${updatedCar.model}`);
   };
 
   const setFilter = (filterType: FilterType) => {
