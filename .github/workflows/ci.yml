@@ -114,8 +114,8 @@ jobs:
           fi
       - name: Download dependencies
         run: go mod download
-      - name: Build
-        run: go build -v ./...
+      # go test compiles all packages (including those with no test files) before running,
+      # so a separate `go build` step would double the compilation time.
       - name: Test
         run: go test -v ./...
 
