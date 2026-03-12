@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import "./FeatureFlagsModal.css";
 
 interface FeatureFlagsModalProps {
@@ -17,9 +17,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const [flags, setFlags] = useState<FlagsMap>({});
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const timeoutRefs = useState<Map<string, NodeJS.Timeout>>(
-    () => new Map()
-  )[0];
+  const timeoutRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const userId = localStorage.getItem("userId") || "1";
 
@@ -61,7 +59,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
     Object.entries(flags).forEach(([flagKey, flagState]) => {
       if (flagState.status !== "idle") {
         // Clear existing timeout for this flag if any
-        const existingTimeout = timeoutRefs.get(flagKey);
+        const existingTimeout = timeoutRefs.current.get(flagKey);
         if (existingTimeout) {
           clearTimeout(existingTimeout);
         }
@@ -72,20 +70,21 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
             ...prev,
             [flagKey]: { ...prev[flagKey], status: "idle" },
           }));
-          timeoutRefs.delete(flagKey);
+          timeoutRefs.current.delete(flagKey);
         }, 2000);
-        timeoutRefs.set(flagKey, timeoutId);
+        timeoutRefs.current.set(flagKey, timeoutId);
       }
     });
-  }, [flags, timeoutRefs]);
+  }, [flags]);
 
   // Cleanup all timeouts on unmount
   useEffect(() => {
+    const refs = timeoutRefs.current;
     return () => {
-      timeoutRefs.forEach((timeout) => clearTimeout(timeout));
-      timeoutRefs.clear();
+      refs.forEach((timeout) => clearTimeout(timeout));
+      refs.clear();
     };
-  }, [timeoutRefs]);
+  }, []);
 
   const handleToggle = async (flagKey: string, newValue: boolean) => {
     // Reset status before making request
