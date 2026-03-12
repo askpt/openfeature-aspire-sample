@@ -10,7 +10,6 @@ const CarCard: React.FC<CarCardProps> = ({ car, onOwnershipChanged }) => {
   const toggleOwnership = (event: React.ChangeEvent<HTMLInputElement>) => {
     const updatedCar = { ...car, isOwned: event.target.checked };
     onOwnershipChanged(updatedCar);
-    console.log(`Toggling ownership for car ${car.year}`);
   };
 
   return (

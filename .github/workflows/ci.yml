@@ -137,6 +137,7 @@ jobs:
           python-version: '3.14'
           allow-prereleases: true
           cache: 'pip'
+          cache-dependency-path: src/Garage.ChatService/requirements.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

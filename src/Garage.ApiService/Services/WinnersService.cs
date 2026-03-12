@@ -20,21 +20,21 @@ public class WinnersService(
             .SetTargetingKey(Guid.NewGuid().ToString())
             .Build();
 
-        var winners = await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
-            ? await GetAllDatabaseWinnersAsync()
-            : await GetAllJsonWinnersAsync();
-
         var count = await featureClient.GetIntegerDetailsAsync("winners-count", 5, evaluationContext);
 
-        return winners.Take(count.Value);
+        return await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
+            ? await GetAllDatabaseWinnersAsync(count.Value)
+            : await GetAllJsonWinnersAsync(count.Value);
     }
 
-    private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync()
+    private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync(int count)
     {
         try
         {
             var winnersDatabase = await context.Winners
+                .AsNoTracking()
                 .OrderByDescending(w => w.Year)
+                .Take(count)
                 .ToListAsync();
 
             var mapper = new WinnerMapper();
@@ -48,7 +48,7 @@ public class WinnersService(
         }
     }
 
-    private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync()
+    private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count)
     {
         await SlowDownAsync();
         var dataFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "winners.json");
@@ -60,7 +60,7 @@ public class WinnersService(
                 PropertyNameCaseInsensitive = true
             });
 
-            return winners?.OrderByDescending(w => w.Year) ?? Enumerable.Empty<Winner>();
+            return winners?.OrderByDescending(w => w.Year).Take(count) ?? Enumerable.Empty<Winner>();
         }
         catch (Exception ex)
         {

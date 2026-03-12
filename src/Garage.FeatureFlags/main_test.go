@@ -90,8 +90,8 @@ func fetch(t *testing.T, url string, method string, body io.Reader) (int, string
 		t.Fatalf("reading response body: %v", err)
 	}
 
-	if err != resp.Body.Close() {
-		t.Fatalf("making request: %v", err)
+	if err := resp.Body.Close(); err != nil {
+		t.Fatalf("closing response body: %v", err)
 	}
 
 	return resp.StatusCode, string(data)
