@@ -1,9 +1,12 @@
 """Le Mans Chatbot Service - FastAPI application using GitHub Models and OpenFeature."""
 
 import os
+import time
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
+
+import grpc
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -104,7 +107,6 @@ def setup_telemetry():
                 logger.info(f"Using CA cert from SSL_CERT_FILE: {ca_cert_path}")
                 with open(ca_cert_path, "rb") as f:
                     ca_cert = f.read()
-                import grpc
                 credentials = grpc.ssl_channel_credentials(root_certificates=ca_cert)
         
         # Setup tracing
@@ -245,7 +247,6 @@ async def health_check():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     """Chat endpoint that uses GitHub Models with dynamic prompt selection."""
-    import time
     start_time = time.time()
     
     tracer = trace.get_tracer(__name__)
