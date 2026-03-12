@@ -1,8 +1,14 @@
 """Unit tests for prompt_loader module."""
 
-import pytest
+import sys
 from pathlib import Path
 
+import pytest
+
+# Ensure the directory containing this test (and prompt_loader.py) is on sys.path
+_THIS_DIR = Path(__file__).resolve().parent
+if str(_THIS_DIR) not in sys.path:
+    sys.path.insert(0, str(_THIS_DIR))
 from prompt_loader import load_prompt, render_messages, get_model_parameters
 
 
@@ -88,7 +94,7 @@ class TestLoadPrompt:
         with pytest.raises(FileNotFoundError):
             load_prompt("nonexistent", str(tmp_path))
 
-    def test_loads_prompt_with_default_directory(self, tmp_path: Path, monkeypatch):
+    def test_loads_prompt_with_default_directory(self, tmp_path: Path):
         """Verify load_prompt uses the prompts_dir parameter correctly."""
         prompt_dir = tmp_path / "prompts"
         prompt_dir.mkdir()
