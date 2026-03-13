@@ -307,11 +307,13 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Evaluate the feature flag before acquiring the file lock: getPreviewModeFlags
+	// makes an OFREP network call and does not touch the flags file, so holding the
+	// read-lock during that call would unnecessarily delay concurrent writes.
+	flagList := getPreviewModeFlags(ctx)
+
 	fileMutex.RLock()
 	defer fileMutex.RUnlock()
-
-	// Get the list of editable flags from enable-preview-mode
-	flagList := getPreviewModeFlags(ctx)
 
 	flagFile, err := readFlagsFile(ctx)
 	if err != nil {
