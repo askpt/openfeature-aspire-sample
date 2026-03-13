@@ -6,7 +6,7 @@ interface CarCardProps {
   onOwnershipChanged: (car: Winner) => void;
 }
 
-const CarCard: React.FC<CarCardProps> = ({ car, onOwnershipChanged }) => {
+const CarCard = ({ car, onOwnershipChanged }: CarCardProps) => {
   const toggleOwnership = (event: React.ChangeEvent<HTMLInputElement>) => {
     const updatedCar = { ...car, isOwned: event.target.checked };
     onOwnershipChanged(updatedCar);

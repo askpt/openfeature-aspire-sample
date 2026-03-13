@@ -73,10 +73,6 @@ const Home = () => {
     );
   };
 
-  const setFilter = (filterType: FilterType) => {
-    setActiveFilter(filterType);
-  };
-
   const handleChangeUserId = () => {
     const newUserId = prompt("Enter new user ID:", currentUserId);
     if (newUserId && newUserId.trim() !== "") {
@@ -161,7 +157,7 @@ const Home = () => {
             className={`tab-btn ${
               activeFilter === FilterType.All ? "active" : ""
             }`}
-            onClick={() => setFilter(FilterType.All)}
+            onClick={() => setActiveFilter(FilterType.All)}
           >
             All Winners ({winners.length})
           </button>
@@ -169,7 +165,7 @@ const Home = () => {
             className={`tab-btn ${
               activeFilter === FilterType.Owned ? "active" : ""
             }`}
-            onClick={() => setFilter(FilterType.Owned)}
+            onClick={() => setActiveFilter(FilterType.Owned)}
           >
             Owned ({ownedCount})
           </button>
@@ -177,7 +173,7 @@ const Home = () => {
             className={`tab-btn ${
               activeFilter === FilterType.NotOwned ? "active" : ""
             }`}
-            onClick={() => setFilter(FilterType.NotOwned)}
+            onClick={() => setActiveFilter(FilterType.NotOwned)}
           >
             Not Owned ({winners.length - ownedCount})
           </button>
