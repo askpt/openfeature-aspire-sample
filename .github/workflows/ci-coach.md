@@ -31,7 +31,7 @@ safe-outputs:
     title-prefix: "[ci-coach] "
     github-token-for-extra-empty-commit: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 timeout-minutes: 30
-source: githubnext/agentics/workflows/ci-coach.md@346204513ecfa08b81566450d7d599556807389f
+source: githubnext/agentics/workflows/ci-coach.md@06bf149d12d83f09e2a52914afab936e9c8b6dd4
 ---
 
 # CI Optimization Coach
