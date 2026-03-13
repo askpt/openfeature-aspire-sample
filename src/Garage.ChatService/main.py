@@ -297,7 +297,9 @@ async def chat(request: ChatRequest):
                     temperature=model_params.get("temperature", 0.7)
                 )
                 
-                answer = response.choices[0].message.content
+                if not response.choices:
+                    raise ValueError("No choices returned from AI model")
+                answer = response.choices[0].message.content or ""
                 model_span.set_attribute("response_length", len(answer))
             
             # Record successful request metrics

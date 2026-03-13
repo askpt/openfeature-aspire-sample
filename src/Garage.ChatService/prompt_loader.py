@@ -42,10 +42,10 @@ def render_messages(prompt: dict[str, Any], variables: dict[str, str]) -> list[d
     """
     messages = []
     for msg in prompt.get('messages', []):
-        content = msg['content']
+        content = msg.get('content', '')
         for key, value in variables.items():
             content = content.replace(f"{{{{{key}}}}}", value)
-        messages.append({"role": msg['role'], "content": content})
+        messages.append({"role": msg.get('role', 'user'), "content": content})
     return messages
 
 
