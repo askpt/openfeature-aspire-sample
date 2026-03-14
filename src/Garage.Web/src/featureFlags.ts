@@ -10,9 +10,6 @@ export function initializeFeatureFlags(ofrepUrl: string) {
     userId,
   };
 
-  console.log("Initializing OpenFeature");
-  console.log("OFREP URL:", ofrepUrl);
-
   // Set context and provider (React SDK handles initialization automatically)
   OpenFeature.setContext(context);
   OpenFeature.setProvider(
@@ -21,6 +18,4 @@ export function initializeFeatureFlags(ofrepUrl: string) {
       pollInterval: 10000,
     })
   );
-
-  console.log("OpenFeature initialized successfully");
 }
