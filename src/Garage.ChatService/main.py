@@ -279,10 +279,23 @@ async def chat(request: ChatRequest):
         span.set_attribute("feature.prompt_file", prompt_file)
         logger.info(f"Using prompt file: {prompt_file} for user: {request.userId}")
         
+        DEFAULT_PROMPT = "expert"
+
         try:
             # Load and render the prompt
             with tracer.start_as_current_span("load_prompt"):
-                prompt = load_prompt(prompt_file, str(PROMPTS_DIR))
+                try:
+                    prompt = load_prompt(prompt_file, str(PROMPTS_DIR))
+                    effective_prompt_style = prompt_file
+                except FileNotFoundError:
+                    if prompt_file == DEFAULT_PROMPT:
+                        raise
+                    logger.warning(
+                        f"Prompt file '{prompt_file}' not found; falling back to '{DEFAULT_PROMPT}'"
+                    )
+                    span.set_attribute("feature.prompt_file_fallback", DEFAULT_PROMPT)
+                    prompt = load_prompt(DEFAULT_PROMPT, str(PROMPTS_DIR))
+                    effective_prompt_style = DEFAULT_PROMPT
                 messages = render_messages(prompt, {"message": request.message})
                 model_params = get_model_parameters(prompt)
             
@@ -305,19 +318,19 @@ async def chat(request: ChatRequest):
             # Record successful request metrics
             duration = time.time() - start_time
             if chat_request_counter:
-                chat_request_counter.add(1, {"status": "success", "prompt_style": prompt_file})
+                chat_request_counter.add(1, {"status": "success", "prompt_style": effective_prompt_style})
             if chat_request_duration:
-                chat_request_duration.record(duration, {"prompt_style": prompt_file})
+                chat_request_duration.record(duration, {"prompt_style": effective_prompt_style})
             
-            return ChatResponse(response=answer, prompt_style=prompt_file)
+            return ChatResponse(response=answer, prompt_style=effective_prompt_style)
             
         except FileNotFoundError:
-            logger.error(f"Prompt file not found: {prompt_file}")
+            logger.error(f"Prompt file not found: {prompt_file} (and fallback '{DEFAULT_PROMPT}' also missing)")
             if chat_request_counter:
                 chat_request_counter.add(1, {"status": "error", "prompt_style": prompt_file})
             raise HTTPException(
-                status_code=500,
-                detail=f"Prompt file '{prompt_file}' not found"
+                status_code=503,
+                detail="Chat service is temporarily unavailable: prompt configuration is missing"
             )
         except Exception as e:
             logger.error(f"Error calling GitHub Models: {e}")
