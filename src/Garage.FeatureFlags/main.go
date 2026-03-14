@@ -340,13 +340,20 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(flagStates); err != nil {
+	// Marshal to a buffer first so headers are only written on success.
+	// Writing directly to w would implicitly commit a 200 status, making
+	// any subsequent http.Error call ineffective.
+	data, err := json.Marshal(flagStates)
+	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to encode flagStates response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(append(data, '\n')); err != nil {
+		slog.ErrorContext(ctx, "failed to write flagStates response", "error", err)
 	}
 }
 
@@ -443,18 +450,23 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 
 	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", userID, "enabled", req.Enabled)
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(map[string]any{
+	// Marshal to a buffer first so headers are only written on success.
+	data, err := json.Marshal(map[string]any{
 		"success": true,
 		"userId":  userID,
 		"enabled": req.Enabled,
 		"userIds": userIDs,
-	}); err != nil {
+	})
+	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to encode response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(append(data, '\n')); err != nil {
+		slog.ErrorContext(ctx, "failed to write response", "error", err)
 	}
 }
 
