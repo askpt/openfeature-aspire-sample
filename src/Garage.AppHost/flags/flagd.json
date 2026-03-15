@@ -81,6 +81,16 @@
       },
       "defaultVariant": "expert"
     },
+    "slow-operation-delay": {
+      "state": "ENABLED",
+      "variants": {
+        "none": 0,
+        "fast": 200,
+        "slow": 1000,
+        "very-slow": 3000
+      },
+      "defaultVariant": "none"
+    },
     "winners-count": {
       "state": "ENABLED",
       "variants": {

@@ -40,7 +40,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("get flags", func(t *testing.T) {
-		const expectedBody = "{}\n"
+		const expectedBody = "{}"
 		code, body := fetch(t, baseURL+"/flags/user1", http.MethodGet, nil)
 
 		if code != http.StatusOK {

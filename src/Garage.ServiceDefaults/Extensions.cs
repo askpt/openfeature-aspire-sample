@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Garage.ServiceDefaults.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
@@ -142,9 +141,6 @@ public static class Extensions
 
     private static TBuilder AddFeatureFlags<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        // Register the feature flags service
-        builder.Services.AddSingleton<IFeatureFlags, FeatureFlags>();
-
         builder.Services.AddOpenFeature(featureBuilder =>
         {
             featureBuilder

@@ -3,6 +3,7 @@ import { useBooleanFlagValue } from "@openfeature/react-sdk";
 import "./ChatBot.css";
 
 interface Message {
+  id: number;
   role: "user" | "assistant" | "error";
   content: string;
   promptStyle?: string;
@@ -12,6 +13,7 @@ const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
+      id: 0,
       role: "assistant",
       content:
         "Hello! I'm your Le Mans expert. Ask me anything about the 24 Hours of Le Mans! 🏎️",
@@ -39,7 +41,7 @@ const ChatBot = () => {
     const userMessage = input.trim();
     const userId = localStorage.getItem("userId") || "1";
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setMessages((prev) => [...prev, { id: Date.now(), role: "user", content: userMessage }]);
     setIsLoading(true);
 
     try {
@@ -62,6 +64,7 @@ const ChatBot = () => {
         ...prev,
         {
           role: "assistant",
+          id: Date.now() + 1,
           content: data.response,
           promptStyle: data.prompt_style,
         },
@@ -71,6 +74,7 @@ const ChatBot = () => {
       setMessages((prev) => [
         ...prev,
         {
+          id: Date.now() + 1,
           role: "error",
           content:
             error instanceof Error
@@ -111,8 +115,8 @@ const ChatBot = () => {
           </div>
 
           <div className="chatbot-messages">
-            {messages.map((message, index) => (
-              <div key={index} className={`chat-message ${message.role}`}>
+            {messages.map((message) => (
+              <div key={message.id} className={`chat-message ${message.role}`}>
                 {message.content}
               </div>
             ))}

@@ -340,13 +340,17 @@ func handleGetFlags(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(flagStates); err != nil {
+	data, err := json.Marshal(flagStates)
+	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to encode flagStates response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(data); err != nil {
+		slog.ErrorContext(ctx, "failed to write flagStates response", "error", err)
 	}
 }
 
@@ -443,18 +447,23 @@ func handleUpdateFlagTargeting(w http.ResponseWriter, r *http.Request) {
 
 	slog.InfoContext(ctx, "Flag targeting updated", "flagKey", req.FlagKey, "userId", userID, "enabled", req.Enabled)
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(map[string]any{
+	respBody := map[string]any{
 		"success": true,
 		"userId":  userID,
 		"enabled": req.Enabled,
 		"userIds": userIDs,
-	}); err != nil {
+	}
+	data, err := json.Marshal(respBody)
+	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to encode response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := w.Write(data); err != nil {
+		slog.ErrorContext(ctx, "failed to write response", "error", err)
 	}
 }
 
