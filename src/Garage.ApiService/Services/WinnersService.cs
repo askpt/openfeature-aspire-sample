@@ -76,7 +76,7 @@ public class WinnersService(
         .Build();
 
         // Simulate a slow operation
-        var delay = await featureClient.GetIntegerValueAsync("SlowOperationDelay", 0, evaluationContext);
+        var delay = await featureClient.GetIntegerValueAsync("slow-operation-delay", 0, evaluationContext);
         await Task.Delay(delay);
     }
 }
