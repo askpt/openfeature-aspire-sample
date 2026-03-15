@@ -2,7 +2,7 @@
 description: Daily CI optimization coach that analyzes GitHub Actions workflows for efficiency improvements and cost reduction opportunities
 
 on:
-  schedule: daily
+  schedule: weekly
   workflow_dispatch:
 
 network:
@@ -31,7 +31,7 @@ safe-outputs:
     title-prefix: "[ci-coach] "
     github-token-for-extra-empty-commit: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
 timeout-minutes: 30
-source: githubnext/agentics/workflows/ci-coach.md@06bf149d12d83f09e2a52914afab936e9c8b6dd4
+source: githubnext/agentics/workflows/ci-coach.md@b897c2f3e43bde9ff7923c8fa9211055b26e27cc
 ---
 
 # CI Optimization Coach
@@ -139,7 +139,7 @@ If no significant improvements are found:
      needs: [build]
    lint:
      needs: [build]
-   
+
    # After: Parallel
    test:
      needs: [build]
