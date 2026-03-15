@@ -24,7 +24,7 @@ public class WinnersService(
 
         return await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
             ? await GetAllDatabaseWinnersAsync(count.Value)
-            : await GetAllJsonWinnersAsync(count.Value);
+            : await GetAllJsonWinnersAsync(count.Value, evaluationContext);
     }
 
     private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync(int count)
@@ -48,9 +48,9 @@ public class WinnersService(
         }
     }
 
-    private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count)
+    private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count, EvaluationContext evaluationContext)
     {
-        await SlowDownAsync();
+        await SlowDownAsync(evaluationContext);
         var dataFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "winners.json");
         try
         {
@@ -69,12 +69,8 @@ public class WinnersService(
         }
     }
 
-    private async Task SlowDownAsync()
+    private async Task SlowDownAsync(EvaluationContext evaluationContext)
     {
-        var evaluationContext = EvaluationContext.Builder()
-        .SetTargetingKey(Guid.NewGuid().ToString())
-        .Build();
-
         // Simulate a slow operation
         var delay = await featureClient.GetIntegerValueAsync("slow-operation-delay", 0, evaluationContext);
         await Task.Delay(delay);
