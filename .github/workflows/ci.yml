@@ -81,10 +81,12 @@ jobs:
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           global-json-file: global.json
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Restore dependencies
+        run: dotnet restore
       - name: dotnet format
         run: dotnet format --verify-no-changes --no-restore
+      - name: Build with dotnet
+        run: dotnet build --configuration Release --no-restore
     #   - name: Test with dotnet
     #     run: dotnet test
 
@@ -137,13 +139,16 @@ jobs:
           python-version: '3.14'
           allow-prereleases: true
           cache: 'pip'
-          cache-dependency-path: src/Garage.ChatService/requirements.txt
+          cache-dependency-path: |
+            src/Garage.ChatService/requirements.txt
+            src/Garage.ChatService/requirements-test.txt
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Check syntax
-        run: python -m py_compile main.py prompt_loader.py
+          pip install -r requirements-test.txt
+      - name: Run tests
+        run: pytest
 
   build-web:
     needs: changes
