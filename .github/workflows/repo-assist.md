@@ -42,7 +42,7 @@ tools:
   github:
     toolsets: [all]
     min-integrity: none # This workflow is allowed to examine and comment on any issues or PRs
-    repos: all
+    allowed-repos: all
   bash: true
   repo-memory: true
 
@@ -171,7 +171,7 @@ steps:
           json.dump(result, f, indent=2)
       EOF
 
-source: githubnext/agentics/workflows/repo-assist.md@d1d884596e62351dd652ae78465885dd32f0dd7d
+source: githubnext/agentics/workflows/repo-assist.md@4957663821dbb3260348084fa2f1659701950fef
 ---
 
 # Repo Assist
