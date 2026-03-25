@@ -9,4 +9,4 @@ opentelemetry-sdk>=1.40.0
 opentelemetry-instrumentation-fastapi>=0.50b0
 opentelemetry-instrumentation-logging>=0.50b0
 opentelemetry-exporter-otlp-proto-grpc>=1.40.0
-grpcio>=1.80.0
+grpcio>=1.78.0
