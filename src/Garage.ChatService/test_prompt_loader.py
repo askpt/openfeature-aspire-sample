@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 # Ensure the directory containing this test (and prompt_loader.py) is on sys.path
 _THIS_DIR = Path(__file__).resolve().parent
@@ -56,6 +57,26 @@ class TestRenderMessages:
         assert result is not prompt["messages"]
         assert original[0]["content"] == "Hello {{x}}"
 
+    def test_repeated_placeholder_in_same_message(self):
+        prompt = {"messages": [{"role": "user", "content": "{{name}} said hello to {{name}}"}]}
+        result = render_messages(prompt, {"name": "Alice"})
+        assert result[0]["content"] == "Alice said hello to Alice"
+
+    def test_empty_variable_value_substituted(self):
+        prompt = {"messages": [{"role": "user", "content": "Hello {{name}}!"}]}
+        result = render_messages(prompt, {"name": ""})
+        assert result[0]["content"] == "Hello !"
+
+    def test_message_missing_content_key_defaults_to_empty(self):
+        prompt = {"messages": [{"role": "user"}]}
+        result = render_messages(prompt, {})
+        assert result == [{"role": "user", "content": ""}]
+
+    def test_message_missing_role_key_defaults_to_user(self):
+        prompt = {"messages": [{"content": "Hello {{x}}"}]}
+        result = render_messages(prompt, {"x": "world"})
+        assert result == [{"role": "user", "content": "Hello world"}]
+
 
 class TestGetModelParameters:
     def test_returns_model_parameters(self):
@@ -103,3 +124,47 @@ class TestLoadPrompt:
         )
         result = load_prompt("simple", str(prompt_dir))
         assert result["name"] == "Simple"
+
+    def test_raises_yaml_error_for_invalid_yaml(self, tmp_path: Path):
+        load_prompt.cache_clear()
+        prompt_dir = tmp_path / "prompts"
+        prompt_dir.mkdir()
+        (prompt_dir / "bad.prompt.yml").write_text(
+            "name: [\n  unclosed bracket\n", encoding="utf-8"
+        )
+        with pytest.raises(yaml.YAMLError):
+            load_prompt("bad", str(prompt_dir))
+        load_prompt.cache_clear()
+
+    def test_cache_returns_same_object(self, tmp_path: Path):
+        load_prompt.cache_clear()
+        prompt_dir = tmp_path / "prompts"
+        prompt_dir.mkdir()
+        (prompt_dir / "cached.prompt.yml").write_text(
+            "name: Cached\nmessages: []\n", encoding="utf-8"
+        )
+        first = load_prompt("cached", str(prompt_dir))
+        second = load_prompt("cached", str(prompt_dir))
+        assert first is second
+        load_prompt.cache_clear()
+
+    def test_prompt_file_with_model_field(self, tmp_path: Path):
+        load_prompt.cache_clear()
+        prompt_dir = tmp_path / "prompts"
+        prompt_dir.mkdir()
+        (prompt_dir / "full.prompt.yml").write_text(
+            "name: Full Prompt\n"
+            "model: openai/gpt-4o\n"
+            "messages:\n"
+            "  - role: system\n"
+            "    content: You are helpful.\n"
+            "modelParameters:\n"
+            "  temperature: 0.3\n",
+            encoding="utf-8",
+        )
+        result = load_prompt("full", str(prompt_dir))
+        assert result["model"] == "openai/gpt-4o"
+        assert result["name"] == "Full Prompt"
+        assert len(result["messages"]) == 1
+        assert get_model_parameters(result) == {"temperature": 0.3}
+        load_prompt.cache_clear()
