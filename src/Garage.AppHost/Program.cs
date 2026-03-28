@@ -45,6 +45,12 @@ var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/"
     .WithHttpHealthCheck("/health")
     .PublishAsDockerFile();
 
+if (builder.ExecutionContext.IsPublishMode)
+{
+    chatService = chatService
+        .WithArgs("main:app", "--host", "0.0.0.0", "--port", "8000");
+}
+
 // Feature flags: flagd + flags-api deployed in both local and Azure modes
 var flagd = builder.AddFlagd("flagd");
 

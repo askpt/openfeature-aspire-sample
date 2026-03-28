@@ -9,6 +9,15 @@
       "command": "gh",
       "args": ["aw", "mcp-server"],
       "cwd": "${workspaceFolder}"
+    },
+    "Azure MCP Server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure/mcp@latest",
+        "server",
+        "start"
+      ]
     }
   },
   "inputs": []
