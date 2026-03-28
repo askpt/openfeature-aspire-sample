@@ -19,7 +19,7 @@ import (
 
 // initOtel initializes OpenTelemetry with autoexport for traces, metrics, and logs
 func initOtel(ctx context.Context) (func(context.Context) error, error) {
-	serviceName := cmp.Or(os.Getenv("OTEL_SERVICE_NAME"), "flags-api")
+	serviceName := cmp.Or(os.Getenv("OTEL_SERVICE_NAME"), "flagsapi")
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(semconv.ServiceName(serviceName)),

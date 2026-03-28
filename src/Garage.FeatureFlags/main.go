@@ -20,7 +20,7 @@ import (
 
 var (
 	featureClient *openfeature.Client
-	tracer        = otel.Tracer("flags-api")
+	tracer        = otel.Tracer("flagsapi")
 )
 
 // openFeatureEndpoint returns the OFREP endpoint from the environment.
@@ -130,5 +130,5 @@ func newServer() *http.Server {
 		_, _ = w.Write([]byte("Hello from Go Feature Flags API!"))
 	})
 
-	return &http.Server{Handler: otelhttp.NewHandler(mux, "flags-api")}
+	return &http.Server{Handler: otelhttp.NewHandler(mux, "flagsapi")}
 }

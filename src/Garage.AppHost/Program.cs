@@ -54,7 +54,7 @@ if (builder.ExecutionContext.IsPublishMode)
         .WithArgs("main:app", "--host", "0.0.0.0", "--port", "8000");
 }
 
-// Feature flags: flagd + flags-api deployed in both local and Azure modes
+// Feature flags: flagd + flagsapi deployed in both local and Azure modes
 var flagd = builder.AddFlagd("flagd");
 
 if (!builder.ExecutionContext.IsPublishMode)
@@ -64,7 +64,7 @@ if (!builder.ExecutionContext.IsPublishMode)
     var flagsDir = Path.GetDirectoryName(flagsPath)!;
     flagd.WithBindFileSync(flagsDir);
 
-    var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+    var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
         .WithHttpEndpoint(env: "PORT")
         .WithExternalHttpEndpoints()
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
@@ -100,7 +100,7 @@ if (!builder.ExecutionContext.IsPublishMode)
 else
 {
     // Azure deployment: flagd reads from Azure Blob Storage (azblob:// sync),
-    // flags-api reads/writes via gocloud.dev blob SDK — no shared volume needed
+    // flagsapi reads/writes via gocloud.dev blob SDK — no shared volume needed
     var flagsStorage = builder.AddAzureStorage("flags-storage");
     var flagsBlobs = flagsStorage.AddBlobs("flags-blobs");
     var defaultFlagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
@@ -209,8 +209,8 @@ else
     var accountName = flagsStorage.GetOutput("accountName");
     var seedScriptId = flagsStorage.GetOutput("seedScriptId");
 
-    // flags-api: reads/writes flagd.json in Azure Blob via gocloud.dev
-    var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+    // flagsapi: reads/writes flagd.json in Azure Blob via gocloud.dev
+    var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
         .WithHttpEndpoint(env: "PORT")
         .WithExternalHttpEndpoints()
         .WithReference(flagsBlobs)

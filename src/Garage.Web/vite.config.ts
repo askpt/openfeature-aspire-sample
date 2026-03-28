@@ -60,8 +60,8 @@ export default defineConfig(({ mode }) => {
         },
         "/flags": {
           target:
-            process.env["services__flags-api__https__0"] ||
-            process.env["services__flags-api__http__0"],
+            process.env["services__flagsapi__https__0"] ||
+            process.env["services__flagsapi__http__0"],
           changeOrigin: true,
           secure: false,
         },
