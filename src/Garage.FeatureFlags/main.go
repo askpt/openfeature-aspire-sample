@@ -77,13 +77,6 @@ func run(ctx context.Context) error {
 		slog.Info("OpenFeature initialized successfully with OFREP provider")
 	}
 
-	// Seed blob storage with default flags if the blob doesn't exist yet
-	if bb, ok := backend.(*blobBackend); ok {
-		if err := bb.seedIfEmpty(ctx); err != nil {
-			slog.Warn("Failed to seed blob storage with default flags", "error", err)
-		}
-	}
-
 	// Start the server
 	server := newServer()
 	eg, ctx := errgroup.WithContext(ctx)

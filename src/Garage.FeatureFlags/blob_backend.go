@@ -3,12 +3,10 @@ package main
 import (
 	"context"
 	"io"
-	"log/slog"
 	"os"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
-	"gocloud.dev/gcerrors"
 )
 
 // flagsBackend abstracts read/write access to the flagd.json configuration.
@@ -72,47 +70,6 @@ func (bb *blobBackend) Write(ctx context.Context, data []byte) error {
 	return writer.Close()
 }
 
-// seedIfEmpty uploads the default flagd.json from the local filesystem to blob
-// storage when the blob does not yet exist. This is used on first deployment.
-func (bb *blobBackend) seedIfEmpty(ctx context.Context) error {
-	bucket, err := blob.OpenBucket(ctx, bb.bucketURL)
-	if err != nil {
-		return err
-	}
-	defer bucket.Close()
-
-	exists, err := bucket.Exists(ctx, bb.blobName)
-	if err != nil {
-		return err
-	}
-	if exists {
-		slog.InfoContext(ctx, "Blob already exists, skipping seed", "blob", bb.blobName)
-		return nil
-	}
-
-	// Read the local flags file as the seed source
-	data, err := os.ReadFile(flagsFilePath)
-	if err != nil {
-		slog.WarnContext(ctx, "No local flags file to seed from", "path", flagsFilePath, "error", err)
-		return nil
-	}
-
-	writer, err := bucket.NewWriter(ctx, bb.blobName, nil)
-	if err != nil {
-		return err
-	}
-	if _, err := writer.Write(data); err != nil {
-		_ = writer.Close()
-		return err
-	}
-	if err := writer.Close(); err != nil {
-		return err
-	}
-
-	slog.InfoContext(ctx, "Seeded blob storage with default flags", "blob", bb.blobName)
-	return nil
-}
-
 // newBackend returns the appropriate backend based on environment variables.
 // If FLAGS_BLOB_CONTAINER is set, it uses Azure Blob Storage via gocloud.dev;
 // otherwise it falls back to the local filesystem.
@@ -130,9 +87,4 @@ func newBackend() flagsBackend {
 	}
 
 	return &fileBackend{path: flagsFilePath}
-}
-
-// isBlobNotFound returns true if the error indicates a blob was not found.
-func isBlobNotFound(err error) bool {
-	return gcerrors.Code(err) == gcerrors.NotFound
 }
