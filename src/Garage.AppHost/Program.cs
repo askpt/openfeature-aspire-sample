@@ -40,7 +40,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
 // Add Python chat service using Uvicorn (FastAPI/ASGI)
-var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/", "main:app")
+var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/", "main:app")
     .WithPip()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
