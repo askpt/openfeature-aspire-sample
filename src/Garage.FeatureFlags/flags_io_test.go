@@ -8,12 +8,17 @@ import (
 	"testing"
 )
 
-// setFlagsFilePath temporarily overrides the global flagsFilePath and restores it on cleanup.
+// setFlagsFilePath temporarily overrides the global flagsFilePath and backend, and restores them on cleanup.
 func setFlagsFilePath(t *testing.T, path string) {
 	t.Helper()
-	old := flagsFilePath
+	oldPath := flagsFilePath
+	oldBackend := backend
 	flagsFilePath = path
-	t.Cleanup(func() { flagsFilePath = old })
+	backend = &fileBackend{path: path}
+	t.Cleanup(func() {
+		flagsFilePath = oldPath
+		backend = oldBackend
+	})
 }
 
 // writeTempFlagsFile creates a temporary flags JSON file and returns its path.

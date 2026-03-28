@@ -12,7 +12,7 @@ server {
     }
 
     location /api/chat {
-        proxy_pass ${services__chat-service__https__0}/chat;
+        proxy_pass ${services__chatservice__http__0}/chat;
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -26,12 +26,18 @@ server {
         rewrite ^/api(/.*)$ $1 break;
     }
 
+    location /flags/ {
+        proxy_pass ${services__flagsapi__http__0};
+        proxy_http_version 1.1;
+        proxy_ssl_server_name on;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
     location /ofrep/ {
         proxy_pass ${OFREP_ENDPOINT}/ofrep/;
         proxy_http_version 1.1;
         proxy_ssl_server_name on;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Authorization "${OFREP_AUTHORIZATION}";
         proxy_set_header Content-Type "application/json";
     }
 }

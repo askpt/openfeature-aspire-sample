@@ -97,7 +97,7 @@ cd src/Garage.FeatureFlags
 go mod download
 
 # Build the application
-go build -o flags-api .
+go build -o flagsapi .
 
 # Run the application
 go run .

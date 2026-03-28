@@ -346,7 +346,7 @@ src/Garage.Web/wwwroot/
 src/Garage.Web/dist/
 
 # Go build artifacts
-src/Garage.FeatureFlags/flags-api
+src/Garage.FeatureFlags/flagsapi
 
 # Python virtual environments
 src/Garage.ChatService/.venv/
