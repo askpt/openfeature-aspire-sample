@@ -1,4 +1,6 @@
 using Aspire.Hosting.GitHub;
+using Azure.Provisioning;
+using Azure.Provisioning.Storage;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -43,12 +45,15 @@ var chatService = builder.AddUvicornApp("chat-service", "../Garage.ChatService/"
     .WithHttpHealthCheck("/health")
     .PublishAsDockerFile();
 
-// Only add flagd service for local development (not during publishing/deployment)
-// Use DevCycle if is in publish mode
+// Feature flags: flagd + flags-api deployed in both local and Azure modes
+var flagd = builder.AddFlagd("flagd");
+
 if (!builder.ExecutionContext.IsPublishMode)
 {
-    // Get the absolute path to the flags directory for the Go app
+    // Local development: use bind mount from host filesystem
     var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
+    var flagsDir = Path.GetDirectoryName(flagsPath)!;
+    flagd.WithBindFileSync(flagsDir);
 
     var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
         .WithHttpEndpoint(env: "PORT")
@@ -56,10 +61,6 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
         .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
         .PublishAsDockerFile();
-
-    var flagsDir = Path.GetDirectoryName(flagsPath)!;
-    var flagd = builder.AddFlagd("flagd")
-        .WithBindFileSync(flagsDir);
 
     var ofrepEndpoint = flagd.GetEndpoint("ofrep");
 
@@ -89,29 +90,81 @@ if (!builder.ExecutionContext.IsPublishMode)
 }
 else
 {
-    var serverKey = builder.AddParameter("devcycle-server-key", secret: true);
-    var devcycleUrl = builder.Configuration["DevCycle:Url"] ?? null;
+    // Azure deployment: flagd reads from Azure Blob Storage (azblob:// sync),
+    // flags-api reads/writes via gocloud.dev blob SDK — no shared volume needed
+    var flagsStorage = builder.AddAzureStorage("flags-storage");
+    var flagsBlobs = flagsStorage.AddBlobs("flags-blobs");
 
-    // For web (nginx), set separate OFREP_AUTHORIZATION for simplicity
+    // Provision a "flags" blob container and output the storage account name
+    flagsStorage.ConfigureInfrastructure(infra =>
+    {
+        var account = infra.GetProvisionableResources()
+            .OfType<StorageAccount>()
+            .Single();
+
+        var blobService = infra.GetProvisionableResources()
+            .OfType<BlobService>()
+            .SingleOrDefault();
+
+        if (blobService is null)
+        {
+            blobService = new BlobService("default") { Parent = account };
+            infra.Add(blobService);
+        }
+
+        var flagsContainer = new BlobContainer("flags") { Parent = blobService, Name = "flags" };
+        infra.Add(flagsContainer);
+
+        infra.Add(new ProvisioningOutput("accountName", typeof(string))
+        {
+            Value = account.Name
+        });
+    });
+
+    var accountName = flagsStorage.GetOutput("accountName");
+
+    // flagd: Azure Blob sync (polls blob for updates)
+    flagd
+        .WithReference(flagsBlobs)
+        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
+        .WithArgs("--uri", "azblob://flags/flagd.json");
+
+    // flags-api: reads/writes flagd.json in Azure Blob via gocloud.dev
+    var flagsApi = builder.AddGolangApp("flags-api", "../Garage.FeatureFlags/")
+        .WithHttpEndpoint(env: "PORT")
+        .WithExternalHttpEndpoints()
+        .WithReference(flagsBlobs)
+        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
+        .WithEnvironment("FLAGS_BLOB_CONTAINER", "flags")
+        .WithEnvironment("FLAGS_BLOB_NAME", "flagd.json")
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+        .PublishAsDockerFile();
+
+    var ofrepEndpoint = flagd.GetEndpoint("ofrep");
+
+    apiService = apiService
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
     webFrontend = webFrontend
+        .WaitFor(flagd)
+        .WithReference(flagsApi)
+        .WaitFor(flagsApi)
         .WithReference(chatService)
         .WaitFor(chatService)
-        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
-        .WithEnvironment("OFREP_AUTHORIZATION", serverKey);
-
-    // For .NET services, use OFREP_HEADERS with Authorization=<value> format
-    apiService = apiService
-        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
-        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
-
-    // For Python chat service, use OFREP_HEADERS with Authorization=<value> format
-    chatService = chatService
-        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
-        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 
     migration = migration
-        .WithEnvironment("OFREP_ENDPOINT", devcycleUrl)
-        .WithEnvironment("OFREP_HEADERS", $"Authorization={serverKey}");
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    flagsApi = flagsApi
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+    chatService = chatService
+        .WaitFor(flagd)
+        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
 
 webFrontend

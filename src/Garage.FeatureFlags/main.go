@@ -55,6 +55,7 @@ type TargetingRequest struct {
 var (
 	flagsFilePath string
 	fileMutex     sync.RWMutex
+	backend       flagsBackend
 
 	featureClient *openfeature.Client
 	tracer        = otel.Tracer("flags-api")
@@ -136,6 +137,7 @@ func init() {
 	if flagsFilePath == "" {
 		flagsFilePath = "../Garage.AppHost/flags/flagd.json"
 	}
+	backend = newBackend()
 }
 
 // initOpenFeature initializes the OpenFeature client with OFREP provider
@@ -164,7 +166,7 @@ func readFlagsFile(ctx context.Context) (*FlagFile, error) {
 	_, span := tracer.Start(ctx, "readFlagsFile")
 	defer span.End()
 
-	data, err := os.ReadFile(flagsFilePath)
+	data, err := backend.Read(ctx)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -193,7 +195,7 @@ func writeFlagsFile(ctx context.Context, flagFile *FlagFile) error {
 		return err
 	}
 
-	if err := os.WriteFile(flagsFilePath, data, 0o600); err != nil {
+	if err := backend.Write(ctx, data); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return err
@@ -506,6 +508,13 @@ func run(ctx context.Context) error {
 		slog.Info("Flag updates require preview mode to be configured")
 	} else {
 		slog.Info("OpenFeature initialized successfully with OFREP provider")
+	}
+
+	// Seed blob storage with default flags if the blob doesn't exist yet
+	if bb, ok := backend.(*blobBackend); ok {
+		if err := bb.seedIfEmpty(ctx); err != nil {
+			slog.Warn("Failed to seed blob storage with default flags", "error", err)
+		}
 	}
 
 	// Start the server
