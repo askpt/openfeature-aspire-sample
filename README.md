@@ -1,9 +1,9 @@
 # OpenFeature .NET OFREP Demo: Le Mans Winners Management System
 
 [![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python)](https://python.org/)
+[![Python 3.14](https://img.shields.io/badge/Python-3.14-3776AB?logo=python)](https://python.org/)
 [![Go 1.25](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go)](https://go.dev/)
-[![Aspire](https://img.shields.io/badge/Aspire-Enabled-purple)](https://learn.microsoft.com/en-us/dotnet/aspire/)
+[![Aspire 13.2](https://img.shields.io/badge/Aspire-13.2-purple)](https://learn.microsoft.com/en-us/dotnet/aspire/)
 [![OpenFeature](https://img.shields.io/badge/OpenFeature-Ready-green)](https://openfeature.dev/)
 [![OFREP](https://img.shields.io/badge/OFREP-Enabled-blue)](https://openfeature.dev/specification/ofrep)
 
@@ -28,11 +28,13 @@ This demo showcases how to implement feature flags using **OpenFeature** and the
 
 - **Garage.Web**: React + Vite frontend for managing car collections with floating chatbot UI
 - **Garage.ApiService**: REST API for car data with Entity Framework Core
+- **Garage.ApiModel**: Data model library containing the EF Core DbContext and entity definitions
+- **Garage.ApiDatabaseSeeder**: Database migration and seeding service
 - **Garage.ChatService**: Python FastAPI service for AI chatbot using GitHub Models
 - **Garage.FeatureFlags**: Go API for managing feature flag targeting rules
-- **Garage.ServiceDefaults**: Shared services including feature flag implementations
-- **Garage.Shared**: Common models and DTOs
-- **Garage.AppHost**: .NET Aspire orchestration and service discovery
+- **Garage.ServiceDefaults**: Shared services including OpenFeature, OpenTelemetry, and resilience configuration
+- **Garage.Shared**: Common models, DTOs, and seed data
+- **Garage.AppHost**: .NET Aspire orchestration, service discovery, and Azure deployment configuration
 
 ### Infrastructure
 
@@ -64,6 +66,7 @@ The demo demonstrates these feature flags:
 | `enable-preview-mode`      | `string` | Comma-separated list of editable flags    | `""`          |
 | `enable-chatbot`           | `bool`   | Show/hide AI chatbot (with targeting)     | `false`       |
 | `prompt-file`              | `string` | Select chatbot prompt style               | `"expert"`    |
+| `slow-operation-delay`     | `int`    | Simulated latency in ms (0/200/1000/3000) | `0`           |
 
 ### Chatbot Prompt Styles
 
@@ -79,8 +82,9 @@ The chatbot supports multiple prompt styles via GitHub Repository Prompts (`.pro
 ### Prerequisites
 
 - .NET 10.0 SDK or later
-- Python 3.12 or later
+- Python 3.14 or later
 - Go 1.25 or later (for Feature Flags API)
+- Node.js 22 or later (for React frontend)
 - Visual Studio, Visual Studio Code with C# extension or JetBrains Rider
 - Git for version control
 - Docker Desktop (for containerized dependencies)
@@ -91,8 +95,8 @@ The chatbot supports multiple prompt styles via GitHub Repository Prompts (`.pro
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/open-feature/openfeature-dotnet-workshop.git
-cd openfeature-dotnet-workshop
+git clone https://github.com/open-feature/openfeature-aspire-sample.git
+cd openfeature-aspire-sample
 ```
 
 ### 2. Configure GitHub Token (for Chatbot)
@@ -121,6 +125,22 @@ aspire run
 - Aspire Dashboard: https://localhost:15888
 
 The application will start with flagd running as a container, providing OFREP endpoints for the React frontend, .NET API service, and Python chatbot to consume feature flags.
+
+## Go Feature Flags API
+
+The Go feature flags API (`Garage.FeatureFlags`) provides dynamic management of flag targeting rules:
+
+- **Framework**: Standard library `net/http` with `otelhttp` instrumentation
+- **Feature Flags**: OpenFeature Go SDK with OFREP provider
+- **Storage**: Local filesystem or Azure Blob Storage (via gocloud.dev)
+- **Telemetry**: Full OpenTelemetry integration (traces, metrics, logs)
+
+### API Endpoints
+
+```
+GET  /flags           # List all flag targeting configurations
+PUT  /flags/{name}    # Update targeting rules for a flag
+```
 
 ## Python Chat Service
 

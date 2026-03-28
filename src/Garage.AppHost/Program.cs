@@ -54,48 +54,24 @@ if (builder.ExecutionContext.IsPublishMode)
         .WithArgs("main:app", "--host", "0.0.0.0", "--port", "8000");
 }
 
-// Feature flags: flagd + flagsapi deployed in both local and Azure modes
+// Feature flags infrastructure
 var flagd = builder.AddFlagd("flagd");
+
+var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
+    .WithHttpEndpoint(env: "PORT")
+    .WithExternalHttpEndpoints()
+    .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+    .PublishAsDockerFile();
 
 if (!builder.ExecutionContext.IsPublishMode)
 {
-    // Local development: use bind mount from host filesystem
+    // Local development: flagd reads from host filesystem via bind mount
     var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
-    var flagsDir = Path.GetDirectoryName(flagsPath)!;
-    flagd.WithBindFileSync(flagsDir);
-
-    var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
-        .WithHttpEndpoint(env: "PORT")
-        .WithExternalHttpEndpoints()
-        .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
-        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-        .PublishAsDockerFile();
-
-    var ofrepEndpoint = flagd.GetEndpoint("ofrep");
-
-    apiService = apiService
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    webFrontend = webFrontend
-        .WaitFor(flagd)
-        .WithReference(flagsApi)
-        .WaitFor(flagsApi)
-        .WithReference(chatService)
-        .WaitFor(chatService)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    migration = migration
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+    flagd.WithBindFileSync(Path.GetDirectoryName(flagsPath)!);
 
     flagsApi = flagsApi
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    chatService = chatService
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+        .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
+        .WaitFor(flagd);
 }
 else
 {
@@ -103,10 +79,66 @@ else
     // flagsapi reads/writes via gocloud.dev blob SDK — no shared volume needed
     var flagsStorage = builder.AddAzureStorage("flags-storage");
     var flagsBlobs = flagsStorage.AddBlobs("flags-blobs");
-    var defaultFlagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
-    var defaultFlagsBase64 = Convert.ToBase64String(File.ReadAllBytes(defaultFlagsPath));
+    var defaultFlagsBase64 = Convert.ToBase64String(
+        File.ReadAllBytes(Path.Combine(builder.AppHostDirectory, "flags", "flagd.json")));
 
-    // Provision a "flags" blob container and output the storage account name
+    ConfigureAzureFlagsInfrastructure(flagsStorage, defaultFlagsBase64);
+
+    var accountName = flagsStorage.GetOutput("accountName");
+    var seedScriptId = flagsStorage.GetOutput("seedScriptId");
+
+    flagsApi = flagsApi
+        .WithReference(flagsBlobs)
+        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
+        .WithEnvironment("FLAGS_BLOB_CONTAINER", "flags")
+        .WithEnvironment("FLAGS_BLOB_NAME", "flagd.json");
+
+    flagd = flagd
+        .WithEnvironment("FLAGS_SEED_SCRIPT_ID", seedScriptId)
+        .WithReference(flagsBlobs)
+        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
+        .WithArgs("--uri", "azblob://flags/flagd.json");
+}
+
+// Wire OFREP endpoint to all services
+var ofrepEndpoint = flagd.GetEndpoint("ofrep");
+
+apiService = apiService
+    .WaitFor(flagd)
+    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+migration = migration
+    .WaitFor(flagd)
+    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+flagsApi = flagsApi
+    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+chatService = chatService
+    .WaitFor(flagd)
+    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
+
+webFrontend
+    .WithReference(apiService)
+    .WaitFor(apiService)
+    .WaitFor(flagd)
+    .WithReference(flagsApi)
+    .WaitFor(flagsApi)
+    .WithReference(chatService)
+    .WaitFor(chatService)
+    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint)
+    .WithEnvironment("BROWSER", "none")
+    .WithHttpEndpoint(env: "VITE_PORT")
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
+
+builder.Build().Run();
+
+// Provision Azure Blob Storage for feature flags (blob container + seed script)
+static void ConfigureAzureFlagsInfrastructure(
+    IResourceBuilder<Aspire.Hosting.Azure.AzureStorageResource> flagsStorage,
+    string defaultFlagsBase64)
+{
     flagsStorage.ConfigureInfrastructure(infra =>
     {
         var account = infra.GetProvisionableResources()
@@ -205,60 +237,4 @@ else
             Value = seedFlagsScript.Id
         });
     });
-
-    var accountName = flagsStorage.GetOutput("accountName");
-    var seedScriptId = flagsStorage.GetOutput("seedScriptId");
-
-    // flagsapi: reads/writes flagd.json in Azure Blob via gocloud.dev
-    var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
-        .WithHttpEndpoint(env: "PORT")
-        .WithExternalHttpEndpoints()
-        .WithReference(flagsBlobs)
-        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
-        .WithEnvironment("FLAGS_BLOB_CONTAINER", "flags")
-        .WithEnvironment("FLAGS_BLOB_NAME", "flagd.json")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
-        .PublishAsDockerFile();
-
-    // flagd: depends on infra seed output so blob exists before sync starts.
-    flagd = flagd
-        .WithEnvironment("FLAGS_SEED_SCRIPT_ID", seedScriptId)
-        .WithReference(flagsBlobs)
-        .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
-        .WithArgs("--uri", "azblob://flags/flagd.json");
-
-    var ofrepEndpoint = flagd.GetEndpoint("ofrep");
-
-    apiService = apiService
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    webFrontend = webFrontend
-        .WaitFor(flagd)
-        .WithReference(flagsApi)
-        .WaitFor(flagsApi)
-        .WithReference(chatService)
-        .WaitFor(chatService)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    migration = migration
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    flagsApi = flagsApi
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-    chatService = chatService
-        .WaitFor(flagd)
-        .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 }
-
-webFrontend
-    .WithReference(apiService)
-    .WaitFor(apiService)
-    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
-    .WithHttpEndpoint(env: "VITE_PORT")
-    .WithExternalHttpEndpoints()
-    .PublishAsDockerFile();
-
-builder.Build().Run();
