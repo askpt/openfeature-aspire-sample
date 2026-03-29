@@ -87,6 +87,7 @@ steps:
   - name: Fetch repo data for task weighting
     env:
       GH_TOKEN: ${{ github.token }}
+      GH_HOST: github.com
     run: |
       mkdir -p /tmp/gh-aw
 
