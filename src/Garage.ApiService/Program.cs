@@ -2,7 +2,6 @@ using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
 using Garage.Shared.Models;
-using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
