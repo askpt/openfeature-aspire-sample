@@ -7,7 +7,7 @@ internal static class OpenApiHelpers
     {
         options.AddDocumentTransformer((document, _, _) =>
         {
-            document.Info.Description = "REST API for Le Mans winners data with feature-flag-driven behavior and caching.";
+            document.Info.Description = "REST API for Le Mans winners data with feature-flag-driven behavior.";
             document.Info.Title = "Garage API Service";
             document.Info.Version = "1.0.0";
             document.Tags = new HashSet<OpenApiTag>

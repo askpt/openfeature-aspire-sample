@@ -36,12 +36,31 @@ if (app.Environment.IsDevelopment())
 }
 
 // Le Mans Winners API endpoints
-app.MapGet("/lemans/winners", async (IWinnersService winnersService) =>
+const string LeMansWinners = "GetAllLeMansWinners";
+app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Program> logger) =>
     {
-        var winners = await winnersService.GetAllWinnersAsync();
-        return Results.Ok(winners);
+        try
+        {
+            // Set correct trace status
+            using var activity = System.Diagnostics.Activity.Current?.Source.StartActivity(LeMansWinners);
+            activity?.SetTag("feature.winners-count", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Count()));
+            activity?.SetTag("feature.enable-database-winners", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Any(w => w.IsOwned)));
+
+            var winners = await winnersService.GetAllWinnersAsync();
+            return Results.Ok(winners);
+        }
+        catch (Exception ex)
+        {
+            // Set trace status to error
+            using var activity = System.Diagnostics.Activity.Current;
+            activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error, ex.Message);
+            // Log the exception (logging is configured in service defaults)
+            logger.LogError(ex, "An error occurred while retrieving Le Mans winners.");
+
+            return Results.Problem("An unexpected error occurred while retrieving winners.", statusCode: StatusCodes.Status500InternalServerError);
+        }
     })
-    .WithName("GetAllLeMansWinners")
+    .WithName(LeMansWinners)
     .WithSummary("List Le Mans 24 Hours winners")
     .WithDescription("Returns Le Mans winners with car and driver details. The data source and result size are controlled by feature flags including enable-database-winners and winners-count.")
     .Produces<IEnumerable<Winner>>(StatusCodes.Status200OK)
