@@ -1,6 +1,9 @@
+using System.Diagnostics;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
+using Garage.Shared.Models;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +23,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IWinnersService, WinnersService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(OpenApiHelpers.ConfigureOpenApi);
 
 var app = builder.Build();
 
@@ -30,16 +33,39 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 // Le Mans Winners API endpoints
-app.MapGet("/lemans/winners", async (IWinnersService winnersService) =>
+const string LeMansWinners = "GetAllLeMansWinners";
+app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Program> logger) =>
     {
-        var winners = await winnersService.GetAllWinnersAsync();
-        return Results.Ok(winners);
+        // Set correct trace status
+        using var activity = Activity.Current;
+        try
+        {
+            var winners = await winnersService.GetAllWinnersAsync();
+            activity?.SetTag("feature.winners-count", winners.Count());
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return Results.Ok(winners);
+        }
+        catch (Exception ex)
+        {
+            // Set trace status to error
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
+            // Log the exception (logging is configured in service defaults)
+            logger.LogError(ex, "An error occurred while retrieving Le Mans winners.");
+
+            return Results.Problem("An unexpected error occurred while retrieving winners.", statusCode: StatusCodes.Status500InternalServerError);
+        }
     })
-    .WithName("GetAllLeMansWinners")
-    .WithTags("Le Mans");
+    .WithName(LeMansWinners)
+    .WithSummary("List Le Mans 24 Hours winners")
+    .WithDescription("Returns Le Mans winners with car and driver details. The data source and result size are controlled by feature flags including enable-database-winners and winners-count.")
+    .Produces<IEnumerable<Winner>>(StatusCodes.Status200OK)
+    .ProducesProblem(StatusCodes.Status500InternalServerError)
+    .WithTags("Le Mans Winners");
 
 app.MapDefaultEndpoints();
 

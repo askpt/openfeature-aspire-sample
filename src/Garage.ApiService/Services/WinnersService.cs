@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Mappers;
@@ -8,27 +9,45 @@ using OpenFeature.Model;
 
 namespace Garage.ApiService.Services;
 
-public class WinnersService(
+internal class WinnersService(
     GarageDbContext context,
     ILogger<WinnersService> logger,
-    IFeatureClient featureClient)
+    IFeatureClient featureClient,
+    IWebHostEnvironment environment)
     : IWinnersService
 {
+    private readonly ActivitySource _activitySource = new(environment.ApplicationName);
+
+    /// <summary>
+    /// Retrieves winners using feature flags to select the data source and item count.
+    /// </summary>
     public async Task<IEnumerable<Winner>> GetAllWinnersAsync()
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllWinnersAsync));
+
         var evaluationContext = EvaluationContext.Builder()
             .SetTargetingKey(Guid.NewGuid().ToString())
             .Build();
 
         var count = await featureClient.GetIntegerDetailsAsync("winners-count", 5, evaluationContext);
 
-        return await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
+        var list = await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
             ? await GetAllDatabaseWinnersAsync(count.Value)
             : await GetAllJsonWinnersAsync(count.Value, evaluationContext);
+
+        activity?.SetStatus(ActivityStatusCode.Ok);
+        return list;
     }
 
+    /// <summary>
+    /// Retrieves winners from PostgreSQL through Entity Framework.
+    /// </summary>
     private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync(int count)
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllDatabaseWinnersAsync));
+
         try
         {
             var winnersDatabase = await context.Winners
@@ -39,17 +58,27 @@ public class WinnersService(
 
             var mapper = new WinnerMapper();
 
-            return winnersDatabase.Select(mapper.WinnerToWinnerDto);
+            var list = winnersDatabase.Select(mapper.WinnerToWinnerDto);
+
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return list;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to retrieve all Le Mans winners");
-            return [];
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw; // Let the exception bubble up to be handled by the caller
         }
     }
 
+    /// <summary>
+    /// Retrieves winners from the JSON seed file.
+    /// </summary>
     private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count, EvaluationContext evaluationContext)
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllJsonWinnersAsync));
+
         await SlowDownAsync(evaluationContext);
         var dataFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "winners.json");
         try
@@ -60,15 +89,21 @@ public class WinnersService(
                 PropertyNameCaseInsensitive = true
             });
 
-            return winners?.OrderByDescending(w => w.Year).Take(count) ?? Enumerable.Empty<Winner>();
+            var list = winners?.OrderByDescending(w => w.Year).Take(count) ?? [];
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return list;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to read winners data from JSON file: {FilePath}", dataFilePath);
-            return [];
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw; // Let the exception bubble up to be handled by the caller
         }
     }
 
+    /// <summary>
+    /// Applies an optional delay for demo and testing scenarios.
+    /// </summary>
     private async Task SlowDownAsync(EvaluationContext evaluationContext)
     {
         // Simulate a slow operation
