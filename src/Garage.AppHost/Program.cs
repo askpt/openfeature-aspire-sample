@@ -4,7 +4,6 @@ using Azure.Provisioning.Expressions;
 using Azure.Provisioning.Resources;
 using Azure.Provisioning.Roles;
 using Azure.Provisioning.Storage;
-using Google.Protobuf.WellKnownTypes;
 using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
