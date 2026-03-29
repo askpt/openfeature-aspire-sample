@@ -4,6 +4,7 @@ using Azure.Provisioning.Expressions;
 using Azure.Provisioning.Resources;
 using Azure.Provisioning.Roles;
 using Azure.Provisioning.Storage;
+using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -72,6 +73,12 @@ if (!builder.ExecutionContext.IsPublishMode)
     flagsApi = flagsApi
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
         .WaitFor(flagd);
+
+    // Add API Reference
+    var scalar = builder.AddScalarApiReference();
+
+    // Register services with the API Reference
+    scalar.WithApiReference(apiService);
 }
 else
 {

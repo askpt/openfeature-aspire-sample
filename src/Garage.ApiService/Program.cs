@@ -3,7 +3,6 @@ using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
 using Garage.Shared.Models;
-using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +32,6 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
 }
 
 // Le Mans Winners API endpoints
