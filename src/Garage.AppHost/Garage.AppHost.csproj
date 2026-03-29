@@ -8,8 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="../Garage.ApiDatabaseSeeder/Garage.ApiDatabaseSeeder.csproj" />
     <ProjectReference Include="..\Garage.ApiService\Garage.ApiService.csproj" />
-    <ProjectReference Include="..\Garage.ServiceDefaults\Garage.ServiceDefaults.csproj"
-      IsAspireProjectResource="false" />
+    <ProjectReference Include="..\Garage.ServiceDefaults\Garage.ServiceDefaults.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +22,7 @@
     <PackageReference Include="Aspire.Hosting.Python" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Flagd" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Golang" />
+    <PackageReference Include="Scalar.Aspire" />
   </ItemGroup>
 
 </Project>
