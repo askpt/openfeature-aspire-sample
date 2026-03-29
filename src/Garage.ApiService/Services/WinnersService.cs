@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Mappers;
@@ -8,26 +9,35 @@ using OpenFeature.Model;
 
 namespace Garage.ApiService.Services;
 
-public class WinnersService(
+internal class WinnersService(
     GarageDbContext context,
     ILogger<WinnersService> logger,
-    IFeatureClient featureClient)
+    IFeatureClient featureClient,
+    IWebHostEnvironment environment)
     : IWinnersService
 {
+    private readonly ActivitySource _activitySource = new(environment.ApplicationName);
+
     /// <summary>
     /// Retrieves winners using feature flags to select the data source and item count.
     /// </summary>
     public async Task<IEnumerable<Winner>> GetAllWinnersAsync()
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllWinnersAsync));
+
         var evaluationContext = EvaluationContext.Builder()
             .SetTargetingKey(Guid.NewGuid().ToString())
             .Build();
 
         var count = await featureClient.GetIntegerDetailsAsync("winners-count", 5, evaluationContext);
 
-        return await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
+        var list = await featureClient.GetBooleanValueAsync("enable-database-winners", false, evaluationContext)
             ? await GetAllDatabaseWinnersAsync(count.Value)
             : await GetAllJsonWinnersAsync(count.Value, evaluationContext);
+
+        activity?.SetStatus(ActivityStatusCode.Ok);
+        return list;
     }
 
     /// <summary>

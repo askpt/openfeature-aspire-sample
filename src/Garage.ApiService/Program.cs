@@ -44,16 +44,15 @@ app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Pro
         using var activity = Activity.Current;
         try
         {
-            activity?.SetTag("feature.winners-count", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Count()));
-            activity?.SetTag("feature.enable-database-winners", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Any(w => w.IsOwned)));
-
             var winners = await winnersService.GetAllWinnersAsync();
+            activity?.SetTag("feature.winners-count", winners.Count());
+            activity?.SetStatus(ActivityStatusCode.Ok);
             return Results.Ok(winners);
         }
         catch (Exception ex)
         {
             // Set trace status to error
-            activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error, ex.Message);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
 
             // Log the exception (logging is configured in service defaults)
             logger.LogError(ex, "An error occurred while retrieving Le Mans winners.");
