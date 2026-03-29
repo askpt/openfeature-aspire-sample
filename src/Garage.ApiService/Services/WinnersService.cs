@@ -45,6 +45,9 @@ internal class WinnersService(
     /// </summary>
     private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync(int count)
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllDatabaseWinnersAsync));
+
         try
         {
             var winnersDatabase = await context.Winners
@@ -55,12 +58,16 @@ internal class WinnersService(
 
             var mapper = new WinnerMapper();
 
-            return winnersDatabase.Select(mapper.WinnerToWinnerDto);
+            var list = winnersDatabase.Select(mapper.WinnerToWinnerDto);
+
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return list;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to retrieve all Le Mans winners");
-            return [];
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw; // Let the exception bubble up to be handled by the caller
         }
     }
 
@@ -69,6 +76,9 @@ internal class WinnersService(
     /// </summary>
     private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count, EvaluationContext evaluationContext)
     {
+        // Create new activity for tracing feature flag evaluation and data retrieval
+        using var activity = _activitySource.StartActivity(nameof(GetAllJsonWinnersAsync));
+
         await SlowDownAsync(evaluationContext);
         var dataFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "winners.json");
         try
@@ -79,12 +89,15 @@ internal class WinnersService(
                 PropertyNameCaseInsensitive = true
             });
 
-            return winners?.OrderByDescending(w => w.Year).Take(count) ?? Enumerable.Empty<Winner>();
+            var list = winners?.OrderByDescending(w => w.Year).Take(count) ?? [];
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return list;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to read winners data from JSON file: {FilePath}", dataFilePath);
-            return [];
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw; // Let the exception bubble up to be handled by the caller
         }
     }
 
