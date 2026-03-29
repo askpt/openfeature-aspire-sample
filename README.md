@@ -120,9 +120,22 @@ aspire run
 
 ### 5. Access the Application
 
-- Web Frontend: https://localhost:7070
-- API Service: https://localhost:7071
-- Aspire Dashboard: https://localhost:15888
+- Web Frontend: [https://localhost:7070](https://localhost:7070)
+- API Service: [https://localhost:7071](https://localhost:7071)
+- Aspire Dashboard: [https://localhost:15888](https://localhost:15888)
+
+### 6. OpenAPI and Scalar Documentation (Development)
+
+The API service exports an OpenAPI document in Development and serves a Scalar UI for interactive exploration.
+
+- OpenAPI JSON: `https://localhost:7071/openapi/v1.json`
+- Scalar UI: `https://localhost:7071/scalar/v1`
+
+The exported OpenAPI includes:
+
+- Endpoint summaries and descriptions
+- Explicit success and problem response documentation
+- Schema property descriptions for winner data
 
 The application will start with flagd running as a container, providing OFREP endpoints for the React frontend, .NET API service, and Python chatbot to consume feature flags.
 
@@ -137,7 +150,7 @@ The Go feature flags API (`Garage.FeatureFlags`) provides dynamic management of 
 
 ### API Endpoints
 
-```
+```text
 GET  /flags           # List all flag targeting configurations
 PUT  /flags/{name}    # Update targeting rules for a flag
 ```
@@ -152,9 +165,9 @@ The Python chat service (`Garage.ChatService`) provides an AI-powered chatbot fo
 - **Telemetry**: Full OpenTelemetry integration (traces, metrics, logs)
 - **Prompts**: GitHub Repository Prompts format (`.prompt.yml`)
 
-### API Endpoints
+### Chat API Endpoints
 
-```
+```text
 POST /chat
 Request: { "message": "Who won Le Mans in 2023?", "userId": "user-123" }
 Response: { "response": "...", "prompt_style": "expert" }

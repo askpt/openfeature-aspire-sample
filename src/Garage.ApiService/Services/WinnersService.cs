@@ -14,6 +14,9 @@ public class WinnersService(
     IFeatureClient featureClient)
     : IWinnersService
 {
+    /// <summary>
+    /// Retrieves winners using feature flags to select the data source and item count.
+    /// </summary>
     public async Task<IEnumerable<Winner>> GetAllWinnersAsync()
     {
         var evaluationContext = EvaluationContext.Builder()
@@ -27,6 +30,9 @@ public class WinnersService(
             : await GetAllJsonWinnersAsync(count.Value, evaluationContext);
     }
 
+    /// <summary>
+    /// Retrieves winners from PostgreSQL through Entity Framework.
+    /// </summary>
     private async Task<IEnumerable<Winner>> GetAllDatabaseWinnersAsync(int count)
     {
         try
@@ -48,6 +54,9 @@ public class WinnersService(
         }
     }
 
+    /// <summary>
+    /// Retrieves winners from the JSON seed file.
+    /// </summary>
     private async Task<IEnumerable<Winner>> GetAllJsonWinnersAsync(int count, EvaluationContext evaluationContext)
     {
         await SlowDownAsync(evaluationContext);
@@ -69,6 +78,9 @@ public class WinnersService(
         }
     }
 
+    /// <summary>
+    /// Applies an optional delay for demo and testing scenarios.
+    /// </summary>
     private async Task SlowDownAsync(EvaluationContext evaluationContext)
     {
         // Simulate a slow operation
