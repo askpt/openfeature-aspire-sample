@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
@@ -39,10 +40,10 @@ if (app.Environment.IsDevelopment())
 const string LeMansWinners = "GetAllLeMansWinners";
 app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Program> logger) =>
     {
+        // Set correct trace status
+        using var activity = Activity.Current;
         try
         {
-            // Set correct trace status
-            using var activity = System.Diagnostics.Activity.Current?.Source.StartActivity(LeMansWinners);
             activity?.SetTag("feature.winners-count", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Count()));
             activity?.SetTag("feature.enable-database-winners", await winnersService.GetAllWinnersAsync().ContinueWith(t => t.Result.Any(w => w.IsOwned)));
 
@@ -52,8 +53,8 @@ app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Pro
         catch (Exception ex)
         {
             // Set trace status to error
-            using var activity = System.Diagnostics.Activity.Current;
             activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error, ex.Message);
+
             // Log the exception (logging is configured in service defaults)
             logger.LogError(ex, "An error occurred while retrieving Le Mans winners.");
 
