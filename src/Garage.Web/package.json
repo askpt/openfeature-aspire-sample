@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@openfeature/ofrep-web-provider": "^0.3.5",
+    "@openfeature/ofrep-web-provider": "^0.3.6",
     "@openfeature/react-sdk": "^1.2.1",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/api-logs": "^0.214.0",
