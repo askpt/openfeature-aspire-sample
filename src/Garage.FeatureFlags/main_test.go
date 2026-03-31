@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"testing"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -25,6 +27,8 @@ func TestRun(t *testing.T) {
 	eg.Go(func() error {
 		return run(ctx)
 	})
+
+	waitForServer(t, "localhost:"+port)
 
 	t.Run("homepage", func(t *testing.T) {
 		const expectedBody = "Hello from Go Feature Flags API!"
@@ -95,4 +99,18 @@ func fetch(t *testing.T, url string, method string, body io.Reader) (int, string
 	}
 
 	return resp.StatusCode, string(data)
+}
+
+func waitForServer(t *testing.T, addr string) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		conn, err := net.DialTimeout("tcp", addr, 100*time.Millisecond)
+		if err == nil {
+			conn.Close()
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatalf("server at %s did not become ready within 5s", addr)
 }
