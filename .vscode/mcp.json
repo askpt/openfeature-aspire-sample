@@ -3,11 +3,17 @@
     "aspire": {
       "type": "stdio",
       "command": "aspire",
-      "args": ["mcp", "start"]
+      "args": [
+        "agent",
+        "mcp"
+      ]
     },
     "github-agentic-workflows": {
       "command": "gh",
-      "args": ["aw", "mcp-server"],
+      "args": [
+        "aw",
+        "mcp-server"
+      ],
       "cwd": "${workspaceFolder}"
     },
     "Azure MCP Server": {
