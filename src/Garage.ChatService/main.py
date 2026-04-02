@@ -3,6 +3,8 @@
 import os
 import time
 import logging
+import json
+from typing import Any
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -26,6 +28,20 @@ from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME as RESOURCE_SERVICE_NAME
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.trace import SpanKind
+
+# Import GenAI semantic conventions for trace attributes
+# The semantic-conventions package provides standardized attribute names
+try:
+    # Try the newer module path first
+    from opentelemetry.semconv.gen_ai import GenAiOperationNameValues, GenAiSystemValues
+    GENAI_OPERATION_CHAT = GenAiOperationNameValues.CHAT.value
+    GENAI_PROVIDER_OPENAI = GenAiSystemValues.OPENAI.value
+except ImportError:
+    # Fallback to string literals if the semconv module is not available
+    # These match the OpenTelemetry semantic conventions for GenAI
+    GENAI_OPERATION_CHAT = "chat"
+    GENAI_PROVIDER_OPENAI = "openai"
 
 from prompt_loader import load_prompt, render_messages, get_model_parameters
 
@@ -38,6 +54,7 @@ GITHUB_MODEL_NAME = os.environ.get("CHAT_MODEL_MODELNAME", "openai/gpt-4o")
 # OpenTelemetry configuration from Aspire
 OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "chatservice")
+CAPTURE_MESSAGE_CONTENT = os.environ.get("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "false").lower() in {"1", "true", "yes", "on"}
 # CORS configuration - allow specific origins from environment, default to localhost dev servers
 CORS_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:5174").split(",")
 PROMPTS_DIR = Path(__file__).parent / "prompts"
@@ -49,6 +66,49 @@ chat_request_duration = None
 # Configure basic logging first (will be enhanced by OTLP later)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+def _as_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    return json.dumps(value)
+
+
+def _build_semconv_payloads(messages: list[dict[str, Any]]) -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
+    """Build GenAI semconv-compatible system instructions and input messages."""
+    system_instructions: list[dict[str, str]] = []
+    input_messages: list[dict[str, Any]] = []
+
+    for message in messages:
+        role = message.get("role", "user")
+        content = _as_text(message.get("content"))
+
+        if role == "system":
+            if content:
+                system_instructions.append({"type": "text", "content": content})
+            continue
+
+        parts: list[dict[str, Any]] = []
+        if content:
+            parts.append({"type": "text", "content": content})
+
+        # Preserve tool call data if present in chat history.
+        for tool_call in message.get("tool_calls", []) or []:
+            parts.append(
+                {
+                    "type": "tool_call",
+                    "id": _as_text(tool_call.get("id")),
+                    "name": _as_text(tool_call.get("function", {}).get("name")),
+                    "arguments": _as_text(tool_call.get("function", {}).get("arguments")),
+                }
+            )
+
+        if parts:
+            input_messages.append({"role": role, "parts": parts})
+
+    return system_instructions, input_messages
 
 
 def setup_telemetry():
@@ -300,9 +360,26 @@ async def chat(request: ChatRequest):
                 model_params = get_model_parameters(prompt)
 
             # Call GitHub Models
-            with tracer.start_as_current_span("github_models_call") as model_span:
+            with tracer.start_as_current_span("github_models_call", kind=SpanKind.CLIENT) as model_span:
+                # Legacy attributes for backward compatibility
                 model_span.set_attribute("model", GITHUB_MODEL_NAME)
                 model_span.set_attribute("temperature", model_params.get("temperature", 0.7))
+
+                # GenAI semantic conventions for Aspire dashboard visualization
+                model_span.set_attribute("gen_ai.operation.name", GENAI_OPERATION_CHAT)
+                model_span.set_attribute("gen_ai.provider.name", GENAI_PROVIDER_OPENAI)
+                model_span.set_attribute("gen_ai.request.model", GITHUB_MODEL_NAME)
+                model_span.set_attribute("gen_ai.request.temperature", model_params.get("temperature", 0.7))
+                model_span.set_attribute("server.address", "models.github.ai")
+                model_span.set_attribute("server.port", 443)
+
+                # Optional sensitive-content capture for GenAI visualizer.
+                if CAPTURE_MESSAGE_CONTENT:
+                    system_instructions, input_messages = _build_semconv_payloads(messages)
+                    if system_instructions:
+                        model_span.set_attribute("gen_ai.system_instructions", json.dumps(system_instructions))
+                    if input_messages:
+                        model_span.set_attribute("gen_ai.input.messages", json.dumps(input_messages))
 
                 response = openai_client.chat.completions.create(
                     model=GITHUB_MODEL_NAME,
@@ -314,6 +391,41 @@ async def chat(request: ChatRequest):
                     raise ValueError("No choices returned from AI model")
                 answer = response.choices[0].message.content or ""
                 model_span.set_attribute("response_length", len(answer))
+
+                # Add GenAI response attributes
+                if response.choices[0].finish_reason:
+                    model_span.set_attribute("gen_ai.response.finish_reasons", [response.choices[0].finish_reason])
+                if hasattr(response, 'model') and response.model:
+                    model_span.set_attribute("gen_ai.response.model", response.model)
+
+                if CAPTURE_MESSAGE_CONTENT:
+                    output_parts = [{"type": "text", "content": answer}] if answer else []
+
+                    for tool_call in getattr(response.choices[0].message, "tool_calls", []) or []:
+                        output_parts.append(
+                            {
+                                "type": "tool_call",
+                                "id": _as_text(getattr(tool_call, "id", "")),
+                                "name": _as_text(getattr(getattr(tool_call, "function", None), "name", "")),
+                                "arguments": _as_text(getattr(getattr(tool_call, "function", None), "arguments", "")),
+                            }
+                        )
+
+                    output_messages = [
+                        {
+                            "role": "assistant",
+                            "parts": output_parts,
+                            "finish_reason": response.choices[0].finish_reason,
+                        }
+                    ]
+                    model_span.set_attribute("gen_ai.output.messages", json.dumps(output_messages))
+
+                # Add token usage metrics if available
+                if hasattr(response, 'usage') and response.usage:
+                    if hasattr(response.usage, 'prompt_tokens') and response.usage.prompt_tokens is not None:
+                        model_span.set_attribute("gen_ai.usage.input_tokens", response.usage.prompt_tokens)
+                    if hasattr(response.usage, 'completion_tokens') and response.usage.completion_tokens is not None:
+                        model_span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
 
             # Record successful request metrics
             duration = time.time() - start_time
