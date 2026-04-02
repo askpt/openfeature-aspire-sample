@@ -4,13 +4,39 @@ updates:
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      aspire:
+        patterns:
+          - "Aspire.*"
+          - "CommunityToolkit.Aspire.*"
+      otel:
+        patterns:
+          - "OpenTelemetry.*"
+      openfeature:
+        patterns:
+          - "OpenFeature.*"
+      dotnet-runtime:
+        patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.Extensions.*"
+      efcore:
+        patterns:
+          - "Microsoft.EntityFrameworkCore.*"
+      dotnet-misc:
+        patterns:
+          - "Riok.Mapperly"
+          - "Scalar.Aspire"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     exclude-paths:
       - .github/workflows/*.lock.yml
 
@@ -18,22 +44,107 @@ updates:
     directory: "src/Garage.Web/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      otel-js:
+        patterns:
+          - "@opentelemetry/*"
+      openfeature-js:
+        patterns:
+          - "@openfeature/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      lint-toolchain:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+          - "typescript-eslint"
+          - "eslint-plugin-*"
+      build-toolchain:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "typescript"
+          - "@types/node"
+          - "globals"
 
   - package-ecosystem: "docker"
     directory: "src/Garage.Web/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      web-base-images:
+        patterns:
+          - "node"
+          - "nginx"
 
   - package-ecosystem: "gomod"
     directory: "src/Garage.FeatureFlags/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      otel-go:
+        patterns:
+          - "go.opentelemetry.io/*"
+      openfeature-go:
+        patterns:
+          - "github.com/open-feature/*"
+      cloud-go:
+        patterns:
+          - "gocloud.dev"
+          - "cloud.google.com/go/*"
+          - "github.com/Azure/*"
+          - "golang.org/x/*"
 
   - package-ecosystem: "pip"
     directory: "src/Garage.ChatService/"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
+    groups:
+      otel-py:
+        patterns:
+          - "opentelemetry-*"
+      openfeature-py:
+        patterns:
+          - "openfeature-*"
+      fastapi-stack:
+        patterns:
+          - "fastapi"
+          - "uvicorn"
+          - "pyyaml"
+          - "grpcio"
+      ai-client:
+        patterns:
+          - "openai"
+      testing:
+        patterns:
+          - "pytest"
+
+  - package-ecosystem: "docker"
+    directory: "src/Garage.FeatureFlags/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    groups:
+      go-base-images:
+        patterns:
+          - "golang"
+          - "alpine"
+
+  - package-ecosystem: "docker"
+    directory: ".devcontainer/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 5
+    groups:
+      devcontainer-base:
+        patterns:
+          - "mcr.microsoft.com/devcontainers/*"
