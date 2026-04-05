@@ -43,17 +43,20 @@ const Home = () => {
     // Record page view metric
     recordPageView();
 
+    const controller = new AbortController();
+
     const loadWinners = async () => {
       try {
         setLoading(true);
         // Call API service directly using Aspire service discovery
-        const response = await fetch("/api/lemans/winners");
+        const response = await fetch("/api/lemans/winners", { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const winnersData: Winner[] = await response.json();
         setWinners(winnersData);
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         console.error("Failed to load winners:", err);
         setError("Failed to load winners");
         setWinners([]);
@@ -63,6 +66,8 @@ const Home = () => {
     };
 
     loadWinners();
+
+    return () => controller.abort();
   }, []);
 
   const handleOwnershipChanged = (updatedCar: Winner) => {
