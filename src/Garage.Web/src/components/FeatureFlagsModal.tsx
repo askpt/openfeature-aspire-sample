@@ -153,11 +153,12 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
                     <span className="flag-name">{flagKey}</span>
                   </div>
                   <div className="flag-toggle-container">
-                    <label className="toggle-switch">
+                    <label className="toggle-switch" aria-label={`Toggle ${flagKey}`}>
                       <input
                         type="checkbox"
                         checked={flags[flagKey].enabled}
                         onChange={(e) => handleToggle(flagKey, e.target.checked)}
+                        aria-label={`Enable ${flagKey}`}
                       />
                       <span className="toggle-slider"></span>
                     </label>

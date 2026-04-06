@@ -22,6 +22,7 @@ const CarCard = ({ car, onOwnershipChanged }: CarCardProps) => {
             className="ownership-checkbox"
             checked={car.isOwned}
             onChange={toggleOwnership}
+            aria-label={`Mark ${car.year} ${car.manufacturer} ${car.model} as owned`}
           />
         </div>
       </div>
