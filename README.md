@@ -42,6 +42,7 @@ This demo showcases how to implement feature flags using **OpenFeature** and the
 - **Redis**: Caching layer for improved performance
 - **flagd**: OpenFeature-compliant feature flag evaluation engine
 - **GitHub Models**: AI model provider for chatbot functionality
+- **Dev Tunnels**: Secure tunneling for external access to flagd during development
 
 ## Telemetry Support
 
@@ -88,6 +89,7 @@ The chatbot supports multiple prompt styles via GitHub Repository Prompts (`.pro
 - Visual Studio, Visual Studio Code with C# extension or JetBrains Rider
 - Git for version control
 - Docker Desktop (for containerized dependencies)
+- Azure account (for Dev Tunnels authentication during development)
 - GitHub PAT with access to GitHub Models (for chatbot functionality)
 
 ## Quick Start
@@ -117,6 +119,8 @@ dotnet restore
 ```bash
 aspire run
 ```
+
+> **Note**: The `aspire.config.json` in the repository root automatically points to the correct AppHost project, so you can run `aspire run` from the repository root.
 
 ### 5. Access the Application
 
