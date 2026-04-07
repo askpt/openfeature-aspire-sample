@@ -34,6 +34,23 @@ def _parse_url(url):
     return scheme, host, port, path
 
 
+def _wrap_tls_socket(sock, host):
+    # CPython path: use a default client context to negotiate modern TLS.
+    if hasattr(ssl, "create_default_context"):
+        context = ssl.create_default_context()
+        return context.wrap_socket(sock, server_hostname=host)
+
+    # MicroPython path: use module-provided wrap function (SNI optional).
+    wrap_socket = getattr(ssl, "wrap_socket", None)
+    if wrap_socket is None:
+        raise ValueError("SSL module does not support socket wrapping")
+
+    try:
+        return wrap_socket(sock, server_hostname=host)
+    except TypeError:
+        return wrap_socket(sock)
+
+
 def _http_post(url, body_bytes, headers, timeout=10):
     scheme, host, port, path = _parse_url(url)
 
@@ -43,7 +60,7 @@ def _http_post(url, body_bytes, headers, timeout=10):
     sock.connect(addr)
 
     if scheme == "https":
-        sock = ssl.wrap_socket(sock, server_hostname=host)
+        sock = _wrap_tls_socket(sock, host)
 
     # Build and send request
     request = "POST %s HTTP/1.0\r\nHost: %s\r\n" % (path, host)
