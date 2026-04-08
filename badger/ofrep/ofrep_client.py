@@ -35,12 +35,6 @@ def _parse_url(url):
 
 
 def _wrap_tls_socket(sock, host):
-    # CPython path: use a default client context to negotiate modern TLS.
-    if hasattr(ssl, "create_default_context"):
-        context = ssl.create_default_context()
-        return context.wrap_socket(sock, server_hostname=host)
-
-    # MicroPython path: use module-provided wrap function (SNI optional).
     wrap_socket = getattr(ssl, "wrap_socket", None)
     if wrap_socket is None:
         raise ValueError("SSL module does not support socket wrapping")
