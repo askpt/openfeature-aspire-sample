@@ -17,9 +17,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - name: Install gh-aw extension
-      uses: github/gh-aw-actions/setup-cli@9d6ae06250fc0ec536a0e5f35de313b35bad7246 # v0.67.4
+      uses: github/gh-aw-actions/setup-cli@2fe53acc038ba01c3bbdc767d4b25df31ca5bdfc # v0.68.1
       with:
-        version: v0.67.4
+        version: v0.68.1
     - name: Set up dotnet
       uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7
       with:

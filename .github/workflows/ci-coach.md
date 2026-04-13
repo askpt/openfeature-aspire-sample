@@ -31,7 +31,7 @@ safe-outputs:
     title-prefix: "[ci-coach] "
 
 timeout-minutes: 30
-source: githubnext/agentics/workflows/ci-coach.md@97143ac59cb3a13ef2a77581f929f06719c7402a
+source: githubnext/agentics/workflows/ci-coach.md@aae6af93b4035df74630817afa13c528d6b74fe6
 ---
 
 # CI Optimization Coach
