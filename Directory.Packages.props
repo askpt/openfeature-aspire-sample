@@ -22,7 +22,7 @@
   <ItemGroup Label="Community Packages">
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Golang" Version="13.1.1" />
-    <PackageVersion Include="Scalar.Aspire" Version="0.9.22" />
+    <PackageVersion Include="Scalar.Aspire" Version="0.9.23" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
