@@ -1,4 +1,4 @@
-FROM node:25-alpine@sha256:ad82ecad30371c43f4057aaa4800a8ed88f9446553a2d21323710c7b937177fc AS build
+FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS build
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:1.29.8-alpine@sha256:582c496ccf79d8aa6f8203a79d32aaf7ffd8b13362c60a701a2f9ac64886c93d
+FROM nginx:1.29.8-alpine@sha256:8aa63af009a39ecd6c28d61da578a5447378c10bb097a069e3a3e0fb42bb6b19
 
 # Install curl for healthcheck (optional)
 RUN apk add --no-cache curl
