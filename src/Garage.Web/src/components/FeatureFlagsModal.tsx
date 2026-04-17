@@ -1,9 +1,20 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  forwardRef,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useImperativeHandle,
+} from "react";
 import "./FeatureFlagsModal.css";
 
 interface FeatureFlagsModalProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+export interface FeatureFlagsModalHandle {
+  refreshFlags: () => void;
 }
 
 interface FlagState {
@@ -13,7 +24,10 @@ interface FlagState {
 
 type FlagsMap = Record<string, FlagState>;
 
-const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
+const FeatureFlagsModal = forwardRef<
+  FeatureFlagsModalHandle,
+  FeatureFlagsModalProps
+>(({ isOpen, onClose }, ref) => {
   const [flags, setFlags] = useState<FlagsMap>({});
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -23,8 +37,6 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
 
   const fetchFlags = useCallback(async () => {
     try {
-      setLoading(true);
-      setFetchError(null);
       const response = await fetch(`/flags/${userId}`);
       if (response.ok) {
         const data = await response.json();
@@ -36,6 +48,7 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
           };
         }
         setFlags(flagsData);
+        setFetchError(null);
       } else {
         setFetchError("Failed to load flags. Please try again.");
         console.error("Failed to fetch flags:", response.statusText);
@@ -48,11 +61,23 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
     }
   }, [userId]);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchFlags();
-    }
-  }, [isOpen, fetchFlags]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      refreshFlags: () => {
+        setLoading(true);
+        setFetchError(null);
+        void fetchFlags();
+      },
+    }),
+    [fetchFlags]
+  );
+
+  const handleClose = () => {
+    setLoading(true);
+    setFetchError(null);
+    onClose();
+  };
 
   // Clean up status indicators after 2 seconds
   useEffect(() => {
@@ -130,11 +155,11 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
   const flagKeys = Object.keys(flags).sort();
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Feature Flags</h2>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button className="modal-close-btn" onClick={handleClose}>
             ×
           </button>
         </div>
@@ -177,6 +202,8 @@ const FeatureFlagsModal = ({ isOpen, onClose }: FeatureFlagsModalProps) => {
       </div>
     </div>
   );
-};
+});
+
+FeatureFlagsModal.displayName = "FeatureFlagsModal";
 
 export default FeatureFlagsModal;

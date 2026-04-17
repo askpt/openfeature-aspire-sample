@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "src/Garage.AppHost/Garage.AppHost.csproj"
+  }
+}

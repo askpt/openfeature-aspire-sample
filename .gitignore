@@ -350,3 +350,4 @@ src/Garage.FeatureFlags/flagsapi
 
 # Python virtual environments
 src/Garage.ChatService/.venv/
+src/Garage.ChatService/prompts.egg-info/
