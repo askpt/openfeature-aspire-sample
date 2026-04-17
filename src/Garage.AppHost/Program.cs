@@ -80,6 +80,10 @@ if (!builder.ExecutionContext.IsPublishMode)
 
     // Register services with the API Reference
     scalar.WithApiReference(apiService);
+
+    var tunnel = builder.AddDevTunnel("tunnel")
+                    .WithReference(flagd)
+                    .WithAnonymousAccess();
 }
 else
 {
@@ -139,6 +143,8 @@ webFrontend
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
+
+
 
 builder.Build().Run();
 
