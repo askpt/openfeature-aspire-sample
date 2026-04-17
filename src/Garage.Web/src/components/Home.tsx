@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useBooleanFlagValue,
   useStringFlagValue,
 } from "@openfeature/react-sdk";
 import { Winner, FilterType } from "../types/Winner";
 import CarCard from "./CarCard";
-import FeatureFlagsModal from "./FeatureFlagsModal";
+import FeatureFlagsModal, {
+  type FeatureFlagsModalHandle,
+} from "./FeatureFlagsModal";
 import { recordPageView, recordUserIdChange } from "../metrics";
 import "./Home.css";
 
@@ -18,6 +20,7 @@ const Home = () => {
     localStorage.getItem("userId") || "1"
   );
   const [showFlagsModal, setShowFlagsModal] = useState(false);
+  const flagsModalRef = useRef<FeatureFlagsModalHandle>(null);
 
   // Use OpenFeature React hooks for feature flags
   const showHeader = useBooleanFlagValue("enable-stats-header", true);
@@ -90,6 +93,11 @@ const Home = () => {
     }
   };
 
+  const handleOpenFlagsModal = () => {
+    setShowFlagsModal(true);
+    flagsModalRef.current?.refreshFlags();
+  };
+
   if (loading) {
     return <div className="loading">Loading winners...</div>;
   }
@@ -141,7 +149,7 @@ const Home = () => {
             {hasEditableFlags && (
               <button
                 className="feature-flags-btn"
-                onClick={() => setShowFlagsModal(true)}
+                onClick={handleOpenFlagsModal}
               >
                 Feature Flags
               </button>
@@ -196,6 +204,7 @@ const Home = () => {
       </div>
 
       <FeatureFlagsModal
+        ref={flagsModalRef}
         isOpen={showFlagsModal}
         onClose={() => setShowFlagsModal(false)}
       />
