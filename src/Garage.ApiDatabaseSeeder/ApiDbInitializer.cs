@@ -7,15 +7,14 @@ namespace Garage.ApiDatabaseSeeder;
 
 public class ApiDbInitializer(
     IServiceProvider serviceProvider,
-    IHostEnvironment hostEnvironment,
     IHostApplicationLifetime hostApplicationLifetime,
     ILogger<ApiDbInitializer> logger) : BackgroundService
 {
-    private readonly ActivitySource _activitySource = new(hostEnvironment.ApplicationName);
+    private static readonly ActivitySource _activitySource = new("Garage.ApiDatabaseSeeder");
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        using var activity = _activitySource.StartActivity(hostEnvironment.ApplicationName, ActivityKind.Client);
+        using var activity = _activitySource.StartActivity("database-initialization", ActivityKind.Client);
 
         try
         {
