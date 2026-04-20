@@ -12,11 +12,11 @@ namespace Garage.ApiService.Services;
 internal class WinnersService(
     GarageDbContext context,
     ILogger<WinnersService> logger,
-    IFeatureClient featureClient,
-    IWebHostEnvironment environment)
+    IFeatureClient featureClient)
     : IWinnersService
 {
-    private readonly ActivitySource _activitySource = new(environment.ApplicationName);
+    private static readonly ActivitySource _activitySource = new("Garage.ApiService");
+    private static readonly WinnerMapper _mapper = new();
 
     /// <summary>
     /// Retrieves winners using feature flags to select the data source and item count.
@@ -56,9 +56,7 @@ internal class WinnersService(
                 .Take(count)
                 .ToListAsync();
 
-            var mapper = new WinnerMapper();
-
-            var list = winnersDatabase.Select(mapper.WinnerToWinnerDto);
+            var list = winnersDatabase.Select(_mapper.WinnerToWinnerDto);
 
             activity?.SetStatus(ActivityStatusCode.Ok);
             return list;
