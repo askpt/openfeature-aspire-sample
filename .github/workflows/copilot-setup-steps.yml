@@ -17,7 +17,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
     - name: Install gh-aw extension
-      uses: github/gh-aw-actions/setup-cli@ea222e359276c0702a5f5203547ff9d88d0ddd76 # v0.68.1
+      uses: github/gh-aw-actions/setup-cli@81b86c58b134601fc10d4745e276d7861cd12911 # v0.69.0
       with:
         version: v0.68.1
     - name: Set up dotnet
@@ -30,7 +30,7 @@ jobs:
         cache-dependency-path: src/Garage.FeatureFlags/go.sum
         go-version: "1.25"
     - name: Set up Node.js
-      uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
       with:
         cache: npm
         cache-dependency-path: src/Garage.Web/package-lock.json
