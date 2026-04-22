@@ -8,28 +8,28 @@
     <CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
   </PropertyGroup>
   <ItemGroup Label="Aspire Packages">
-    <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.DevTunnels" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.2.2" />
-    <PackageVersion Include="Aspire.Hosting.Python" Version="13.2.2" />
-    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.2.2" />
+    <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.DevTunnels" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.2.3" />
+    <PackageVersion Include="Aspire.Hosting.Python" Version="13.2.3" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.2.3" />
   </ItemGroup>
   <ItemGroup Label="Community Packages">
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Golang" Version="13.1.1" />
-    <PackageVersion Include="Scalar.Aspire" Version="0.9.24" />
+    <PackageVersion Include="Scalar.Aspire" Version="0.9.26" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.6" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.5.0" />
   </ItemGroup>
@@ -38,11 +38,11 @@
     <PackageVersion Include="OpenFeature.Providers.Ofrep" Version="0.1.5" />
   </ItemGroup>
   <ItemGroup Label="OpenTelemetry Packages">
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.2" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
   </ItemGroup>
   <ItemGroup Label="Other Packages">
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
