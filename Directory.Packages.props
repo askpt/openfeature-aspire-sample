@@ -22,7 +22,7 @@
   <ItemGroup Label="Community Packages">
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.1.1" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Golang" Version="13.1.1" />
-    <PackageVersion Include="Scalar.Aspire" Version="0.9.27" />
+    <PackageVersion Include="Scalar.Aspire" Version="0.9.32" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
@@ -33,7 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.5.0" />
   </ItemGroup>
   <ItemGroup Label="OpenFeature Packages">
-    <PackageVersion Include="OpenFeature.Hosting" Version="2.12.0" />
+    <PackageVersion Include="OpenFeature.Hosting" Version="2.13.0" />
     <PackageVersion Include="OpenFeature.Providers.Ofrep" Version="0.1.5" />
   </ItemGroup>
   <ItemGroup Label="OpenTelemetry Packages">
