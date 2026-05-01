@@ -17,6 +17,7 @@ internal class WinnersService(
 {
     private static readonly ActivitySource _activitySource = new("Garage.ApiService");
     private static readonly WinnerMapper _mapper = new();
+    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     /// <summary>
     /// Retrieves winners using feature flags to select the data source and item count.
@@ -82,10 +83,7 @@ internal class WinnersService(
         try
         {
             var jsonData = await File.ReadAllTextAsync(dataFilePath);
-            var winners = JsonSerializer.Deserialize<Winner[]>(jsonData, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var winners = JsonSerializer.Deserialize<Winner[]>(jsonData, _jsonOptions);
 
             var list = winners?.OrderByDescending(w => w.Year).Take(count) ?? [];
             activity?.SetStatus(ActivityStatusCode.Ok);

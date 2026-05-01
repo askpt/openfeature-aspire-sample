@@ -11,6 +11,7 @@ public class ApiDbInitializer(
     ILogger<ApiDbInitializer> logger) : BackgroundService
 {
     private static readonly ActivitySource _activitySource = new("Garage.ApiDatabaseSeeder");
+    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -63,10 +64,7 @@ public class ApiDbInitializer(
             }
 
             var jsonData = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
-            var winners = JsonSerializer.Deserialize<ApiModel.Data.Models.Winner[]>(jsonData, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var winners = JsonSerializer.Deserialize<ApiModel.Data.Models.Winner[]>(jsonData, _jsonOptions);
 
             if (winners == null || winners.Length == 0)
             {
