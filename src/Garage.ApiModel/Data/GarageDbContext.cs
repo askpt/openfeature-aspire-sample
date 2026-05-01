@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Garage.ApiModel.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Garage.ApiModel.Data;
 
@@ -29,7 +30,11 @@ public class GarageDbContext : DbContext
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<string[]>(v, (JsonSerializerOptions?)null) ?? Array.Empty<string>()
                 )
-                .HasColumnType("TEXT");
+                .HasColumnType("TEXT")
+                .Metadata.SetValueComparer(new ValueComparer<string[]>(
+                    (c1, c2) => c1 == null && c2 == null || c1 != null && c2 != null && c1.SequenceEqual(c2),
+                    c => c == null ? 0 : c.Aggregate(0, (acc, item) => HashCode.Combine(acc, item.GetHashCode())),
+                    c => c == null ? Array.Empty<string>() : c.ToArray()));
             entity.Property(w => w.IsOwned).HasDefaultValue(false);
         });
     }
