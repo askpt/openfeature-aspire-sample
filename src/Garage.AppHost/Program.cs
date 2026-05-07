@@ -38,7 +38,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     })
     .WithHttpHealthCheck("/health");
 
-var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
+var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/").WithBrowserLogs();
 
 // Add Python chat service using Uvicorn (FastAPI/ASGI)
 var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/", "main:app")

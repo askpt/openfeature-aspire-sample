@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <UserSecretsId>1315e618-bdbb-4ef7-9974-5761ed98b9d4</UserSecretsId>
+    <NoWarn>ASPIREBROWSERLOGS001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,7 @@
     <PackageReference Include="Aspire.Hosting.Azure.Redis" />
     <PackageReference Include="Aspire.Hosting.Azure.AppContainers" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" />
+    <PackageReference Include="Aspire.Hosting.Browsers" />
     <PackageReference Include="Aspire.Hosting.DevTunnels" />
     <PackageReference Include="Aspire.Hosting.GitHub.Models" />
     <PackageReference Include="Aspire.Hosting.JavaScript" />
