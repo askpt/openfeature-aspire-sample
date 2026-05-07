@@ -33,7 +33,8 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     })
     .WithHttpHealthCheck("/health");
 
-var migrations = apiService.AddEFMigrations("api-migrations", "Garage.ApiModel.Data.GarageDbContext");
+var migrations = apiService.AddEFMigrations("api-migrations", "Garage.ApiModel.Data.GarageDbContext")
+    .RunDatabaseUpdateOnStart();
 
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/").WithBrowserLogs();
 
