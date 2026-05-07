@@ -23,20 +23,17 @@ var cache = builder.AddAzureManagedRedis("cache").RunAsContainer();
 var postgres = builder.AddAzurePostgresFlexibleServer("postgres").RunAsContainer();
 var database = postgres.AddDatabase("garage-db");
 
-var migration = builder.AddProject<Projects.Garage_ApiDatabaseSeeder>("database-seeder")
-    .WithReference(database)
-    .WaitFor(database);
-
 var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(cache)
     .WaitFor(cache)
-    .WaitFor(migration)
     .PublishAsAzureContainerApp((infra, app) =>
     {
     })
     .WithHttpHealthCheck("/health");
+
+var migrations = apiService.AddEFMigrations("api-migrations", "Garage.ApiModel.Data.GarageDbContext");
 
 var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/").WithBrowserLogs();
 
@@ -116,10 +113,6 @@ else
 var ofrepEndpoint = flagd.GetEndpoint("ofrep");
 
 apiService = apiService
-    .WaitFor(flagd)
-    .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
-
-migration = migration
     .WaitFor(flagd)
     .WithEnvironment("OFREP_ENDPOINT", ofrepEndpoint);
 

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Garage.ApiDatabaseSeeder.Migrations
+namespace Garage.ApiModel.Migrations
 {
     [DbContext(typeof(GarageDbContext))]
     partial class GarageDbContextModelSnapshot : ModelSnapshot

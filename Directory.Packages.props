@@ -15,6 +15,7 @@
     <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.3.0" />
     <PackageVersion Include="Aspire.Hosting.Browsers" Version="13.3.0-preview.1.26256.5" />
     <PackageVersion Include="Aspire.Hosting.DevTunnels" Version="13.3.0" />
+    <PackageVersion Include="Aspire.Hosting.EntityFrameworkCore" Version="13.3.0-preview.1.26256.5" />
     <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.3.0" />
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.3.0" />
     <PackageVersion Include="Aspire.Hosting.Python" Version="13.3.0" />
