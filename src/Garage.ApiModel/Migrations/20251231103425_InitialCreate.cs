@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Garage.ApiDatabaseSeeder.Migrations
+namespace Garage.ApiModel.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
