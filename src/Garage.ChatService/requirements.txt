@@ -1,8 +1,8 @@
 fastapi==0.136.1
 uvicorn==0.46.0
-openai==2.35.1
+openai==2.36.0
 openfeature-sdk==0.9.0
-openfeature-provider-ofrep==0.2.0
+openfeature-provider-ofrep==0.3.0
 pyyaml==6.0.3
 opentelemetry-api==1.41.1
 opentelemetry-sdk==1.41.1

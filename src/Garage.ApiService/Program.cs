@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
 using Garage.ServiceDefaults;
 using Garage.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +15,37 @@ builder.AddRedisDistributedCache("cache");
 builder.AddServiceDefaults();
 
 // Add database
-builder.AddAzureNpgsqlDbContext<GarageDbContext>("garage-db");
+builder.AddAzureNpgsqlDbContext<GarageDbContext>("garage-db", configureDbContextOptions: options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseAsyncSeeding(async (context, _, cancellationToken) =>
+        {
+            if (await context.Set<Garage.ApiModel.Data.Models.Winner>().AnyAsync(cancellationToken))
+            {
+                return;
+            }
+
+            var jsonFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "winners.json");
+            if (!File.Exists(jsonFilePath))
+            {
+                return;
+            }
+
+            var jsonData = await File.ReadAllTextAsync(jsonFilePath, cancellationToken);
+            var winners = JsonSerializer.Deserialize<Garage.ApiModel.Data.Models.Winner[]>(
+                jsonData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (winners is { Length: > 0 })
+            {
+                await context.Set<Garage.ApiModel.Data.Models.Winner>().AddRangeAsync(winners, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
+            }
+        });
+
+        options.EnableSensitiveDataLogging();
+    }
+});
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -32,6 +64,10 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<GarageDbContext>();
+    var strategy = context.Database.CreateExecutionStrategy();
+    await strategy.ExecuteAsync(async () => await context.Database.EnsureCreatedAsync());
 }
 
 // Le Mans Winners API endpoints

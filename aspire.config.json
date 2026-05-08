@@ -1,5 +1,6 @@
 {
   "appHost": {
-    "path": "src/Garage.AppHost/Garage.AppHost.csproj"
+    "path": "src/Garage.AppHost/Garage.AppHost.csproj",
+    "language": "csharp"
   }
 }

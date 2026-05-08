@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Garage.ApiDatabaseSeeder.Migrations
+namespace Garage.ApiModel.Migrations
 {
     [DbContext(typeof(GarageDbContext))]
     [Migration("20251231103425_InitialCreate")]
