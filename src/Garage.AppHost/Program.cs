@@ -56,7 +56,7 @@ if (builder.ExecutionContext.IsPublishMode)
 // Feature flags infrastructure
 var flagd = builder.AddFlagd("flagd");
 
-var flagsApi = builder.AddGolangApp("flagsapi", "../Garage.FeatureFlags/")
+var flagsApi = builder.AddGoApp("flagsapi", "../Garage.FeatureFlags/")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
     .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
