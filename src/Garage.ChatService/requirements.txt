@@ -10,4 +10,4 @@ opentelemetry-semantic-conventions==0.63b1
 opentelemetry-instrumentation-fastapi==0.63b1
 opentelemetry-instrumentation-logging==0.63b1
 opentelemetry-exporter-otlp-proto-grpc==1.42.1
-grpcio==1.81.0
+grpcio==1.81.1
