@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup Label="Community Packages">
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.4.0" />
+    <PackageVersion Include="MessagePack" Version="2.5.301" />
     <PackageVersion Include="Scalar.Aspire" Version="0.10.3" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
