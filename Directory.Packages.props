@@ -9,22 +9,21 @@
   </PropertyGroup>
   <ItemGroup Label="Aspire Packages">
     <PackageVersion Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.4.6" />
-    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.Browsers" Version="13.4.2-preview.1.26303.6" />
-    <PackageVersion Include="Aspire.Hosting.DevTunnels" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.EntityFrameworkCore" Version="13.4.2-preview.1.26303.6" />
-    <PackageVersion Include="Aspire.Hosting.Go" Version="13.4.2-preview.1.26303.6" />
-    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.4" />
-    <PackageVersion Include="Aspire.Hosting.Python" Version="13.4.4" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Azure.PostgreSQL" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Redis" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Browsers" Version="13.4.6-preview.1.26319.6" />
+    <PackageVersion Include="Aspire.Hosting.DevTunnels" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.EntityFrameworkCore" Version="13.4.6-preview.1.26319.6" />
+    <PackageVersion Include="Aspire.Hosting.Go" Version="13.4.6-preview.1.26319.6" />
+    <PackageVersion Include="Aspire.Hosting.GitHub.Models" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Python" Version="13.4.6" />
     <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.4.6" />
   </ItemGroup>
   <ItemGroup Label="Community Packages">
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.4.0" />
-    <PackageVersion Include="MessagePack" Version="2.5.301" />
     <PackageVersion Include="Scalar.Aspire" Version="0.11.2" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
@@ -34,6 +33,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.7.0" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
   </ItemGroup>
   <ItemGroup Label="OpenFeature Packages">
     <PackageVersion Include="OpenFeature.Hosting" Version="2.14.0" />
