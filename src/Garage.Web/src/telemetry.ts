@@ -186,7 +186,7 @@ function setupLogs(
 
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes(attributes),
-    processors: [new BatchLogRecordProcessor(logExporter)],
+    processors: [new BatchLogRecordProcessor({ exporter: logExporter })],
   });
 
   logs.setGlobalLoggerProvider(loggerProvider);
