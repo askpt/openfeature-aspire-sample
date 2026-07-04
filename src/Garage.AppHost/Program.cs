@@ -124,7 +124,6 @@ if (!builder.ExecutionContext.IsPublishMode)
                 .WithReference(webFrontend)
                 .WaitFor(webFrontend)
                 .WithEnvironment("K6_WEB_DASHBOARD", "true")
-                .WithEnvironment("K6_WEB_DASHBOARD_EXPORT", "dashboard-report.html")
                 .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
                 .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
                 .WithK6OtlpEnvironment();
