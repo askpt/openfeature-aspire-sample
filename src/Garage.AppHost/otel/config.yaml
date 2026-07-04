@@ -19,6 +19,8 @@ receivers:
             - Content-Type
             - Range
             - Access-Control-Allow-Origin
+            # Sent by the browser OTLP exporter (from OTEL_EXPORTER_OTLP_HEADERS)
+            - x-otlp-api-key
           max_age: 86400
 
 processors:

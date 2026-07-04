@@ -107,9 +107,14 @@ if (!builder.ExecutionContext.IsPublishMode)
                     .WithReference(flagd)
                     .WithAnonymousAccess();
 
+    // Browser telemetry is sent directly from the browser to the collector, so it
+    // must target the collector's HTTP OTLP endpoint (port 4318) which has CORS
+    // configured — browsers can't use gRPC. Setting the protocol to "http" makes
+    // WithAppForwarding route to the collector's "http" endpoint instead of "grpc".
     webFrontend = webFrontend
         .WithBrowserLogs()
         .WithOtlpExporter()
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
         .WaitFor(collector);
 }
 else
