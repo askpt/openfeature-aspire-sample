@@ -8,10 +8,16 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
+var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+    .WithExternalHttpEndpoints();
+
 // Add collector for OpenTelemetry signals
 var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
     .WithConfig("otel/config.yaml")
-    .WithAppForwarding();
+    .WithAppForwarding()
+    .WaitFor(lgtm);
 
 // Add Azure Container App Environment for publishing
 var containerAppEnvironment = builder

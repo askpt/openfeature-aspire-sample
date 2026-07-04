@@ -18,18 +18,22 @@ exporters:
       x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
         insecure: true
+  otlp/lgtm:
+    endpoint: lgtm:4317
+    tls:
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/aspire]
+      exporters: [otlp/aspire, otlp/lgtm]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/aspire]
+      exporters: [otlp/aspire, otlp/lgtm]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/aspire]
+      exporters: [otlp/aspire, otlp/lgtm]
