@@ -129,6 +129,26 @@ aspire run
 - Aspire Dashboard: [https://localhost:15888](https://localhost:15888)
 - Grafana (LGTM): [http://localhost:3000](http://localhost:3000) (`admin` / `admin`)
 
+### Provisioned Grafana Dashboards
+
+Grafana dashboard provisioning is configured in the AppHost and mounted into the LGTM container.
+
+- Provider config: `src/Garage.AppHost/grafana/provisioning/dashboards/custom.yaml`
+- Dashboard JSON folder: `src/Garage.AppHost/grafana/provisioning/dashboards/custom/`
+
+To add an external dashboard:
+
+1. Export or download the dashboard JSON.
+2. Place it in `src/Garage.AppHost/grafana/provisioning/dashboards/custom/`.
+3. Restart Aspire (`aspire run`) so LGTM reloads provisioned dashboards.
+4. Open Grafana and navigate to the **OpenFeature** folder.
+
+The starter dashboard includes datasource placeholder variables you can reuse in your panels:
+
+- `$metrics_ds` (Prometheus)
+- `$logs_ds` (Loki)
+- `$traces_ds` (Tempo)
+
 ### 6. OpenAPI and Scalar Documentation (Development)
 
 The API service exports an OpenAPI document in Development and serves a Scalar UI for interactive exploration.

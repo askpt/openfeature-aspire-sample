@@ -8,9 +8,12 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
+
 // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
 var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
     .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+    .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
     .WithExternalHttpEndpoints();
 
 // Add collector for OpenTelemetry signals
