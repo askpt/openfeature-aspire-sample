@@ -1,0 +1,56 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - http://localhost:*
+            - https://localhost:*
+          # Important, make sure you whitelists all "unsafe" headers
+          allowed_headers:
+            - Authorization
+            - X-Requested-With
+            - Accept
+            - Accept-Language
+            - Content-Language
+            - Content-Type
+            - Range
+            - Access-Control-Allow-Origin
+            # Sent by the browser OTLP exporter (from OTEL_EXPORTER_OTLP_HEADERS)
+            - x-otlp-api-key
+          max_age: 86400
+
+processors:
+  batch:
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp/aspire:
+    endpoint: ${env:ASPIRE_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
+    tls:
+        insecure: true
+  otlp/lgtm:
+    endpoint: lgtm:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlp/lgtm]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlp/lgtm]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire, otlp/lgtm]

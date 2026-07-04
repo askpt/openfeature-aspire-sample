@@ -35,7 +35,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
 
 var migrations = apiService.AddEFMigrations("api-migrations", "Garage.ApiModel.Data.GarageDbContext");
 
-var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/").WithBrowserLogs();
+var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
 // Add Python chat service using Uvicorn (FastAPI/ASGI)
 var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/", "main:app")
@@ -59,16 +59,41 @@ var flagd = builder.AddFlagd("flagd");
 var flagsApi = builder.AddGoApp("flagsapi", "../Garage.FeatureFlags/")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
-    .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
     .PublishAsDockerFile();
 
 if (!builder.ExecutionContext.IsPublishMode)
 {
+    // Add local Grafana provisioning path for dashboards
+    var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
+    if (!Directory.Exists(grafanaProvisioningPath))
+    {
+        throw new DirectoryNotFoundException($"Grafana provisioning path not found: {grafanaProvisioningPath}");
+    }
+
+    // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
+    var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
+        .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+        .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
+        .WithExternalHttpEndpoints();
+
+    // Add collector for OpenTelemetry signals
+    var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
+        .WithConfig("otel/config.yaml")
+        .WithExternalHttpEndpoints()
+        .WithAppForwarding()
+        .WaitFor(lgtm);
+
     // Local development: flagd reads from host filesystem via bind mount
     var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
     flagd.WithBindFileSync(Path.GetDirectoryName(flagsPath)!);
 
+    flagd = flagd.WaitFor(collector);
+    chatService = chatService.WaitFor(collector);
+    apiService = apiService.WaitFor(collector);
+    migrations = migrations.WaitFor(collector);
+
     flagsApi = flagsApi
+        .WaitFor(collector)
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
         .WaitFor(flagd);
 
@@ -81,6 +106,16 @@ if (!builder.ExecutionContext.IsPublishMode)
     var tunnel = builder.AddDevTunnel("tunnel")
                     .WithReference(flagd)
                     .WithAnonymousAccess();
+
+    // Browser telemetry is sent directly from the browser to the collector, so it
+    // must target the collector's HTTP OTLP endpoint (port 4318) which has CORS
+    // configured — browsers can't use gRPC. Setting the protocol to "http" makes
+    // WithAppForwarding route to the collector's "http" endpoint instead of "grpc".
+    webFrontend = webFrontend
+        .WithBrowserLogs()
+        .WithOtlpExporter()
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
+        .WaitFor(collector);
 }
 else
 {
@@ -98,6 +133,7 @@ else
 
     flagsApi = flagsApi
         .WithReference(flagsBlobs)
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
         .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
         .WithEnvironment("FLAGS_BLOB_CONTAINER", "flags")
         .WithEnvironment("FLAGS_BLOB_NAME", "flagd.json");

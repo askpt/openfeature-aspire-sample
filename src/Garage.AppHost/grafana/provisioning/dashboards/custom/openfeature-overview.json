@@ -1,0 +1,103 @@
+{
+  "id": null,
+  "uid": "openfeature-overview",
+  "title": "OpenFeature Overview",
+  "tags": [
+    "openfeature",
+    "aspire",
+    "lgtm"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "About",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "# OpenFeature Aspire Dashboard\\n\\nThis dashboard is provisioned from the repository and loaded automatically by LGTM.\\n\\nDatasource placeholders are available as dashboard variables:\\n- `$metrics_ds` (Prometheus)\\n- `$logs_ds` (Loki)\\n- `$traces_ds` (Tempo)\\n\\nUse these variables when adding or cloning panels so dashboards remain portable across environments."
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Service Up (Sample)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(up)",
+          "legendFormat": "sum(up)"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "metrics_ds",
+        "label": "Metrics datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "refresh": 1
+      },
+      {
+        "name": "logs_ds",
+        "label": "Logs datasource",
+        "type": "datasource",
+        "query": "loki",
+        "current": {
+          "text": "Loki",
+          "value": "Loki"
+        },
+        "refresh": 1
+      },
+      {
+        "name": "traces_ds",
+        "label": "Traces datasource",
+        "type": "datasource",
+        "query": "tempo",
+        "current": {
+          "text": "Tempo",
+          "value": "Tempo"
+        },
+        "refresh": 1
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "weekStart": ""
+}

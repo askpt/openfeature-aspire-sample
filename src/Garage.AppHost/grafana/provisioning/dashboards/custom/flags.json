@@ -1,0 +1,327 @@
+{
+  "id": null,
+  "uid": "feature-flags",
+  "title": "Feature Flags",
+  "description": "Feature flag evaluation metrics.",
+  "tags": [
+    "openfeature",
+    "feature-flags",
+    "lgtm"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Active Feature Flags",
+      "description": "Total number of currently active feature flags",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(feature_flag_evaluation_active_count{feature_flag_key=~\"$feature_flag_key\"})",
+          "instant": true,
+          "legendFormat": "Active Flags"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "Evaluation Request Rate",
+      "description": "Total evaluation requests per second",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(feature_flag_evaluation_requests_total{}[$__rate_interval]))",
+          "instant": true,
+          "legendFormat": "Requests/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Evaluation Success Rate",
+      "description": "Total successful evaluations per second",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(feature_flag_evaluation_success_total{}[$__rate_interval]))",
+          "instant": true,
+          "legendFormat": "Successes/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Evaluation Error Rate",
+      "description": "Total evaluation errors per second",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(feature_flag_evaluation_error_total{}[$__rate_interval]))",
+          "instant": true,
+          "legendFormat": "Errors/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 0.01, "color": "red" }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Request Rate by Feature Flag",
+      "description": "Evaluation requests per second broken down by flag key",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(feature_flag_key) (rate(feature_flag_evaluation_requests_total{}[$__rate_interval]))",
+          "legendFormat": "{{feature_flag_key}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "Success Rate by Flag and Reason",
+      "description": "Successful evaluations per second by flag key and result reason",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(feature_flag_key, feature_flag_result_reason) (rate(feature_flag_evaluation_success_total{}[$__rate_interval]))",
+          "legendFormat": "{{feature_flag_key}} - {{feature_flag_result_reason}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Error Rate by Flag and Exception",
+      "description": "Evaluation errors per second by flag key and exception type",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(feature_flag_key, exception) (rate(feature_flag_evaluation_error_total{}[$__rate_interval]))",
+          "legendFormat": "{{feature_flag_key}} - {{exception}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 16,
+      "type": "table",
+      "title": "Active Flag Count by Key",
+      "description": "Current active evaluation count per feature flag key, sorted descending",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sort_desc(sum by(feature_flag_key) (feature_flag_evaluation_active_count{feature_flag_key=~\"$feature_flag_key\"}))",
+          "instant": true,
+          "legendFormat": "{{feature_flag_key}}"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          { "displayName": "Value", "desc": true }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "metrics_ds",
+        "label": "Metrics datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" },
+        "refresh": 1
+      },
+      {
+        "name": "logs_ds",
+        "label": "Logs datasource",
+        "type": "datasource",
+        "query": "loki",
+        "current": { "text": "Loki", "value": "Loki" },
+        "refresh": 1
+      },
+      {
+        "name": "traces_ds",
+        "label": "Traces datasource",
+        "type": "datasource",
+        "query": "tempo",
+        "current": { "text": "Tempo", "value": "Tempo" },
+        "refresh": 1
+      },
+      {
+        "name": "feature_flag_key",
+        "label": "Feature Flag",
+        "type": "query",
+        "datasource": "$metrics_ds",
+        "query": "label_values(feature_flag_evaluation_requests_total, feature_flag_key)",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "refresh": 1,
+        "current": { "text": "All", "value": ".*" }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "weekStart": ""
+}
