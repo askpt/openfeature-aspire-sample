@@ -8,6 +8,11 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Add collector for OpenTelemetry signals
+var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
+    .WithConfig("otel/config.yaml")
+    .WithAppForwarding();
+
 // Add Azure Container App Environment for publishing
 var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
@@ -59,7 +64,6 @@ var flagd = builder.AddFlagd("flagd");
 var flagsApi = builder.AddGoApp("flagsapi", "../Garage.FeatureFlags/")
     .WithHttpEndpoint(env: "PORT")
     .WithExternalHttpEndpoints()
-    .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
     .PublishAsDockerFile();
 
 if (!builder.ExecutionContext.IsPublishMode)
