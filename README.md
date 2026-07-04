@@ -127,7 +127,7 @@ aspire run
 - Web Frontend: [https://localhost:7070](https://localhost:7070)
 - API Service: [https://localhost:7071](https://localhost:7071)
 - Aspire Dashboard: [https://localhost:15888](https://localhost:15888)
-- Grafana (LGTM): [http://localhost:3000](http://localhost:3000) (`admin` / `admin`)
+- Grafana (LGTM): [http://localhost:3000](http://localhost:3000)
 
 ### Provisioned Grafana Dashboards
 

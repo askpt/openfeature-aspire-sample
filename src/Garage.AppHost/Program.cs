@@ -8,19 +8,27 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
+// Add local Grafana provisioning path for dashboards (only used in local development, not in Azure deployment)
+if (!builder.ExecutionContext.IsPublishMode)
+{
+    var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
+    if (!Directory.Exists(grafanaProvisioningPath))
+    {
+        throw new DirectoryNotFoundException($"Grafana provisioning path not found: {grafanaProvisioningPath}");
+    }
 
-// Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
-var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
-    .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
-    .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
-    .WithExternalHttpEndpoints();
+    // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
+    var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
+        .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+        .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
+        .WithExternalHttpEndpoints();
 
-// Add collector for OpenTelemetry signals
-var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
-    .WithConfig("otel/config.yaml")
-    .WithAppForwarding()
-    .WaitFor(lgtm);
+    // Add collector for OpenTelemetry signals
+    var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
+        .WithConfig("otel/config.yaml")
+        .WithAppForwarding()
+        .WaitFor(lgtm);
+}
 
 // Add Azure Container App Environment for publishing
 var containerAppEnvironment = builder
@@ -111,6 +119,7 @@ else
 
     flagsApi = flagsApi
         .WithReference(flagsBlobs)
+        .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
         .WithEnvironment("AZURE_STORAGE_ACCOUNT", accountName)
         .WithEnvironment("FLAGS_BLOB_CONTAINER", "flags")
         .WithEnvironment("FLAGS_BLOB_NAME", "flagd.json");
