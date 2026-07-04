@@ -8,28 +8,6 @@ using Scalar.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add local Grafana provisioning path for dashboards (only used in local development, not in Azure deployment)
-if (!builder.ExecutionContext.IsPublishMode)
-{
-    var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
-    if (!Directory.Exists(grafanaProvisioningPath))
-    {
-        throw new DirectoryNotFoundException($"Grafana provisioning path not found: {grafanaProvisioningPath}");
-    }
-
-    // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
-    var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
-        .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
-        .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
-        .WithExternalHttpEndpoints();
-
-    // Add collector for OpenTelemetry signals
-    var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
-        .WithConfig("otel/config.yaml")
-        .WithAppForwarding()
-        .WaitFor(lgtm);
-}
-
 // Add Azure Container App Environment for publishing
 var containerAppEnvironment = builder
     .AddAzureContainerAppEnvironment("cae");
@@ -57,7 +35,7 @@ var apiService = builder.AddProject<Projects.Garage_ApiService>("apiservice")
 
 var migrations = apiService.AddEFMigrations("api-migrations", "Garage.ApiModel.Data.GarageDbContext");
 
-var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/").WithBrowserLogs();
+var webFrontend = builder.AddJavaScriptApp("web", "../Garage.Web/");
 
 // Add Python chat service using Uvicorn (FastAPI/ASGI)
 var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/", "main:app")
@@ -85,11 +63,37 @@ var flagsApi = builder.AddGoApp("flagsapi", "../Garage.FeatureFlags/")
 
 if (!builder.ExecutionContext.IsPublishMode)
 {
+    // Add local Grafana provisioning path for dashboards
+    var grafanaProvisioningPath = Path.Combine(builder.AppHostDirectory, "grafana", "provisioning", "dashboards");
+    if (!Directory.Exists(grafanaProvisioningPath))
+    {
+        throw new DirectoryNotFoundException($"Grafana provisioning path not found: {grafanaProvisioningPath}");
+    }
+
+    // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
+    var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
+        .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+        .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
+        .WithExternalHttpEndpoints();
+
+    // Add collector for OpenTelemetry signals
+    var collector = builder.AddOpenTelemetryCollector("opentelemetry-collector")
+        .WithConfig("otel/config.yaml")
+        .WithExternalHttpEndpoints()
+        .WithAppForwarding()
+        .WaitFor(lgtm);
+
     // Local development: flagd reads from host filesystem via bind mount
     var flagsPath = Path.Combine(builder.AppHostDirectory, "flags", "flagd.json");
     flagd.WithBindFileSync(Path.GetDirectoryName(flagsPath)!);
 
+    flagd = flagd.WaitFor(collector);
+    chatService = chatService.WaitFor(collector);
+    apiService = apiService.WaitFor(collector);
+    migrations = migrations.WaitFor(collector);
+
     flagsApi = flagsApi
+        .WaitFor(collector)
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
         .WaitFor(flagd);
 
@@ -102,6 +106,11 @@ if (!builder.ExecutionContext.IsPublishMode)
     var tunnel = builder.AddDevTunnel("tunnel")
                     .WithReference(flagd)
                     .WithAnonymousAccess();
+
+    webFrontend = webFrontend
+        .WithBrowserLogs()
+        .WithOtlpExporter()
+        .WaitFor(collector);
 }
 else
 {

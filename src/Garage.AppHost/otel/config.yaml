@@ -5,6 +5,21 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - http://localhost:*
+            - https://localhost:*
+          # Important, make sure you whitelists all "unsafe" headers
+          allowed_headers:
+            - Authorization
+            - X-Requested-With
+            - Accept
+            - Accept-Language
+            - Content-Language
+            - Content-Type
+            - Range
+            - Access-Control-Allow-Origin
+          max_age: 86400
 
 processors:
   batch:
