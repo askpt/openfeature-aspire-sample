@@ -98,10 +98,9 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WaitFor(flagd);
 
     // Add API Reference
-    var scalar = builder.AddScalarApiReference();
-
-    // Register services with the API Reference
-    scalar.WithApiReference(apiService);
+    var scalar = builder.AddScalarApiReference()
+        .WithApiReference(apiService)
+        .WaitFor(apiService);
 
     var tunnel = builder.AddDevTunnel("tunnel")
                     .WithReference(flagd)
@@ -116,6 +115,18 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithOtlpExporter()
         .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
         .WaitFor(collector);
+
+    var k6 = builder.AddK6("k6")
+                .WithBindMount("k6", "/scripts", isReadOnly: true)
+                .WithScript("/scripts/main.js", virtualUsers: 50, duration: "1h")
+                .WithReference(apiService)
+                .WaitFor(apiService)
+                .WithReference(webFrontend)
+                .WaitFor(webFrontend)
+                .WithEnvironment("K6_WEB_DASHBOARD", "true")
+                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
+                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
+                .WithK6OtlpEnvironment();
 }
 else
 {
