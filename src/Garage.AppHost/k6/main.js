@@ -1,23 +1,27 @@
 import http from 'k6/http';
-import { sleep } from 'k6';
 
 export const options = {
+  discardResponseBodies: true,
   scenarios: {
     contacts: {
-      executor: 'ramping-arrival-rate',
-      preAllocatedVUs: 50,
+      executor: 'constant-arrival-rate',
+
+      // How many iterations per timeUnit
+      rate: 30,
+
+      // Start `rate` iterations per second
       timeUnit: '1s',
-      startRate: 50,
-      stages: [
-        { target: 200, duration: '30s' }, // linearly go from 50 iters/s to 200 iters/s for 30s
-        { target: 500, duration: '0' }, // instantly jump to 500 iters/s
-        { target: 500, duration: '10m' }, // continue with 500 iters/s for 10 minutes
-      ],
+
+      // Pre-allocate 2 VUs before starting the test
+      preAllocatedVUs: 2,
+
+      // Spin up a maximum of 50 VUs to sustain the defined
+      // constant arrival rate.
+      maxVUs: 50,
     },
   },
 };
 
 export default function () {
   http.get(`${__ENV.services__apiservice__http__0}/lemans/winners`);
-  sleep(1);
 }

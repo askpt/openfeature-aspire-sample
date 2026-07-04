@@ -98,10 +98,9 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WaitFor(flagd);
 
     // Add API Reference
-    var scalar = builder.AddScalarApiReference();
-
-    // Register services with the API Reference
-    scalar.WithApiReference(apiService);
+    var scalar = builder.AddScalarApiReference()
+        .WithApiReference(apiService)
+        .WaitFor(apiService);
 
     var tunnel = builder.AddDevTunnel("tunnel")
                     .WithReference(flagd)
@@ -119,7 +118,7 @@ if (!builder.ExecutionContext.IsPublishMode)
 
     var k6 = builder.AddK6("k6")
                 .WithBindMount("k6", "/scripts", isReadOnly: true)
-                .WithScript("/scripts/main.js")
+                .WithScript("/scripts/main.js", virtualUsers: 50, duration: "1h")
                 .WithReference(apiService)
                 .WaitFor(apiService)
                 .WithReference(webFrontend)
