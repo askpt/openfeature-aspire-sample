@@ -3,7 +3,7 @@ import http from 'k6/http';
 export const options = {
   discardResponseBodies: true,
   scenarios: {
-    contacts: {
+    constant: {
       executor: 'constant-arrival-rate',
 
       // How many iterations per timeUnit
