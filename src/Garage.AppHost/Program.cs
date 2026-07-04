@@ -116,6 +116,19 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithOtlpExporter()
         .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
         .WaitFor(collector);
+
+    var k6 = builder.AddK6("k6")
+                .WithBindMount("k6", "/scripts", isReadOnly: true)
+                .WithScript("/scripts/main.js")
+                .WithReference(apiService)
+                .WaitFor(apiService)
+                .WithReference(webFrontend)
+                .WaitFor(webFrontend)
+                .WithEnvironment("K6_WEB_DASHBOARD", "true")
+                .WithEnvironment("K6_WEB_DASHBOARD_EXPORT", "dashboard-report.html")
+                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
+                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
+                .WithK6OtlpEnvironment();
 }
 else
 {
