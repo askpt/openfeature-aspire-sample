@@ -65,6 +65,8 @@ builder.Services.TryAddSingleton(s =>
     s.GetRequiredService<IMeterFactory>().Create("Garage.ApiService", "1.0.0"));
 builder.Services.TryAddSingleton(s =>
     ApiMetrics.CreateRequestCounter(s.GetRequiredService<Meter>()));
+builder.Services.TryAddSingleton(s =>
+    ApiMetrics.CreateRequestHistogram(s.GetRequiredService<Meter>()));
 
 var app = builder.Build();
 
@@ -112,11 +114,12 @@ app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Pro
     .WithTags("Le Mans Winners");
 
 // Test endpoint for the feature flags (error/slow responses)
-app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? requestCounter, ILogger<Program> logger) =>
+app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? requestCounter, RequestHistogram? requestHistogram, ILogger<Program> logger) =>
 {
     using var activity = Activity.Current;
     IResult result;
     var stopwatch = Stopwatch.StartNew();
+    var isError = false;
 
     try
     {
@@ -137,13 +140,14 @@ app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? r
 
         // Log the exception (logging is configured in service defaults)
         logger.LogError(ex, "An error occurred during the test endpoint.");
-
+        isError = true;
         result = Results.Problem("An unexpected error occurred during the test endpoint.", statusCode: StatusCodes.Status500InternalServerError);
     }
 
     stopwatch.Stop();
 
     requestCounter?.Add(1, "error", "test");
+    requestHistogram?.Record(stopwatch.ElapsedMilliseconds, "error", "test", isError);
 
     activity?.SetStatus(ActivityStatusCode.Ok);
     return result;
