@@ -127,6 +127,18 @@ if (!builder.ExecutionContext.IsPublishMode)
                 .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
                 .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
                 .WithK6OtlpEnvironment();
+
+    var k6_error = builder.AddK6("k6-error")
+                .WithBindMount("k6", "/scripts", isReadOnly: true)
+                .WithScript("/scripts/test_error.js", virtualUsers: 50, duration: "1h")
+                .WithReference(apiService)
+                .WaitFor(apiService)
+                .WithReference(webFrontend)
+                .WaitFor(webFrontend)
+                .WithEnvironment("K6_WEB_DASHBOARD", "true")
+                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
+                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
+                .WithK6OtlpEnvironment();
 }
 else
 {
