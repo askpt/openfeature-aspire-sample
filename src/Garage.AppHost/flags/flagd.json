@@ -100,6 +100,25 @@
         "zero": 0
       },
       "defaultVariant": "one-hundred"
+    },
+    "simulate-delay-ms": {
+      "state": "ENABLED",
+      "variants": {
+        "none": 0,
+        "fast": 200,
+        "slow": 1000,
+        "very-slow": 3000,
+        "extremely-slow": 10000
+      },
+      "defaultVariant": "none"
+    },
+    "simulate-error": {
+      "state": "ENABLED",
+      "variants": {
+        "none": false,
+        "error": true
+      },
+      "defaultVariant": "none"
     }
   }
 }
