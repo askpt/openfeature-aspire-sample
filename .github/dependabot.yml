@@ -103,7 +103,7 @@ updates:
           - "github.com/Azure/*"
           - "golang.org/x/*"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "src/Garage.ChatService/"
     schedule:
       interval: daily

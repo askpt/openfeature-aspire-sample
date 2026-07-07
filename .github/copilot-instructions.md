@@ -31,7 +31,7 @@ This repository is set up to use Aspire. Aspire is an orchestrator for the entir
 │   ├── Garage.ChatService/     # Python FastAPI chatbot service
 │   │   ├── main.py             # FastAPI application
 │   │   ├── prompt_loader.py    # GitHub Repository Prompts loader
-│   │   ├── requirements.txt    # Python dependencies
+│   │   ├── pyproject.toml      # Python dependencies (uv-managed)
 │   │   └── prompts/            # .prompt.yml files
 │   ├── Garage.FeatureFlags/    # Go API for feature flag management
 │   ├── Garage.ServiceDefaults/ # Shared services & feature flags
@@ -114,24 +114,17 @@ golangci-lint run
 ```bash
 cd src/Garage.ChatService
 
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-source .venv/bin/activate  # Linux/Mac
-.venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install -r requirements.txt
+# Create/update virtual environment and install dependencies
+uv sync --group dev
 
 # Run the application (development)
-uvicorn main:app --reload --port 8080
+uv run uvicorn main:app --reload --port 8080
 
 # Format code
-black .
+uv run black .
 
 # Type checking
-mypy .
+uv run mypy .
 ```
 
 ## Coding Standards and Conventions
@@ -222,7 +215,7 @@ Available prompt styles:
 - Service defaults are in `Garage.ServiceDefaults` for shared configuration
 - Use .NET Aspire for service orchestration and discovery
 - All services include OpenTelemetry instrumentation
-- Python services use `AddUvicornApp` with `.WithPip()` for package management
+- Python services use `AddUvicornApp` with `.WithUv()` for package management
 
 ### Database Access
 
@@ -255,9 +248,9 @@ Currently, there are no test projects in the solution. When adding tests:
 ## Dependencies and Security
 
 - Use Dependabot for dependency updates (configured in `.github/dependabot.yml`)
-- Dependabot monitors: NuGet, npm, pip, Go modules, GitHub Actions, Docker
+- Dependabot monitors: NuGet, npm, uv, Go modules, GitHub Actions, Docker
 - Keep .NET SDK at version 10.0.100 or later (see `global.json`)
-- Review and update NuGet, npm, and pip packages regularly
+- Review and update NuGet, npm, and uv-managed Python packages regularly
 - Follow security best practices for feature flag configuration
 - Store GitHub PAT as user secret for GitHub Models access
 
