@@ -1,5 +1,5 @@
 fastapi==0.139.0
-uvicorn==0.50.0
+uvicorn==0.50.2
 openai==2.44.0
 openfeature-sdk==0.10.0
 openfeature-provider-ofrep==0.3.0
@@ -10,4 +10,4 @@ opentelemetry-semantic-conventions==0.64b0
 opentelemetry-instrumentation-fastapi==0.64b0
 opentelemetry-instrumentation-logging==0.64b0
 opentelemetry-exporter-otlp-proto-grpc==1.43.0
-grpcio==1.81.1
+grpcio==1.82.0
