@@ -1,3 +1,29 @@
+[project]
+name = "garage-chatservice"
+version = "0.1.0"
+description = "Le Mans chatbot service"
+requires-python = ">=3.14"
+dependencies = [
+	"fastapi==0.139.0",
+	"grpcio==1.81.1",
+	"openai==2.44.0",
+	"openfeature-provider-ofrep==0.3.0",
+	"openfeature-sdk==0.10.0",
+	"opentelemetry-api==1.43.0",
+	"opentelemetry-exporter-otlp-proto-grpc==1.43.0",
+	"opentelemetry-instrumentation-fastapi==0.64b0",
+	"opentelemetry-instrumentation-logging==0.64b0",
+	"opentelemetry-sdk==1.43.0",
+	"opentelemetry-semantic-conventions==0.64b0",
+	"pyyaml==6.0.3",
+	"uvicorn==0.50.0",
+]
+
+[dependency-groups]
+dev = [
+	"pytest==9.1.1",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]

@@ -137,16 +137,17 @@ jobs:
         with:
           python-version: '3.14'
           allow-prereleases: true
-          cache: 'pip'
-          cache-dependency-path: |
-            src/Garage.ChatService/requirements.txt
-            src/Garage.ChatService/requirements-test.txt
+      - name: Setup uv
+        uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            src/Garage.ChatService/pyproject.toml
+            src/Garage.ChatService/uv.lock
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install -r requirements-test.txt
+        run: uv sync --frozen --group dev
       - name: Run tests
-        run: pytest
+        run: uv run pytest
 
   build-web:
     needs: changes
