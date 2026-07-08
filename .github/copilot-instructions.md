@@ -121,10 +121,10 @@ uv sync --group dev
 uv run uvicorn main:app --reload --port 8080
 
 # Format code
-uv run black .
+uvx black .
 
 # Type checking
-uv run mypy .
+uvx mypy .
 ```
 
 ## Coding Standards and Conventions
