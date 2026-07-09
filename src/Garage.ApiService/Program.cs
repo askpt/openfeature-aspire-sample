@@ -123,13 +123,13 @@ app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? r
 
     try
     {
+        var delay = await featureClient.GetIntegerDetailsAsync("simulate-delay-ms", 100);
+        await Task.Delay(delay.Value);
+
         if (await featureClient.GetBooleanValueAsync("simulate-error", false))
         {
             throw new InvalidOperationException("Simulated error for testing feature flags.");
         }
-
-        var delay = await featureClient.GetIntegerDetailsAsync("simulate-delay-ms", 100);
-        await Task.Delay(delay.Value);
 
         result = Results.Ok(new { message = "Test endpoint executed successfully." });
     }
@@ -148,8 +148,7 @@ app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? r
 
     requestCounter?.Add(1, "error", "test");
     requestHistogram?.Record(stopwatch.ElapsedMilliseconds, "error", "test", isError);
-
-    activity?.SetStatus(ActivityStatusCode.Ok);
+    activity?.SetStatus(isError ? ActivityStatusCode.Error : ActivityStatusCode.Ok);
     return result;
 });
 
