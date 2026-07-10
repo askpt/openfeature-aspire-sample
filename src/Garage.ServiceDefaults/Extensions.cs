@@ -67,7 +67,7 @@ public static class Extensions
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
-                    .AddMeter("OpenFeature")
+                    .AddMeter("*")
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })

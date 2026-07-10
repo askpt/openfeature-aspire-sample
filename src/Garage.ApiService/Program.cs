@@ -1,10 +1,14 @@
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Text.Json;
 using Garage.ApiModel.Data;
 using Garage.ApiService.Services;
+using Garage.ApiService.Telemetry;
 using Garage.ServiceDefaults;
 using Garage.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using OpenFeature;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +60,14 @@ builder.Services.AddScoped<IWinnersService, WinnersService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi(OpenApiHelpers.ConfigureOpenApi);
 
+// Register Meter and source-generated metrics
+builder.Services.TryAddSingleton(s =>
+    s.GetRequiredService<IMeterFactory>().Create("Garage.ApiService", "1.0.0"));
+builder.Services.TryAddSingleton(s =>
+    ApiMetrics.CreateRequestCounter(s.GetRequiredService<Meter>()));
+builder.Services.TryAddSingleton(s =>
+    ApiMetrics.CreateRequestHistogram(s.GetRequiredService<Meter>()));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -100,6 +112,51 @@ app.MapGet("/lemans/winners", async (IWinnersService winnersService, ILogger<Pro
     .Produces<IEnumerable<Winner>>(StatusCodes.Status200OK)
     .ProducesProblem(StatusCodes.Status500InternalServerError)
     .WithTags("Le Mans Winners");
+
+// Test endpoint for the feature flags (error/slow responses)
+app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? requestCounter, RequestHistogram? requestHistogram, ILogger<Program> logger) =>
+{
+    using var activity = Activity.Current;
+    IResult result;
+    var stopwatch = Stopwatch.StartNew();
+    var isError = false;
+
+    try
+    {
+        var delay = await featureClient.GetIntegerDetailsAsync("simulate-delay-ms", 100);
+        await Task.Delay(delay.Value);
+
+        if (await featureClient.GetBooleanValueAsync("simulate-error", false))
+        {
+            throw new InvalidOperationException("Simulated error for testing feature flags.");
+        }
+
+        result = Results.Ok(new { message = "Test endpoint executed successfully." });
+    }
+    catch (Exception ex)
+    {
+        // Set trace status to error
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
+        // Log the exception (logging is configured in service defaults)
+        logger.LogError(ex, "An error occurred during the test endpoint.");
+        isError = true;
+        result = Results.Problem("An unexpected error occurred during the test endpoint.", statusCode: StatusCodes.Status500InternalServerError);
+    }
+
+    stopwatch.Stop();
+
+    requestCounter?.Add(1, "error", "test");
+    requestHistogram?.Record(stopwatch.ElapsedMilliseconds, "error", "test", isError);
+    activity?.SetStatus(isError ? ActivityStatusCode.Error : ActivityStatusCode.Ok);
+    return result;
+});
+
+// Test endpoint for the feature flags (tracking API)
+app.MapGet("/test/track", (ILogger<Program> logger) =>
+{
+    using var activity = Activity.Current;
+});
 
 app.MapDefaultEndpoints();
 
