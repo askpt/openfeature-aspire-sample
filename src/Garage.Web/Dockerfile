@@ -11,7 +11,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginx:1.31.6-alpine@sha256:092a82dc1cb2fa653ee660f24a8f8603f55b4ea9316923f9a0d394e50714ae10
+FROM nginx:1.31.6-alpine@sha256:d0a6faaed2491faecdb9021f449e8edd7b1bbba246fe2ddf7eba63cccd5b9803
 
 # Install curl for healthcheck (optional)
 RUN apk add --no-cache curl
