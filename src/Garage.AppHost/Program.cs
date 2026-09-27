@@ -49,7 +49,6 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
     .WithUv()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
-    .WaitFor(chatModel)
     .WithEnvironment("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
     .WithOtlpExporter()
     .WithHttpHealthCheck("/health")
