@@ -15,7 +15,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from openai import OpenAI
+from openai import AsyncOpenAI
 from openfeature import api
 from openfeature.contrib.provider.ofrep import OFREPProvider
 from openfeature.evaluation_context import EvaluationContext
@@ -295,9 +295,11 @@ FastAPIInstrumentor.instrument_app(app)
 # Create the OpenAI-compatible client for the configured Microsoft Foundry endpoint.
 # Foundry Local injects a static API key; Azure AI Foundry authenticates with Microsoft Entra ID,
 # and the OpenAI SDK refreshes the bearer token on every request through the provider callable.
-openai_client = OpenAI(
+openai_client = AsyncOpenAI(
     base_url=CHAT_MODEL_BASE_URL,
-    api_key=CHAT_MODEL_KEY or get_bearer_token_provider(DefaultAzureCredential(), CHAT_MODEL_SCOPE)
+    api_key=CHAT_MODEL_KEY or get_bearer_token_provider(DefaultAzureCredential(), CHAT_MODEL_SCOPE),
+    timeout=30.0,
+    max_retries=0,
 )
 
 
@@ -401,14 +403,28 @@ async def chat(request: ChatRequest):
                     if input_messages:
                         model_span.set_attribute("gen_ai.input.messages", json.dumps(input_messages))
 
-                response = openai_client.chat.completions.create(
-                    model=CHAT_MODEL_NAME,
-                    messages=messages,
-                    temperature=model_params.get("temperature", 0.7)
-                )
+                try:
+                    response = await openai_client.chat.completions.create(
+                        model=CHAT_MODEL_NAME,
+                        messages=messages,
+                        temperature=model_params.get("temperature", 0.7)
+                    )
+                    if not response.choices:
+                        raise ValueError("No choices returned from AI model")
+                except Exception as e:
+                    logger.warning(
+                        "Foundry is unavailable for requested prompt '%s': %s",
+                        prompt_file,
+                        e,
+                    )
+                    answer = f"Foundry not working. Requested prompt was: {prompt_file}"
+                    duration = time.time() - start_time
+                    if chat_request_counter:
+                        chat_request_counter.add(1, {"status": "fallback", "prompt_style": prompt_file})
+                    if chat_request_duration:
+                        chat_request_duration.record(duration, {"prompt_style": prompt_file})
+                    return ChatResponse(response=answer, prompt_style=effective_prompt_style)
 
-                if not response.choices:
-                    raise ValueError("No choices returned from AI model")
                 answer = response.choices[0].message.content or ""
                 model_span.set_attribute("response_length", len(answer))
 

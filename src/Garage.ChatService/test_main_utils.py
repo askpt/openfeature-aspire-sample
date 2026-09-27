@@ -6,10 +6,12 @@ third-party imports are replaced with ``MagicMock`` stubs so the test can
 run without installing the full service dependency stack.
 """
 
+import asyncio
 import importlib.util
 import os
 import sys
-from unittest.mock import MagicMock
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -265,3 +267,38 @@ class TestBuildSemconvPayloads:
         parts = inputs[0]["parts"]
         assert any(p["type"] == "text" for p in parts)
         assert any(p["type"] == "tool_call" for p in parts)
+
+
+class TestChatFallback:
+    def test_returns_requested_prompt_when_foundry_is_unavailable(self, main_module, monkeypatch):
+        flag_client = MagicMock()
+        flag_client.get_boolean_value.return_value = True
+        flag_client.get_string_value.return_value = "casual"
+        monkeypatch.setattr(main_module.api, "get_client", lambda: flag_client)
+        monkeypatch.setattr(main_module, "load_prompt", lambda *_: {"messages": []})
+        monkeypatch.setattr(main_module, "render_messages", lambda *_: [])
+        monkeypatch.setattr(main_module, "get_model_parameters", lambda *_: {})
+        monkeypatch.setattr(main_module, "CAPTURE_MESSAGE_CONTENT", False)
+        monkeypatch.setattr(
+            main_module,
+            "ChatResponse",
+            lambda **values: SimpleNamespace(**values),
+        )
+
+        create_completion = AsyncMock(side_effect=ConnectionError("Foundry unavailable"))
+        monkeypatch.setattr(
+            main_module,
+            "openai_client",
+            SimpleNamespace(
+                chat=SimpleNamespace(
+                    completions=SimpleNamespace(create=create_completion)
+                )
+            ),
+        )
+
+        chat_handler = main_module.app.post.return_value.call_args.args[0]
+        response = asyncio.run(chat_handler(SimpleNamespace(message="Hello", userId="test-user")))
+
+        assert response.response == "Foundry not working. Requested prompt was: casual"
+        assert response.prompt_style == "casual"
+        create_completion.assert_awaited_once()

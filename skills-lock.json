@@ -4,27 +4,32 @@
     "aspire": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
+      "skillPath": "skills/aspire/SKILL.md",
       "computedHash": "aa502e4ff4c9cb28baa2c9ebd14b48fe7ed572fd291a9e24cda5226654413903"
     },
     "dotnet-best-practices": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
+      "skillPath": "skills/dotnet-best-practices/SKILL.md",
       "computedHash": "9ef94db7f06c167d544369817e5a4415eeb7886dcff0d47026837a1aada260e3"
     },
     "golang-pro": {
       "source": "jeffallan/claude-skills",
       "sourceType": "github",
-      "computedHash": "709f35fe79694533e7e8f1059eecb627cced758a1e31ae2d0c0c6f4bffa91277"
+      "skillPath": "skills/golang-pro/SKILL.md",
+      "computedHash": "12b4cac8f65228f82cbc26f0da9232aba87ffa45ccd01afa3998fb8ec61dc288"
     },
     "python-sdk": {
       "source": "inference-sh-9/skills",
       "sourceType": "github",
-      "computedHash": "e266a809ae6f808115082c5b8155cf99c17d03708e9f4ac28cf36b3cebc8f39a"
+      "skillPath": "sdk/python-sdk/SKILL.md",
+      "computedHash": "f4068c27d05308a6e782dbb5c2c72e72125acc63b9e630d30c9580cb61b6544b"
     },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
-      "computedHash": "4365be772fd3b41994a72ad478472c6d680678e7f3859860ab010e9c46e48ee0"
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
     }
   }
 }

@@ -49,7 +49,6 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
     .WithUv()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
-    .WaitFor(chatModel)
     .WithEnvironment("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
     .WithOtlpExporter()
     .WithHttpHealthCheck("/health")
@@ -118,6 +117,7 @@ if (!builder.ExecutionContext.IsPublishMode)
 
     var tunnel = builder.AddDevTunnel("tunnel")
                     .WithReference(flagd)
+                    .WithExplicitStart()
                     .WithAnonymousAccess();
 
     // Browser telemetry is sent directly from the browser to the collector, so it

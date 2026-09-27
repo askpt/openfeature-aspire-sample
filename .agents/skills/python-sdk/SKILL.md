@@ -1,8 +1,10 @@
 ---
 name: python-sdk
-description: "Python SDK for inference.sh - run AI apps, build agents, and integrate with 150+ models. Package: inferencesh (pip install inferencesh). Supports sync/async, streaming, file uploads. Build agents with template or ad-hoc patterns, tool builder API, skills, and human approval. Use for: Python integration, AI apps, agent development, RAG pipelines, automation. Triggers: python sdk, inferencesh, pip install, python api, python client, async inference, python agent, tool builder python, programmatic ai, python integration, sdk python"
+description: "Python SDK for inference.sh - run AI apps, build agents, and integrate with all models. Package: inferencesh (pip install inferencesh). Supports sync/async, streaming, file uploads. Build agents with template or ad-hoc patterns, tool builder API, skills, and human approval. Use for: Python integration, AI apps, agent development, RAG pipelines, automation. Triggers: python sdk, inferencesh, pip install, python api, python client, async inference, python agent, tool builder python, programmatic ai, python integration, sdk python"
 allowed-tools: Bash(pip install inferencesh), Bash(python *)
 ---
+
+> **Install the belt CLI skill:** `npx skills add belt-sh/cli`
 
 # Python SDK
 
@@ -23,7 +25,7 @@ client = inference(api_key="inf_your_key")
 
 # Run an AI app
 result = client.run({
-    "app": "infsh/flux-schnell",
+    "app": "infsh/flux-1-dev",
     "input": {"prompt": "A sunset over mountains"}
 })
 print(result["output"])
@@ -62,7 +64,7 @@ Get your API key: Settings → API Keys → Create API Key
 
 ```python
 result = client.run({
-    "app": "infsh/flux-schnell",
+    "app": "infsh/flux-1-dev",
     "input": {"prompt": "A cat astronaut"}
 })
 
@@ -203,7 +205,7 @@ calculator = (
 )
 
 image_gen = (
-    app_tool("generate_image", "infsh/flux-schnell@latest")
+    app_tool("generate_image", "infsh/flux-1-dev@latest")
     .describe("Generate an image")
     .param("prompt", string("Image description"))
     .build()
@@ -270,7 +272,7 @@ greet = (
 
 ```python
 generate = (
-    app_tool("generate_image", "infsh/flux-schnell@latest")
+    app_tool("generate_image", "infsh/flux-1-dev@latest")
     .describe("Generate an image from text")
     .param("prompt", string("Image description"))
     .setup({"model": "schnell"})
@@ -399,7 +401,7 @@ async def main():
 
     # Async app execution
     result = await client.run({
-        "app": "infsh/flux-schnell",
+        "app": "infsh/flux-1-dev",
         "input": {"prompt": "A galaxy"}
     })
 
@@ -463,8 +465,8 @@ response = agent.send_message(
 # JavaScript SDK
 npx skills add inference-sh/skills@javascript-sdk
 
-# Full platform skill (all 150+ apps via CLI)
-npx skills add inference-sh/skills@inference-sh
+# Full platform skill (all apps via CLI)
+npx skills add inference-sh/skills@infsh-cli
 
 # LLM models
 npx skills add inference-sh/skills@llm-models
@@ -477,7 +479,8 @@ npx skills add inference-sh/skills@ai-image-generation
 
 - [Python SDK Reference](https://inference.sh/docs/api/sdk-python) - Full API documentation
 - [Agent SDK Overview](https://inference.sh/docs/api/agent-sdk) - Building agents
-- [Tool Builder Reference](https://inference.sh/docs/api/agent-tools) - Creating tools
+- [Tool Builder Reference](https://inference.sh/docs/api/infsh-cli) - Creating tools
 - [Authentication](https://inference.sh/docs/api/authentication) - API key setup
 - [Streaming](https://inference.sh/docs/api/sdk/streaming) - Real-time updates
 - [File Uploads](https://inference.sh/docs/api/sdk/files) - File handling
+
