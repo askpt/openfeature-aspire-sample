@@ -35,7 +35,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
-    <PackageVersion Include="Microsoft.OpenApi" Version="3.10.2" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
   </ItemGroup>
   <ItemGroup Label="OpenFeature Packages">
     <PackageVersion Include="OpenFeature.Hosting" Version="2.14.1" />
