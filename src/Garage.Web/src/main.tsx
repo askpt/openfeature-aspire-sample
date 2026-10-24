@@ -17,10 +17,8 @@ const otelResourceAttributes =
 
 initializeTelemetry(otelEndpoint, otelHeaders, otelResourceAttributes);
 
-// Initialize OpenFeature provider before rendering
-const ofrepServiceUrl = import.meta.env.VITE_OFREP_SERVICE_URL || "";
-
-initializeFeatureFlags(ofrepServiceUrl);
+// Initialize OpenFeature provider before rendering (OFREP is proxied same-origin under /ofrep)
+initializeFeatureFlags();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

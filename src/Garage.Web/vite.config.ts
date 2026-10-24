@@ -10,13 +10,8 @@ export default defineConfig(({ mode }) => {
   const otelHeaders = process.env.OTEL_EXPORTER_OTLP_HEADERS;
   const otelResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES;
 
-  // Only define service URLs and OTEL config if they are set
+  // Only define OTEL config if it is set
   const defineConfig: Record<string, string> = {};
-
-  // For OFREP, use relative URL (proxied) instead of absolute URL
-  defineConfig["import.meta.env.VITE_OFREP_SERVICE_URL"] = JSON.stringify(
-    ofrepServiceUrl ? "/ofrep" : ""
-  );
 
   if (otelEndpoint) {
     defineConfig["import.meta.env.VITE_OTEL_ENDPOINT"] =
@@ -52,10 +47,11 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, ""),
           secure: false,
         },
+        // Pass the /ofrep prefix through untouched: flagd serves both
+        // /ofrep/v1/evaluate/flags and the SSE stream /ofrep/v1/sse under it.
         "/ofrep": {
           target: ofrepServiceUrl,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/ofrep/, ""),
           secure: false,
         },
         "/flags": {
