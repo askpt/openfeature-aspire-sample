@@ -6,6 +6,7 @@ import {
   useRef,
   useImperativeHandle,
 } from "react";
+import "./Modal.css";
 import "./FeatureFlagsModal.css";
 
 interface FeatureFlagsModalProps {

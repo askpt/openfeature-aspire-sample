@@ -8,6 +8,7 @@ import CarCard from "./CarCard";
 import FeatureFlagsModal, {
   type FeatureFlagsModalHandle,
 } from "./FeatureFlagsModal";
+import ChangeUserModal from "./ChangeUserModal";
 import { recordPageView, recordUserIdChange } from "../metrics";
 import "./Home.css";
 
@@ -20,6 +21,7 @@ const Home = () => {
     localStorage.getItem("userId") || "1"
   );
   const [showFlagsModal, setShowFlagsModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const flagsModalRef = useRef<FeatureFlagsModalHandle>(null);
 
   // Use OpenFeature React hooks for feature flags
@@ -81,16 +83,14 @@ const Home = () => {
     );
   };
 
-  const handleChangeUserId = () => {
-    const newUserId = prompt("Enter new user ID:", currentUserId);
-    if (newUserId && newUserId.trim() !== "") {
-      localStorage.setItem("userId", newUserId.trim());
-      setCurrentUserId(newUserId.trim());
-      // Record user ID change metric
-      recordUserIdChange();
-      // Reload the page to reinitialize OpenFeature with the new user ID
-      window.location.reload();
-    }
+  const handleChangeUserId = (newUserId: string) => {
+    localStorage.setItem("userId", newUserId);
+    setCurrentUserId(newUserId);
+    setShowUserModal(false);
+    // Record user ID change metric
+    recordUserIdChange();
+    // Reload the page to reinitialize OpenFeature with the new user ID
+    window.location.reload();
   };
 
   const handleOpenFlagsModal = () => {
@@ -143,7 +143,10 @@ const Home = () => {
           </div>
           <div className="user-section">
             <span className="user-id-label">User ID: {currentUserId}</span>
-            <button className="change-user-btn" onClick={handleChangeUserId}>
+            <button
+              className="change-user-btn"
+              onClick={() => setShowUserModal(true)}
+            >
               Change User
             </button>
             {hasEditableFlags && (
@@ -208,6 +211,14 @@ const Home = () => {
         isOpen={showFlagsModal}
         onClose={() => setShowFlagsModal(false)}
       />
+
+      {showUserModal && (
+        <ChangeUserModal
+          currentUserId={currentUserId}
+          onClose={() => setShowUserModal(false)}
+          onSubmit={handleChangeUserId}
+        />
+      )}
     </div>
   );
 };
