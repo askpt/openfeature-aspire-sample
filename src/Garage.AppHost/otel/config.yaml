@@ -24,33 +24,54 @@ receivers:
           max_age: 86400
 
 processors:
+  # Shed load instead of growing without bound: refuse incoming data while over the soft
+  # limit so the collector survives bursts (e.g. k6) rather than being OOM-killed.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
   batch:
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+    timeout: 1s
 
 exporters:
   debug:
     verbosity: detailed
+  # The Aspire dashboard is a best-effort dev UI with in-memory storage: when it cannot keep up,
+  # drop data quickly rather than queueing and retrying it in memory.
   otlp/aspire:
     endpoint: ${env:ASPIRE_ENDPOINT}
     headers:
       x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
         insecure: true
+    timeout: 5s
+    sending_queue:
+      queue_size: 50
+    retry_on_failure:
+      enabled: false
   otlp/lgtm:
     endpoint: lgtm:4317
     tls:
       insecure: true
+    timeout: 10s
+    sending_queue:
+      queue_size: 200
+    retry_on_failure:
+      max_elapsed_time: 60s
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [otlp/aspire, otlp/lgtm]
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [otlp/aspire, otlp/lgtm]
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [otlp/aspire, otlp/lgtm]
