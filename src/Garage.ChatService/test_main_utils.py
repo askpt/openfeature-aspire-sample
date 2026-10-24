@@ -89,6 +89,46 @@ def main_module():
 
 
 # ---------------------------------------------------------------------------
+# _join_base_url
+# ---------------------------------------------------------------------------
+
+
+class TestJoinBaseUrl:
+    def test_appends_route_to_service_root(self, main_module):
+        # Foundry Local via Aspire 13.6.4+: root endpoint, AppHost supplies "v1".
+        assert (
+            main_module._join_base_url("http://127.0.0.1:53447/", "v1")
+            == "http://127.0.0.1:53447/v1"
+        )
+
+    def test_appends_nested_route_to_account_root(self, main_module):
+        # Azure AI Foundry in publish mode.
+        assert (
+            main_module._join_base_url("https://acct.services.ai.azure.com/", "openai/v1")
+            == "https://acct.services.ai.azure.com/openai/v1"
+        )
+
+    def test_does_not_duplicate_route_already_on_endpoint(self, main_module):
+        # Older Aspire versions published Foundry Local as a ready-to-use ".../v1" base URL.
+        assert (
+            main_module._join_base_url("http://127.0.0.1:53447/v1", "v1")
+            == "http://127.0.0.1:53447/v1"
+        )
+
+    def test_empty_route_returns_endpoint_without_trailing_slash(self, main_module):
+        assert (
+            main_module._join_base_url("http://localhost:5273/v1/", "")
+            == "http://localhost:5273/v1"
+        )
+
+    def test_tolerates_slashes_around_route(self, main_module):
+        assert (
+            main_module._join_base_url("http://localhost:5273", "/v1/")
+            == "http://localhost:5273/v1"
+        )
+
+
+# ---------------------------------------------------------------------------
 # _as_text
 # ---------------------------------------------------------------------------
 

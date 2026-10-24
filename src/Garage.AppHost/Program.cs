@@ -49,6 +49,10 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
     .WithUv()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
+    // Foundry Local resolves the model alias (phi-4-mini) to the id the service actually serves
+    // (Phi-4-mini-instruct-generic-gpu:5) only once the model is loaded, and CHAT_MODEL_MODELNAME
+    // is captured when the chat service starts, so it has to start after the deployment is ready.
+    .WaitFor(chatModel)
     .WithEnvironment("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
     .WithOtlpExporter()
     .WithHttpHealthCheck("/health")
@@ -56,14 +60,19 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
 
 if (builder.ExecutionContext.IsPublishMode)
 {
-    // Foundry Local publishes a ready-to-use OpenAI base URL, but Azure AI Foundry only exposes the
-    // account root, so the OpenAI-compatible route has to be appended there.
+    // Neither Foundry flavour exposes the OpenAI-compatible route on the endpoint Aspire publishes:
+    // Foundry Local reports its service root and Azure AI Foundry the account root, so the chat
+    // service appends the mode-specific OpenAI path.
     // Azure AI Foundry also has local auth disabled, so the chat service authenticates with its
     // managed identity instead of an API key.
     chatService = chatService
         .WithArgs("main:app", "--host", "0.0.0.0", "--port", "8000")
         .WithEnvironment("CHAT_MODEL_API_PATH", "openai/v1")
         .WithRoleAssignments(foundry, CognitiveServicesBuiltInRole.CognitiveServicesUser);
+}
+else
+{
+    chatService = chatService.WithEnvironment("CHAT_MODEL_API_PATH", "v1");
 }
 
 // Feature flags infrastructure

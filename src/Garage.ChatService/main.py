@@ -53,15 +53,25 @@ OFREP_ENDPOINT = os.environ.get("OFREP_ENDPOINT", "http://localhost:8016")
 # Foundry Local injects CHAT_MODEL_KEY; Azure AI Foundry does not and expects a
 # Microsoft Entra ID token from the service's managed identity instead.
 CHAT_MODEL_ENDPOINT = os.environ.get("CHAT_MODEL_URI", "http://localhost:5273/v1")
-# Foundry Local already exposes a complete OpenAI base URL, while Azure AI Foundry only exposes the
-# account root, so the AppHost supplies the extra "openai/v1" segment in publish mode.
+# Aspire publishes the service root for Foundry Local and the account root for Azure AI Foundry,
+# so the AppHost supplies the OpenAI-compatible route ("v1" or "openai/v1") separately.
 CHAT_MODEL_API_PATH = os.environ.get("CHAT_MODEL_API_PATH", "")
 CHAT_MODEL_KEY = os.environ.get("CHAT_MODEL_KEY", "")
 CHAT_MODEL_NAME = os.environ.get("CHAT_MODEL_MODELNAME", "phi-4-mini")
 CHAT_MODEL_SCOPE = os.environ.get("CHAT_MODEL_SCOPE", "https://cognitiveservices.azure.com/.default")
-CHAT_MODEL_BASE_URL = "/".join(
-    part for part in (CHAT_MODEL_ENDPOINT.rstrip("/"), CHAT_MODEL_API_PATH.strip("/")) if part
-)
+
+
+def _join_base_url(endpoint: str, api_path: str) -> str:
+    """Append the OpenAI route unless the endpoint already ends with it (older Aspire
+    versions published Foundry Local as a ready-to-use ".../v1" base URL)."""
+    endpoint = endpoint.rstrip("/")
+    api_path = api_path.strip("/")
+    if not api_path or endpoint.endswith(f"/{api_path}"):
+        return endpoint
+    return f"{endpoint}/{api_path}"
+
+
+CHAT_MODEL_BASE_URL = _join_base_url(CHAT_MODEL_ENDPOINT, CHAT_MODEL_API_PATH)
 # OpenTelemetry configuration from Aspire
 OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "chatservice")
