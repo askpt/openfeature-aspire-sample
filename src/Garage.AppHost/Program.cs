@@ -139,7 +139,9 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
         .WaitFor(collector);
 
+    // Load generators only run on demand: press Start on the dashboard to kick them off.
     var k6 = builder.AddK6("k6")
+                .WithExplicitStart()
                 .WithBindMount("k6", "/scripts", isReadOnly: true)
                 .WithScript("/scripts/main.js", virtualUsers: 8, duration: "1h")
                 .WithReference(apiService)
@@ -152,6 +154,7 @@ if (!builder.ExecutionContext.IsPublishMode)
                 .WithK6OtlpEnvironment();
 
     var k6_error = builder.AddK6("k6-error")
+                .WithExplicitStart()
                 .WithBindMount("k6", "/scripts", isReadOnly: true)
                 .WithScript("/scripts/test_error.js", virtualUsers: 8, duration: "1h")
                 .WithReference(apiService)
