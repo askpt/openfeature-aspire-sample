@@ -154,14 +154,26 @@ app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? r
 });
 
 // Test endpoint for the feature flags (tracking API): scores the `prompt-file` variant served to a
-// random user and reports it through OpenFeature tracking, so the quality of the active prompt can
-// be charted while k6 drives traffic and the flag is changed.
+// random user and reports it, together with a simulated per-request cost, through OpenFeature
+// tracking. Charted side by side, the two show the quality/cost trade-off of each prompt while k6
+// drives traffic and the flag is changed.
 var promptScores = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
 {
     ["unreliable"] = 0,
     ["brief"] = 3,
     ["casual"] = 5,
     ["expert"] = 10,
+};
+
+// Simulated cost per request in USD: longer prompts and answers burn more tokens, so the terse,
+// unreliable prompt is the cheapest and the expert one the most expensive. Each request draws a
+// random value from the variant's range to mimic varying token counts.
+var promptCostRanges = new Dictionary<string, (double Min, double Max)>(StringComparer.OrdinalIgnoreCase)
+{
+    ["unreliable"] = (0.0004, 0.0008),
+    ["brief"] = (0.0008, 0.0015),
+    ["casual"] = (0.0015, 0.0030),
+    ["expert"] = (0.0040, 0.0080),
 };
 
 app.MapGet("/test/prompt-score", async (IFeatureClient featureClient, RequestCounter? requestCounter, RequestHistogram? requestHistogram) =>
@@ -175,18 +187,27 @@ app.MapGet("/test/prompt-score", async (IFeatureClient featureClient, RequestCou
     var prompt = await featureClient.GetStringDetailsAsync("prompt-file", "expert", evaluationContext);
     var variant = prompt.Variant ?? prompt.Value;
     var score = promptScores.GetValueOrDefault(variant);
+    var (minCost, maxCost) = promptCostRanges.GetValueOrDefault(variant, (0.0010, 0.0020));
+    var cost = Math.Round(minCost + Random.Shared.NextDouble() * (maxCost - minCost), 6);
 
-    featureClient.Track("prompt-score", evaluationContext, TrackingEventDetails.Builder()
-        .SetValue(score)
+    var trackingDetails = TrackingEventDetails.Builder()
         .Set("feature_flag.key", "prompt-file")
         .Set("feature_flag.result.variant", variant)
+        .Build();
+    featureClient.Track("prompt-score", evaluationContext, TrackingEventDetails.Builder()
+        .Merge(trackingDetails)
+        .SetValue(score)
+        .Build());
+    featureClient.Track("prompt-cost", evaluationContext, TrackingEventDetails.Builder()
+        .Merge(trackingDetails)
+        .SetValue(cost)
         .Build());
 
     stopwatch.Stop();
     requestCounter?.Add(1, "prompt-score", "test");
     requestHistogram?.Record(stopwatch.ElapsedMilliseconds, "prompt-score", "test", false);
 
-    return Results.Ok(new { promptFile = prompt.Value, variant, score });
+    return Results.Ok(new { promptFile = prompt.Value, variant, score, cost });
 });
 
 app.MapDefaultEndpoints();

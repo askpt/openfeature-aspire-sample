@@ -2,7 +2,7 @@
   "id": null,
   "uid": "prompt-score",
   "title": "Prompt Score",
-  "description": "Quality score reported through OpenFeature tracking for the `prompt-file` flag (unreliable 0, brief 3, casual 5, expert 10). Driven by the k6-prompt-score load generator against GET /test/prompt-score.",
+  "description": "Quality score and simulated cost reported through OpenFeature tracking for the `prompt-file` flag (score: unreliable 0, brief 3, casual 5, expert 10; cost rises in the same order). Driven by the k6-prompt-score load generator against GET /test/prompt-score.",
   "tags": [
     "openfeature",
     "feature-flags",
@@ -11,7 +11,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "editable": true,
   "refresh": "10s",
   "annotations": {
@@ -63,15 +63,30 @@
   "weekStart": "",
   "panels": [
     {
+      "id": 14,
+      "type": "text",
+      "title": "About",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Quality vs. cost of the `prompt-file` feature flag.** Every request to `GET /test/prompt-score` evaluates `prompt-file` for a random user, scores the served prompt variant (**unreliable 0 · brief 3 · casual 5 · expert 10**) and draws a simulated model cost (cheapest for *unreliable*, most expensive for *expert*). Both are reported through the OpenFeature **tracking API** — `Track(\"prompt-score\")` and `Track(\"prompt-cost\")` — and exported as OpenTelemetry metrics.\n\n**Try it:** start the `k6-prompt-score` resource in the Aspire dashboard, then edit `src/Garage.AppHost/flags/flagd.json` — change the `defaultVariant` of `prompt-file` or add a `fractional` targeting rule — and watch quality and cost move. Hover the ⓘ icon on any panel for how it is computed and how to read it."
+      }
+    },
+    {
       "id": 1,
       "type": "stat",
       "title": "Average Prompt Score",
-      "description": "Mean score of the prompt variants served over the rate interval (unreliable 0, brief 3, casual 5, expert 10)",
+      "description": "Average quality score of the `prompt-file` variants being served right now, on a 0–10 scale (unreliable 0 · brief 3 · casual 5 · expert 10).\n\nComputed from the `prompt-score` OpenFeature tracking events as rate(sum) ÷ rate(count) over the rate interval, so it is weighted by traffic. Colour thresholds: red < 2.5, orange < 4.5, yellow < 7.5, green ≥ 7.5.\n\nChange `defaultVariant` or the targeting of `prompt-file` in `flagd.json` and this value follows within about a minute.",
       "gridPos": {
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 5
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -134,12 +149,12 @@
       "id": 2,
       "type": "stat",
       "title": "Tracking Events",
-      "description": "OpenFeature `prompt-score` tracking events per second",
+      "description": "Rate of `prompt-score` tracking events per second — one per request handled by `GET /test/prompt-score`.\n\nWith the `k6-prompt-score` load generator running this sits at ~10/s. If it reads 0, start the generator from the Aspire dashboard.",
       "gridPos": {
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 5
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -179,12 +194,12 @@
       "id": 3,
       "type": "piechart",
       "title": "Variant Share (last 5m)",
-      "description": "Share of requests that were served each `prompt-file` variant in the last five minutes",
+      "description": "Which `prompt-file` variants users actually received in the last five minutes, and in what proportion, counted from the tracking events (legend values are request counts).\n\nA single slice means everyone gets the default variant; several slices mean targeting — for example a `fractional` rollout rule — is splitting traffic.",
       "gridPos": {
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 5
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -295,12 +310,12 @@
       "id": 4,
       "type": "timeseries",
       "title": "Average Prompt Score Over Time",
-      "description": "Mean tracked score across all variants; moves when the `prompt-file` flag changes",
+      "description": "The headline quality metric over time: mean score of all served variants, weighted by traffic.\n\nA step change marks the moment the flag was changed; a gradual move means a progressive rollout is shifting the traffic mix. The dashed lines are the same thresholds as the stat above.",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 5
+        "y": 10
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -372,12 +387,12 @@
       "id": 5,
       "type": "timeseries",
       "title": "Average Score by Variant",
-      "description": "Mean tracked score per served `prompt-file` variant",
+      "description": "Mean tracked score per served variant.\n\nEach variant maps to a fixed score, so the lines sit flat at 0, 3, 5 and 10 — a line only exists while that variant receives traffic, which makes this panel a quick check of which variants are live and of the scoring mapping.",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 5
+        "y": 10
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -485,12 +500,12 @@
       "id": 6,
       "type": "timeseries",
       "title": "Tracking Events by Variant",
-      "description": "`prompt-score` tracking events per second, broken down by served variant",
+      "description": "Requests per second served with each variant, stacked so the top of the stack is the total request rate.\n\nShows how a flag change moves traffic between prompts while the overall load stays the same.",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 19
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -599,12 +614,12 @@
       "id": 7,
       "type": "timeseries",
       "title": "Variant Share Over Time",
-      "description": "Fraction of requests served each variant (5m window); shows targeting and fractional rollouts shifting traffic",
+      "description": "Fraction of traffic (0–100%) served with each variant over a sliding 5-minute window.\n\nUse it to watch rollouts: a 50/50 `fractional` rule shows as two bands of equal height, and promoting a variant to the default makes its band grow to 100%.",
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 19
       },
       "datasource": "$metrics_ds",
       "targets": [
@@ -632,6 +647,448 @@
           },
           "min": 0,
           "max": 1
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unreliable"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brief"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "casual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "expert"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "row",
+      "title": "Cost",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "panels": [],
+      "description": "Simulated per-request model cost reported with the `prompt-cost` tracking event; together with the score above it shows the quality/cost trade-off of each prompt variant."
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Average Cost per Request",
+      "description": "Average simulated model cost (USD) of one chat request at the current prompt mix, derived from the `prompt-cost` tracking events as rate(sum) ÷ rate(count).\n\nThe API draws a random cost per request within a range per variant — unreliable $0.0004–0.0008 · brief $0.0008–0.0015 · casual $0.0015–0.0030 · expert $0.0040–0.0080 — to mimic token usage: richer prompts and longer answers cost more.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 29
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval])) / sum(rate(feature_flag_tracking_value_count{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval]))",
+          "instant": true,
+          "legendFormat": "Cost/request"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "Spend Rate",
+      "description": "Projected spend per hour: the per-second sum of tracked `prompt-cost` values × 3600.\n\nIt reflects both the request rate and the prompt mix, so it rises when the flag routes more users to expensive variants and drops to 0 when the load generator stops.",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 29
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval])) * 3600",
+          "instant": true,
+          "legendFormat": "USD/hour"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 11,
+      "type": "bargauge",
+      "title": "Score per Cent by Variant",
+      "description": "Value for money: average score ÷ average cost in cents, per variant — the quality points bought for $0.01.\n\nCheap prompts rank high here even when their absolute quality is poor, so read it together with “Average Score by Variant” when choosing which variant to promote with the flag. Only variants currently receiving traffic appear.",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-score\"}[$__rate_interval])) / sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_count{feature_flag_tracking_event_name=\"prompt-score\"}[$__rate_interval]))) / ((sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval])) / sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_count{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval]))) * 100)",
+          "instant": true,
+          "legendFormat": "{{feature_flag_result_variant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unreliable"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brief"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "casual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "expert"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "showUnfilled": true,
+        "namePlacement": "auto",
+        "sizing": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Average Cost per Request by Variant",
+      "description": "Mean simulated cost per request for each served variant.\n\nThe lines keep their relative order (unreliable < brief < casual < expert) and jitter within each variant's range because every request draws a random cost.",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval])) / sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_count{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval]))",
+          "legendFormat": "{{feature_flag_result_variant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unreliable"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "brief"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "casual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "expert"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Spend Rate by Variant",
+      "description": "Projected hourly spend attributed to each variant, stacked so the top of the stack equals the total “Spend Rate”.\n\nMakes the cost impact of a rollout visible: moving traffic from expert to casual shrinks the total even though the request rate is unchanged.",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "datasource": "$metrics_ds",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(feature_flag_result_variant) (rate(feature_flag_tracking_value_sum{feature_flag_tracking_event_name=\"prompt-cost\"}[$__rate_interval])) * 3600",
+          "legendFormat": "{{feature_flag_result_variant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2,
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 40,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "spanNulls": true
+          }
         },
         "overrides": [
           {

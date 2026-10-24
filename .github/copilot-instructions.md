@@ -191,8 +191,9 @@ Example feature flags in use:
   `OpenTelemetryTrackingProvider` in `Garage.ServiceDefaults`, which decorates the OFREP provider
   (OFREP itself has no tracking endpoint). Primitive tracking details become metric attributes, so keep them low-cardinality.
 - `GET /test/prompt-score` in `Garage.ApiService` scores the served `prompt-file` variant
-  (unreliable 0, brief 3, casual 5, expert 10) and tracks it as `prompt-score`; the `k6-prompt-score`
-  resource drives it and the provisioned **Prompt Score** Grafana dashboard charts it.
+  (unreliable 0, brief 3, casual 5, expert 10) and draws a simulated per-request cost (cheapest for
+  unreliable, most expensive for expert), tracked as `prompt-score` and `prompt-cost`; the `k6-prompt-score`
+  resource drives it and the provisioned **Prompt Score** Grafana dashboard charts quality vs. cost.
 - k6 scripts in `src/Garage.AppHost/k6/` own their rate/duration via `scenarios`; do not pass
   `virtualUsers`/`duration` to `WithScript`, as the resulting `--vus/--duration` flags make k6 discard the scenario.
 
