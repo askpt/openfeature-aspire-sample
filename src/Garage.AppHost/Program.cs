@@ -95,6 +95,8 @@ if (!builder.ExecutionContext.IsPublishMode)
     // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
     var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
         .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+        .WithUrlForEndpoint("grafana", url => url.DisplayText = "Grafana")
+        .WithUrlForEndpoint("grafana", _ => new() { Url = "/d/prompt-score", DisplayText = "Prompt Score dashboard" })
         .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
         .WithExternalHttpEndpoints();
 
@@ -140,31 +142,25 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WaitFor(collector);
 
     // Load generators only run on demand: press Start on the dashboard to kick them off.
-    var k6 = builder.AddK6("k6")
-                .WithExplicitStart()
-                .WithBindMount("k6", "/scripts", isReadOnly: true)
-                .WithScript("/scripts/main.js", virtualUsers: 8, duration: "1h")
-                .WithReference(apiService)
-                .WaitFor(apiService)
-                .WithReference(webFrontend)
-                .WaitFor(webFrontend)
-                .WithEnvironment("K6_WEB_DASHBOARD", "true")
-                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
-                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
-                .WithK6OtlpEnvironment();
+    AddLoadGenerator("k6", "main.js");
+    AddLoadGenerator("k6-error", "test_error.js");
+    AddLoadGenerator("k6-prompt-score", "test_prompt_score.js");
 
-    var k6_error = builder.AddK6("k6-error")
-                .WithExplicitStart()
-                .WithBindMount("k6", "/scripts", isReadOnly: true)
-                .WithScript("/scripts/test_error.js", virtualUsers: 8, duration: "1h")
-                .WithReference(apiService)
-                .WaitFor(apiService)
-                .WithReference(webFrontend)
-                .WaitFor(webFrontend)
-                .WithEnvironment("K6_WEB_DASHBOARD", "true")
-                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
-                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
-                .WithK6OtlpEnvironment();
+    // Rate, VUs and duration live in each script's `scenarios`: passing virtualUsers/duration here
+    // would add --vus/--duration, which makes k6 discard the scenario and run the VUs flat out.
+    IResourceBuilder<K6Resource> AddLoadGenerator(string name, string script) =>
+        builder.AddK6(name)
+            .WithExplicitStart()
+            .WithBindMount("k6", "/scripts", isReadOnly: true)
+            .WithScript($"/scripts/{script}")
+            .WithReference(apiService)
+            .WaitFor(apiService)
+            .WithReference(webFrontend)
+            .WaitFor(webFrontend)
+            .WithEnvironment("K6_WEB_DASHBOARD", "true")
+            .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
+            .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
+            .WithK6OtlpEnvironment();
 }
 else
 {

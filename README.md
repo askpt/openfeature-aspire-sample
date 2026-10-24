@@ -78,6 +78,18 @@ The chatbot supports multiple prompt styles via GitHub Repository Prompts (`.pro
 - **brief**: Quick facts with concise responses
 - **unreliable**: Confidently incorrect information (for A/B testing demos)
 
+### Tracking the Prompt Score
+
+`GET /test/prompt-score` on the API service shows OpenFeature's [tracking API](https://openfeature.dev/specification/sections/tracking):
+it evaluates `prompt-file` for a random user, scores the served variant (`unreliable` 0, `brief` 3,
+`casual` 5, `expert` 10) and reports it with `IFeatureClient.Track("prompt-score", ...)`. The OFREP
+provider has no tracking endpoint, so `Garage.ServiceDefaults` wraps it to export tracking events as
+OpenTelemetry metrics (`feature_flag.tracking.events`, `feature_flag.tracking.value`) and span events.
+
+Start the `k6-prompt-score` resource from the Aspire dashboard to drive traffic, open the **Prompt Score**
+Grafana dashboard (linked from the `lgtm` resource) and change the flag's default variant or add a
+`fractional` targeting rule in `flagd.json` to watch the score move.
+
 ## Requirements
 
 ### Prerequisites

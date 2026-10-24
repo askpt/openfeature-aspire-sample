@@ -9,6 +9,7 @@ using Garage.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenFeature;
+using OpenFeature.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -152,10 +153,40 @@ app.MapGet("/test/error", async (IFeatureClient featureClient, RequestCounter? r
     return result;
 });
 
-// Test endpoint for the feature flags (tracking API)
-app.MapGet("/test/track", (ILogger<Program> logger) =>
+// Test endpoint for the feature flags (tracking API): scores the `prompt-file` variant served to a
+// random user and reports it through OpenFeature tracking, so the quality of the active prompt can
+// be charted while k6 drives traffic and the flag is changed.
+var promptScores = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
 {
-    using var activity = Activity.Current;
+    ["unreliable"] = 0,
+    ["brief"] = 3,
+    ["casual"] = 5,
+    ["expert"] = 10,
+};
+
+app.MapGet("/test/prompt-score", async (IFeatureClient featureClient, RequestCounter? requestCounter, RequestHistogram? requestHistogram) =>
+{
+    var stopwatch = Stopwatch.StartNew();
+
+    var evaluationContext = EvaluationContext.Builder()
+        .SetTargetingKey(Guid.NewGuid().ToString())
+        .Build();
+
+    var prompt = await featureClient.GetStringDetailsAsync("prompt-file", "expert", evaluationContext);
+    var variant = prompt.Variant ?? prompt.Value;
+    var score = promptScores.GetValueOrDefault(variant);
+
+    featureClient.Track("prompt-score", evaluationContext, TrackingEventDetails.Builder()
+        .SetValue(score)
+        .Set("feature_flag.key", "prompt-file")
+        .Set("feature_flag.result.variant", variant)
+        .Build());
+
+    stopwatch.Stop();
+    requestCounter?.Add(1, "prompt-score", "test");
+    requestHistogram?.Record(stopwatch.ElapsedMilliseconds, "prompt-score", "test", false);
+
+    return Results.Ok(new { promptFile = prompt.Value, variant, score });
 });
 
 app.MapDefaultEndpoints();

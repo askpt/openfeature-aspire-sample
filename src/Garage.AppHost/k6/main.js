@@ -12,6 +12,9 @@ export const options = {
       // Start `rate` iterations per second
       timeUnit: '1s',
 
+      // Keep generating load for an hour (or until the resource is stopped)
+      duration: '1h',
+
       // Pre-allocate 2 VUs before starting the test
       preAllocatedVUs: 2,
 
