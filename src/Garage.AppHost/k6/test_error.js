@@ -7,10 +7,13 @@ export const options = {
       executor: 'constant-arrival-rate',
 
       // How many iterations per timeUnit
-      rate: 30,
+      rate: 10,
 
       // Start `rate` iterations per second
       timeUnit: '1s',
+
+      // Keep generating load for an hour (or until the resource is stopped)
+      duration: '1h',
 
       // Pre-allocate 2 VUs before starting the test
       preAllocatedVUs: 2,

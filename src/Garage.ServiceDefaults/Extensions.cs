@@ -1,8 +1,11 @@
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Garage.ServiceDefaults.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -151,6 +154,29 @@ public static class Extensions
                 .AddHook<MetricsHook>();
         });
 
+        // OFREP has no tracking endpoint, so the provider ignores Track(). Wrap it so tracking
+        // events are exported through OpenTelemetry (metrics + span events) instead of being lost.
+        builder.Services.AddMetrics();
+        builder.Services.DecorateFeatureProvider((serviceProvider, inner) =>
+            new OpenTelemetryTrackingProvider(inner, serviceProvider.GetRequiredService<IMeterFactory>()));
+
         return builder;
+    }
+
+    /// <summary>
+    /// Replaces the registered default <see cref="FeatureProvider"/> with one produced by
+    /// <paramref name="decorate"/>, which receives the provider the original registration creates.
+    /// </summary>
+    private static void DecorateFeatureProvider(this IServiceCollection services, Func<IServiceProvider, FeatureProvider, FeatureProvider> decorate)
+    {
+        var descriptor = services.LastOrDefault(d => d.ServiceType == typeof(FeatureProvider) && !d.IsKeyedService)
+            ?? throw new InvalidOperationException("No default OpenFeature provider is registered.");
+        var innerFactory = descriptor.ImplementationFactory
+            ?? throw new InvalidOperationException("The default OpenFeature provider must be registered with a factory.");
+
+        services.Replace(ServiceDescriptor.Describe(
+            typeof(FeatureProvider),
+            serviceProvider => decorate(serviceProvider, (FeatureProvider)innerFactory(serviceProvider)),
+            descriptor.Lifetime));
     }
 }

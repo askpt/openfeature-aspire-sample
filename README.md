@@ -78,6 +78,21 @@ The chatbot supports multiple prompt styles via GitHub Repository Prompts (`.pro
 - **brief**: Quick facts with concise responses
 - **unreliable**: Confidently incorrect information (for A/B testing demos)
 
+### Tracking the Prompt Score
+
+`GET /test/prompt-score` on the API service shows OpenFeature's [tracking API](https://openfeature.dev/specification/sections/tracking):
+it evaluates `prompt-file` for a random user, scores the served variant (`unreliable` 0, `brief` 3,
+`casual` 5, `expert` 10), draws a simulated per-request model cost (cheapest for `unreliable`, most
+expensive for `expert`) and reports both with `IFeatureClient.Track("prompt-score", ...)` and
+`Track("prompt-cost", ...)`. The OFREP
+provider has no tracking endpoint, so `Garage.ServiceDefaults` wraps it to export tracking events as
+OpenTelemetry metrics (`feature_flag.tracking.events`, `feature_flag.tracking.value`) and span events.
+
+Start the `k6-prompt-score` resource from the Aspire dashboard to drive traffic, open the **Prompt Score**
+Grafana dashboard (linked from the `lgtm` resource) and change the flag's default variant or add a
+`fractional` targeting rule in `flagd.json` to watch the score, the spend and the score-per-cent of each
+variant move — the quality/cost trade-off you would use to tune prompts with feature flags.
+
 ## Requirements
 
 ### Prerequisites
@@ -156,17 +171,26 @@ Grafana dashboard provisioning is configured in the AppHost and mounted into the
 - Provider config: `src/Garage.AppHost/grafana/provisioning/dashboards/custom.yaml`
 - Dashboard JSON folder: `src/Garage.AppHost/grafana/provisioning/dashboards/custom/`
 
-To add an external dashboard:
+The **OpenFeature** folder in Grafana contains three dashboards. Each starts with an *About* panel explaining
+the demo and how to try it, and every panel's ⓘ icon describes what it shows and how it is computed:
 
-1. Export or download the dashboard JSON.
+| Dashboard         | Shows                                                                                                   | Drive it with      |
+| ----------------- | ------------------------------------------------------------------------------------------------------- | ------------------ |
+| **Feature Flags** | Evaluation rate, success/errors, served variants and resolution reasons from the OpenFeature `MetricsHook` | any load generator |
+| **Flag Impact**   | What `simulate-delay-ms` and `simulate-error` do to `GET /test/error`: latency, failure rate, error traces | `k6-error`         |
+| **Prompt Score**  | Quality score and simulated cost of the `prompt-file` variants, reported with the OpenFeature tracking API | `k6-prompt-score`  |
+
+To add or change a dashboard:
+
+1. Export or download the dashboard JSON (Grafana's classic v1 schema, as used by the existing files).
 2. Place it in `src/Garage.AppHost/grafana/provisioning/dashboards/custom/`.
-3. Restart Aspire (`aspire run`) so LGTM reloads provisioned dashboards.
+3. Restart Aspire (`aspire run`), or reload without restarting:
+   `curl -u admin:admin -X POST http://localhost:3000/api/admin/provisioning/dashboards/reload`
 4. Open Grafana and navigate to the **OpenFeature** folder.
 
-The starter dashboard includes datasource placeholder variables you can reuse in your panels:
+The dashboards declare datasource variables you can reuse in your panels so they stay portable:
 
 - `$metrics_ds` (Prometheus)
-- `$logs_ds` (Loki)
 - `$traces_ds` (Tempo)
 
 ### 6. OpenAPI and Scalar Documentation (Development)

@@ -49,6 +49,10 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
     .WithUv()
     .WithExternalHttpEndpoints()
     .WithReference(chatModel)
+    // Foundry Local resolves the model alias (phi-4-mini) to the id the service actually serves
+    // (Phi-4-mini-instruct-generic-gpu:5) only once the model is loaded, and CHAT_MODEL_MODELNAME
+    // is captured when the chat service starts, so it has to start after the deployment is ready.
+    .WaitFor(chatModel)
     .WithEnvironment("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "true")
     .WithOtlpExporter()
     .WithHttpHealthCheck("/health")
@@ -56,14 +60,19 @@ var chatService = builder.AddUvicornApp("chatservice", "../Garage.ChatService/",
 
 if (builder.ExecutionContext.IsPublishMode)
 {
-    // Foundry Local publishes a ready-to-use OpenAI base URL, but Azure AI Foundry only exposes the
-    // account root, so the OpenAI-compatible route has to be appended there.
+    // Neither Foundry flavour exposes the OpenAI-compatible route on the endpoint Aspire publishes:
+    // Foundry Local reports its service root and Azure AI Foundry the account root, so the chat
+    // service appends the mode-specific OpenAI path.
     // Azure AI Foundry also has local auth disabled, so the chat service authenticates with its
     // managed identity instead of an API key.
     chatService = chatService
         .WithArgs("main:app", "--host", "0.0.0.0", "--port", "8000")
         .WithEnvironment("CHAT_MODEL_API_PATH", "openai/v1")
         .WithRoleAssignments(foundry, CognitiveServicesBuiltInRole.CognitiveServicesUser);
+}
+else
+{
+    chatService = chatService.WithEnvironment("CHAT_MODEL_API_PATH", "v1");
 }
 
 // Feature flags infrastructure
@@ -86,6 +95,8 @@ if (!builder.ExecutionContext.IsPublishMode)
     // Add Grafana LGTM stack (Loki, Tempo, Prometheus, Pyroscope, Grafana)
     var lgtm = builder.AddContainer("lgtm", "grafana/otel-lgtm", "latest")
         .WithHttpEndpoint(port: 3000, targetPort: 3000, name: "grafana")
+        .WithUrlForEndpoint("grafana", url => url.DisplayText = "Grafana")
+        .WithUrlForEndpoint("grafana", _ => new() { Url = "/d/prompt-score", DisplayText = "Prompt Score dashboard" })
         .WithBindMount(grafanaProvisioningPath, "/otel-lgtm/grafana/conf/provisioning/dashboards", isReadOnly: true)
         .WithExternalHttpEndpoints();
 
@@ -130,29 +141,26 @@ if (!builder.ExecutionContext.IsPublishMode)
         .WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http")
         .WaitFor(collector);
 
-    var k6 = builder.AddK6("k6")
-                .WithBindMount("k6", "/scripts", isReadOnly: true)
-                .WithScript("/scripts/main.js", virtualUsers: 8, duration: "1h")
-                .WithReference(apiService)
-                .WaitFor(apiService)
-                .WithReference(webFrontend)
-                .WaitFor(webFrontend)
-                .WithEnvironment("K6_WEB_DASHBOARD", "true")
-                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
-                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
-                .WithK6OtlpEnvironment();
+    // Load generators only run on demand: press Start on the dashboard to kick them off.
+    AddLoadGenerator("k6", "main.js");
+    AddLoadGenerator("k6-error", "test_error.js");
+    AddLoadGenerator("k6-prompt-score", "test_prompt_score.js");
 
-    var k6_error = builder.AddK6("k6-error")
-                .WithBindMount("k6", "/scripts", isReadOnly: true)
-                .WithScript("/scripts/test_error.js", virtualUsers: 8, duration: "1h")
-                .WithReference(apiService)
-                .WaitFor(apiService)
-                .WithReference(webFrontend)
-                .WaitFor(webFrontend)
-                .WithEnvironment("K6_WEB_DASHBOARD", "true")
-                .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
-                .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
-                .WithK6OtlpEnvironment();
+    // Rate, VUs and duration live in each script's `scenarios`: passing virtualUsers/duration here
+    // would add --vus/--duration, which makes k6 discard the scenario and run the VUs flat out.
+    IResourceBuilder<K6Resource> AddLoadGenerator(string name, string script) =>
+        builder.AddK6(name)
+            .WithExplicitStart()
+            .WithBindMount("k6", "/scripts", isReadOnly: true)
+            .WithScript($"/scripts/{script}")
+            .WithReference(apiService)
+            .WaitFor(apiService)
+            .WithReference(webFrontend)
+            .WaitFor(webFrontend)
+            .WithEnvironment("K6_WEB_DASHBOARD", "true")
+            .WithHttpEndpoint(targetPort: 5665, name: "k6-dashboard")
+            .WithUrlForEndpoint("k6-dashboard", url => url.DisplayText = "K6 Dashboard")
+            .WithK6OtlpEnvironment();
 }
 else
 {
