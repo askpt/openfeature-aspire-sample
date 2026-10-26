@@ -26,11 +26,11 @@
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Flagd" Version="13.6.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.OpenTelemetryCollector" Version="13.6.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.k6" Version="13.6.0" />
-    <PackageVersion Include="Scalar.Aspire" Version="0.12.2" />
+    <PackageVersion Include="Scalar.Aspire" Version="0.12.3" />
   </ItemGroup>
   <ItemGroup Label="Microsoft Packages">
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
