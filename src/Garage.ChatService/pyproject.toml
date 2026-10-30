@@ -6,7 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
 	"azure-identity==1.27.0",
 	"fastapi==0.141.1",
-	"grpcio==1.84.1",
+	"grpcio==1.85.0",
 	"openai==3.37.0",
 	"openfeature-provider-ofrep==0.3.0",
 	"openfeature-sdk==0.10.0",
