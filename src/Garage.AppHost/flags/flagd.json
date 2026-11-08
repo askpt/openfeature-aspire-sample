@@ -79,7 +79,26 @@
         "expert": "expert",
         "unreliable": "unreliable"
       },
-      "defaultVariant": "expert"
+      "targeting": {
+        "fractional": [
+          [
+            "brief",
+            1
+          ],
+          [
+            "casual",
+            0
+          ],
+          [
+            "expert",
+            0
+          ],
+          [
+            "unreliable",
+            0
+          ]
+        ]
+      }
     },
     "slow-operation-delay": {
       "state": "ENABLED",
