@@ -116,9 +116,13 @@ if (!builder.ExecutionContext.IsPublishMode)
     apiService = apiService.WaitFor(collector);
     migrations = migrations.WaitFor(collector);
 
+    // Aspire sets SSL_CERT_DIR to its development certificates. Since Go 1.27 that replaces the
+    // macOS/Windows certificate store, so `go run` can no longer verify proxy.golang.org.
+    // x509sslcertoverrideplatform=0 restores the platform store (Go plans to remove it in 1.31).
     flagsApi = flagsApi
         .WaitFor(collector)
         .WithEnvironment("FLAGS_FILE_PATH", flagsPath)
+        .WithEnvironment("GODEBUG", "x509sslcertoverrideplatform=0")
         .WaitFor(flagd);
 
     // Add API Reference
