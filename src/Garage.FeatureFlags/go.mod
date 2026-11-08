@@ -1,6 +1,6 @@
 module garageflags
 
-go 1.26.3
+go 1.27.3
 
 require (
 	github.com/open-feature/go-sdk v1.20.0
