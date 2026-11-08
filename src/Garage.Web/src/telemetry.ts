@@ -1,4 +1,10 @@
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { context, logs, metrics, propagation, trace } from "@opentelemetry/api";
+import {
+  CompositePropagator,
+  W3CBaggagePropagator,
+  W3CTraceContextPropagator,
+} from "@opentelemetry/core";
+import { SimpleSpanProcessor, TracerProvider } from "@opentelemetry/sdk-trace";
 import { DocumentLoadInstrumentation } from "@opentelemetry/instrumentation-document-load";
 import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
@@ -7,18 +13,15 @@ import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 import { ZoneContextManager } from "@opentelemetry/context-zone";
 import {
   LoggerProvider,
   BatchLogRecordProcessor,
 } from "@opentelemetry/sdk-logs";
-import { logs } from "@opentelemetry/api-logs";
 import {
   MeterProvider,
   PeriodicExportingMetricReader,
 } from "@opentelemetry/sdk-metrics";
-import { metrics } from "@opentelemetry/api";
 
 /**
  * Metrics API for recording application metrics
@@ -102,17 +105,23 @@ function setupTraces(
     headers: parseDelimitedValues(headers),
   };
 
-  const provider = new WebTracerProvider({
+  const provider = new TracerProvider({
     resource: resourceFromAttributes(attributes),
     spanProcessors: [
-      new SimpleSpanProcessor(new OTLPTraceExporter(otlpOptions)),
+      new SimpleSpanProcessor({ exporter: new OTLPTraceExporter(otlpOptions) }),
     ],
   });
 
-  provider.register({
-    // Prefer ZoneContextManager: supports asynchronous operations
-    contextManager: new ZoneContextManager(),
-  });
+  trace.setGlobalTracerProvider(provider);
+  context.setGlobalContextManager(new ZoneContextManager().enable());
+  propagation.setGlobalPropagator(
+    new CompositePropagator({
+      propagators: [
+        new W3CTraceContextPropagator(),
+        new W3CBaggagePropagator(),
+      ],
+    })
+  );
 
   // Register instrumentations for automatic tracing
   registerInstrumentations({
