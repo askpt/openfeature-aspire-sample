@@ -6,7 +6,7 @@ requires-python = ">=3.14"
 dependencies = [
 	"azure-identity==1.27.0",
 	"fastapi==0.141.1",
-	"grpcio==1.85.1",
+	"grpcio==1.85.3",
 	"openai==3.46.0",
 	"openfeature-provider-ofrep==0.3.0",
 	"openfeature-sdk==0.10.0",
@@ -16,7 +16,7 @@ dependencies = [
 	"opentelemetry-instrumentation-logging==0.64b0",
 	"opentelemetry-sdk==1.43.0",
 	"opentelemetry-semantic-conventions==0.64b0",
-	"pyyaml==6.0.3",
+	"pyyaml==6.0.4",
 	"uvicorn==0.54.0",
 ]
 
